@@ -1333,12 +1333,31 @@ async function callClaude(prompt,key){
 function parseJSON(raw){
   var clean=raw.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
   // Try array first (multiple reports)
-  var arrMatch=clean.match(/\[[\s\S]*\]/);
-  if(arrMatch){ try{ var arr=JSON.parse(arrMatch[0]); if(Array.isArray(arr)&&arr.length) return arr; }catch(e){} }
-  // Fall back to single object
-  var m=clean.match(/\{[\s\S]*\}/);
-  if(!m) throw new Error('No se pudo parsear la respuesta. Intenta de nuevo.');
-  return JSON.parse(m[0]);
+  try {
+    var arrMatch=clean.match(/\[[\s\S]*\]/);
+    if(arrMatch){
+      var arr=JSON.parse(arrMatch[0]);
+      if(Array.isArray(arr)&&arr.length) return arr;
+    }
+  } catch(e){}
+  // Try single object
+  try {
+    var m=clean.match(/\{[\s\S]*\}/);
+    if(m) return JSON.parse(m[0]);
+  } catch(e){
+    // Try to fix truncated JSON
+    var partial=clean.match(/\{[\s\S]*/);
+    if(partial){
+      var fixed=partial[0];
+      // Close open strings and brackets
+      var opens=(fixed.match(/\[/g)||[]).length-(fixed.match(/\]/g)||[]).length;
+      var openb=(fixed.match(/\{/g)||[]).length-(fixed.match(/\}/g)||[]).length;
+      for(var i=0;i<opens;i++) fixed+=']';
+      for(var i=0;i<openb;i++) fixed+='}';
+      try{ return JSON.parse(fixed); }catch(e2){}
+    }
+  }
+  throw new Error('No se pudo procesar la respuesta. Intenta de nuevo.');
 }
 
 function normalizeRec(d){
