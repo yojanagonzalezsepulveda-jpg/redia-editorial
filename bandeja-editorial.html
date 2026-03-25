@@ -1125,6 +1125,7 @@ function buildCard(r){
       ${(r.estado||'pendiente')!=='aprobado'  ?`<button class="abtn ab-ok"   onclick="estado('${uid}','aprobado')">Aprobar</button>`:''}
       ${(r.estado||'pendiente')!=='descartado'?`<button class="abtn ab-disc" onclick="estado('${uid}','descartado')">Descartar</button>`:''}
       ${(r.estado||'pendiente')==='descartado'?`<button class="abtn ab-ok"   onclick="estado('${uid}','pendiente')">Restaurar</button>`:''}
+      ${(r.titular||r.articulo?.titular)&&!(r.linkedin)?`<button class="abtn ab-grad" id="distbtn-${uid}" onclick="generarDistribucion('${uid}')">Generar distribución</button>`:''}
       <button class="abtn ab-save" id="savebtn-${uid}" onclick="guardarEdicion('${uid}')">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13"/><polyline points="7 3 7 8 15 8"/></svg>
         Guardar edición
@@ -1175,6 +1176,53 @@ async function guardarEdicion(uid){
   }
   var btn=document.getElementById('savebtn-'+uid);
   if(btn){ btn.textContent='Guardado'; btn.style.background='var(--ok)'; setTimeout(()=>{ btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13"/><polyline points="7 3 7 8 15 8"/></svg> Guardar edición'; btn.style.background='var(--p6)'; },2000); }
+}
+
+// ── GENERAR DISTRIBUCIÓN ──────────────────────────────
+async function generarDistribucion(uid){
+  var rec=getRec(uid); if(!rec) return;
+  var key=ANT_KEY;
+  if(!key){ alert('Ingresa tu API key de Anthropic en Configuración.'); return; }
+  var btn=document.getElementById('distbtn-'+uid);
+  if(btn){ btn.textContent='Generando...'; btn.disabled=true; }
+  try {
+    var titular=rec.titular||rec.articulo?.titular||'';
+    var bajada=rec.bajada||rec.articulo?.bajada||'';
+    var cuerpo=rec.cuerpo_html||rec.articulo?.cuerpo||'';
+    var prompt=`Eres el editor de distribución de REDIA, antena de inteligencia acuícola chilena.
+
+Con base en el siguiente informe periodístico, genera los textos de distribución:
+
+TITULAR: ${titular}
+BAJADA: ${bajada}
+CUERPO: ${cuerpo.replace(/<[^>]+>/g,' ').substring(0,2000)}
+
+Responde SOLO con JSON válido sin markdown:
+{
+  "linkedin": "Post LinkedIn informativo, no publicitario. Emojis sectoriales. Máx 1200 chars. Incluye link redia.pro.",
+  "facebook": "Post Facebook conversacional. Máx 500 chars. Incluye link redia.pro.",
+  "audio_script": "Guión narración audio. Informativo y cercano. Mín 350 palabras.",
+  "video_script": "Guión YouTube con timecodes 00:00. Descripción visual entre corchetes. CTA suscripción."
+}`;
+    var raw=await callClaude(prompt,key);
+    var data=parseJSON(raw);
+    if(data&&!Array.isArray(data)){
+      if(data.linkedin)    rec.linkedin=data.linkedin;
+      if(data.facebook)    rec.facebook=data.facebook;
+      if(data.audio_script) rec.audio_script=data.audio_script;
+      if(data.video_script) rec.video_script=data.video_script;
+      if(rec.id){
+        await Promise.all(['linkedin','facebook','audio_script','video_script']
+          .filter(k=>data[k])
+          .map(k=>gsActualizar(rec.id,k,data[k])));
+      }
+      renderBandeja();
+      setTimeout(()=>{ var b=document.getElementById('body-'+uid); if(b) b.classList.add('open'); },50);
+    }
+  } catch(e){
+    alert('Error generando distribución: '+e.message);
+    if(btn){ btn.textContent='Generar distribución'; btn.disabled=false; }
+  }
 }
 
 // ── BÚSQUEDA MANUAL ───────────────────────────────────
@@ -1309,11 +1357,7 @@ Responde SOLO con JSON válido sin markdown — un array con múltiples informes
       "analisis_muestra": "Lo que muestra este análisis — hechos concretos y verificados",
       "analisis_no_resuelve": "Lo que no resuelve por sí solo — limitaciones e incógnitas pendientes",
       "analisis_relevante_para": "Para quiénes es especialmente relevante y por qué — por actor y rubro"
-    },
-    "linkedin": "Post LinkedIn. Informativo, no publicitario. Emojis sectoriales. Máx 1200 chars. Link redia.pro.",
-    "facebook": "Post Facebook conversacional. Máx 500 chars. Link redia.pro.",
-    "audio_script": "Guión narración audio. Informativo y cercano. Mín 350 palabras.",
-    "video_script": "Guión YouTube. Timecodes 00:00. Descripción visual entre corchetes. CTA suscripción."
+    }
   }
 ]
 Genera entre 2 y 4 objetos en el array — uno por cada ángulo/noticia relevante y distinto que encuentres.`;
