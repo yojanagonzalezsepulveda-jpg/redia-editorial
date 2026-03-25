@@ -1977,6 +1977,8 @@ cargarCredenciales();
 var tipoActual = 'noticia';
 var crearRec   = null;
 
+var TIPO_LABELS = {noticia:'Noticia / Informe', entrevista:'Entrevista', mercado:'Aviso de Mercado', patrocinado:'Contenido patrocinado'};
+
 function selTipo(tipo, el) {
   tipoActual = tipo;
   document.querySelectorAll('.tipo-card').forEach(c => c.classList.remove('on'));
@@ -1987,6 +1989,11 @@ function selTipo(tipo, el) {
   });
   document.getElementById('crear-result').style.display  = 'none';
   document.getElementById('crear-loading').style.display = 'none';
+  var tabBtn = document.querySelector('button.ntab[onclick*="\'crear\'"]');
+  if (tabBtn) {
+    var tn = [...tabBtn.childNodes].filter(n => n.nodeType === 3).pop();
+    if (tn) tn.textContent = '\n      ' + (TIPO_LABELS[tipo] || 'Crear contenido') + '\n    ';
+  }
 }
 
 var CREAR_STEPS = {
