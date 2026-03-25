@@ -846,17 +846,18 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
     <div class="cpg on" id="cfg-voz">
       <div class="csec">
         <div class="cs-t">Voz y tono de REDIA</div>
-        <div class="cs-s">Define cómo habla REDIA. Se aplica a todos los informes generados.</div>
-        <div class="tone-g" id="toneGrid">
-          <div class="tone-o on" data-t="directo"><div class="tone-n">Directo</div><div class="tone-d">Sin rodeos, al punto</div></div>
-          <div class="tone-o" data-t="tecnico"><div class="tone-n">Técnico</div><div class="tone-d">Preciso y especializado</div></div>
-          <div class="tone-o" data-t="periodistico"><div class="tone-n">Periodístico</div><div class="tone-d">Narrativo y humano</div></div>
-          <div class="tone-o" data-t="analitico"><div class="tone-n">Analítico</div><div class="tone-d">Datos y contexto</div></div>
-          <div class="tone-o" data-t="divulgativo"><div class="tone-n">Divulgativo</div><div class="tone-d">Accesible para todos</div></div>
-          <div class="tone-o" data-t="mixto"><div class="tone-n">Mixto</div><div class="tone-d">Técnico + accesible</div></div>
+        <div class="cs-s">REDIA aplica el registro correcto según el tipo de publicación. Esta configuración permite ajustes adicionales.</div>
+        <div style="background:var(--s1);border:1px solid var(--s2);border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:12.5px;color:var(--s7);line-height:1.9">
+          El sistema aplica automáticamente:<br>
+          <span style="color:var(--p6);font-weight:600">· Periodístico</span> → Noticias e informes de análisis<br>
+          <span style="color:var(--p6);font-weight:600">· Técnico</span> → Análisis científico e innovación<br>
+          <span style="color:var(--p6);font-weight:600">· Cercano</span> → Entrevistas y casos de éxito<br>
+          <span style="color:var(--p6);font-weight:600">· Editorial</span> → Contenido patrocinado y avisos
         </div>
         <label class="cfl">Instrucción adicional de voz</label>
-        <textarea class="cfi ta" id="cfVoz" placeholder="Ej: Escribe como un periodista especializado que conoce el sector desde adentro. Evita el lenguaje corporativo."></textarea>
+        <textarea class="cfi ta" id="cfVoz" placeholder="Ej: Énfasis en la realidad de Chiloé y las comunidades del archipiélago. Evita el lenguaje corporativo."></textarea>
+        <label class="cfl">Temas sensibles o instrucciones especiales</label>
+        <textarea class="cfi ta" id="cfSensible" placeholder="Ej: Cuando cubras temas de comunidades, siempre incluir perspectiva de los trabajadores. Evitar comparaciones directas entre empresas."></textarea>
       </div>
       <button class="scfg" onclick="guardarCfg('voz',this)">Guardar</button>
     </div>
@@ -1017,14 +1018,14 @@ function saveCFG(obj){ Object.assign(CFG,obj); localStorage.setItem('redia_cfg',
 function applyCFG(){
   if(CFG.tono) document.querySelectorAll('#toneGrid .tone-o').forEach(el=>el.classList.toggle('on',el.dataset.t===CFG.tono));
   if(CFG.audiencias) document.querySelectorAll('#audGrid .aud-o').forEach(el=>el.classList.toggle('on',(CFG.audiencias||[]).includes(el.dataset.a)));
-  var m={cfVoz:'voz',cfAud:'aud',cfWords:'words',cfSecc:'secc',cfEstr:'estr',cfDim:'dim',cfAnal:'anal',cfProh:'proh'};
+  var m={cfVoz:'voz',cfSensible:'sensible',cfAud:'aud',cfWords:'words',cfSecc:'secc',cfEstr:'estr',cfDim:'dim',cfAnal:'anal',cfProh:'proh'};
   Object.entries(m).forEach(([elId,key])=>{ var el=document.getElementById(elId); if(el&&CFG[key]) el.value=CFG[key]; });
   var fuentesGuardadas = CFG.fuentes ? CFG.fuentes.split('\n').filter(Boolean) : DEFAULT_FUENTES;
   renderFuentesPills(fuentesGuardadas);
 }
 function guardarCfg(sec,btn){
   var d={};
-  if(sec==='voz'){ var t=document.querySelector('#toneGrid .tone-o.on'); d.tono=t?t.dataset.t:'directo'; d.voz=document.getElementById('cfVoz').value; }
+  if(sec==='voz'){ d.voz=document.getElementById('cfVoz').value; d.sensible=document.getElementById('cfSensible').value; }
   else if(sec==='audiencia'){ d.audiencias=[...document.querySelectorAll('#audGrid .aud-o.on')].map(e=>e.dataset.a); d.aud=document.getElementById('cfAud').value; }
   else if(sec==='estructura'){ d.words=document.getElementById('cfWords').value; d.secc=document.getElementById('cfSecc').value; d.estr=document.getElementById('cfEstr').value; }
   else if(sec==='analisis'){ d.dim=document.getElementById('cfDim').value; d.anal=document.getElementById('cfAnal').value; }
@@ -1392,7 +1393,7 @@ function buildPrompt(esp,foc,kw){
   var minW=CFG.words||700;
   var proh=(CFG.proh||'').split('\n').filter(Boolean).join(' · ');
   if(proh) id+='\nADICIONAL PROHIBIDO: '+proh;
-  var extras=(CFG.voz?'\nVOZ: '+CFG.voz:'')+(CFG.aud?'\nAUDIENCIA: '+CFG.aud:'')+(CFG.dim?'\nDIMENSIONES: '+CFG.dim:'')+(CFG.fuentes?'\nFUENTES ADICIONALES: '+CFG.fuentes.split('\n').filter(Boolean).join(' · '):'');
+  var extras=(CFG.voz?'\nVOZ: '+CFG.voz:'')+(CFG.sensible?'\nINSTRUCCIONES ESPECIALES: '+CFG.sensible:'')+(CFG.aud?'\nAUDIENCIA: '+CFG.aud:'')+(CFG.dim?'\nDIMENSIONES: '+CFG.dim:'')+(CFG.fuentes?'\nFUENTES ADICIONALES: '+CFG.fuentes.split('\n').filter(Boolean).join(' · '):'');
   return id+extras+`
 
 Eres el editor estratégico de REDIA. Busca noticias reales y recientes en la web.
