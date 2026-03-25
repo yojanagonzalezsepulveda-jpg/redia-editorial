@@ -564,7 +564,7 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
       <div class="sb-sec" style="margin-bottom:12px">Tipo de contenido</div>
       <div class="tipo-card on" id="tipo-noticia" onclick="selTipo('noticia',this)">
         <div class="tipo-icon" style="background:var(--p1)">📝</div>
-        <div class="tipo-info"><div class="tipo-name">Noticia / Informe</div><div class="tipo-desc">Análisis propio del sector</div></div>
+        <div class="tipo-info"><div class="tipo-name">Análisis / Redacción propia</div><div class="tipo-desc">Noticias, normativa, mercado, ciencia, etc.</div></div>
       </div>
       <div class="tipo-card" id="tipo-entrevista" onclick="selTipo('entrevista',this)">
         <div class="tipo-icon" style="background:var(--t0)">🎙️</div>
@@ -658,6 +658,7 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
           </select>
           <label class="cf-lbl">Empresa o persona que publica</label>
           <input type="text" class="cf-inp" id="m-empresa" placeholder="Ej: Mitilmar SpA, Puerto Montt">
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--s7);margin-bottom:12px;cursor:pointer"><input type="checkbox" id="m-anonimo" style="width:15px;height:15px;accent-color:var(--p6)"> Publicar de forma anónima (no mencionar el nombre de la empresa)</label>
           <label class="cf-lbl">Descripción del aviso</label>
           <textarea class="cf-inp big" id="m-descripcion" placeholder="Describe qué ofreces, qué buscas, cuáles son las condiciones, precios si aplica, zona geográfica, contacto, etc.&#10;&#10;Mientras más detalles, mejor resultado."></textarea>
           <label class="cf-lbl">Precio o rango (opcional)</label>
@@ -2017,7 +2018,7 @@ cargarCredenciales();
 var tipoActual = 'noticia';
 var crearRec   = null;
 
-var TIPO_LABELS = {noticia:'Noticia / Informe', entrevista:'Entrevista', mercado:'Aviso de Mercado', patrocinado:'Contenido patrocinado'};
+var TIPO_LABELS = {noticia:'Análisis / Redacción propia', entrevista:'Entrevista', mercado:'Aviso de Mercado', patrocinado:'Contenido patrocinado'};
 
 function selTipo(tipo, el) {
   tipoActual = tipo;
@@ -2519,15 +2520,15 @@ Responde SOLO con JSON válido sin markdown:
 {"titulo_seo":"máx 60 chars","descripcion_seo":"máx 140 chars","tags":["t1","t2","t3","t4"],"categoria":"tecnologia","tiempo_lectura":"X min","fuentes_consultadas":["F1","F2"],"imagen_prompt":"Prompt fotorrealista en inglés — instalación científica, laboratorio acuícola, tecnología aplicada al sector. Específico, nunca genérico. 16:9","articulo":{"titular":"Titular directo con el hallazgo concreto","bajada":"Qué se descubrió, quién lo hizo y qué significa para el sector","cuerpo":"HTML: h2 para cada pregunta del análisis, p con datos concretos, blockquote para citas de investigadores si las hay. Cuadro análisis REDIA al final. Mín ${minWords} palabras.","analisis_muestra":"Lo que este avance evidencia para el sector","analisis_no_resuelve":"Lo que falta para su aplicación real en Chile","analisis_relevante_para":"Qué rubros y actores deben estar atentos a este desarrollo"},"linkedin":"Post LinkedIn. Tono de divulgación técnica. Máx 1200 chars. Link redia.pro.","facebook":"Post Facebook. Accesible. Máx 500 chars. Link redia.pro.","audio_script":"Guión narración. Explica el avance y su relevancia para el sector. Mín 300 palabras.","video_script":"Guión YouTube con timecodes y descripción visual del proceso/tecnología. Mín 250 palabras."}`;
 }
 
-function buildPromptMercado(tipoAviso, empresa, link, descripcion, precio, minWords) {
+function buildPromptMercado(tipoAviso, empresa, link, descripcion, precio, minWords, anonimo) {
   return REDIA_IDENTITY + `
 
 TIPO DE CONTENIDO: Aviso de Mercado
 REGISTRO: Tercera persona directa y concreta — tono editorial, nunca publicitario. El lector recibe información útil, no un anuncio.
-
+${anonimo ? '\nANONIMATO: No menciones el nombre de la empresa ni datos que la identifiquen. Usa expresiones como "una empresa del sector", "un productor de la región", "una compañía acuícola", etc.\n' : ''}
 MATERIAL:
 - Tipo de aviso: ${tipoAviso}
-- Empresa o persona: ${empresa || ''}
+- Empresa o persona: ${empresa || (anonimo ? 'anónimo' : '')}
 - Link de referencia: ${link || 'ninguno'}
 - Descripción: ${descripcion}
 - Precio o condiciones: ${precio || 'a convenir'}
@@ -2624,13 +2625,16 @@ function buildPromptByTipo(tipo) {
     );
   }
   if (tipo === 'mercado') {
+    var mEmpresa = document.getElementById('m-empresa')?.value.trim() || '';
+    var mAnonimo = document.getElementById('m-anonimo')?.checked;
     return buildPromptMercado(
       document.getElementById('m-tipo-aviso')?.value || 'oferta',
-      document.getElementById('m-empresa')?.value.trim() || '',
+      mAnonimo ? '' : mEmpresa,
       document.getElementById('m-link')?.value.trim() || '',
       document.getElementById('m-descripcion')?.value.trim() || '',
       document.getElementById('m-precio')?.value.trim() || '',
-      minW
+      minW,
+      mAnonimo
     );
   }
   if (tipo === 'caso') {
