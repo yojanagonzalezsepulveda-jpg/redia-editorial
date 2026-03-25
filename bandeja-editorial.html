@@ -870,8 +870,12 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
       <div class="csec">
         <div class="cs-t">Fuentes prioritarias</div>
         <div class="cs-s">Medios e instituciones que el sistema siempre consulta.</div>
-        <label class="cfl">Fuentes a consultar (una por línea)</label>
-        <textarea class="cfi" id="cfFuentes" style="min-height:180px;font-size:12px" placeholder="Aqua.cl&#10;MundoAcuícola&#10;SERNAPESCA&#10;SUBPESCA&#10;Intesal&#10;FAO&#10;Globefish&#10;El Llanquihue&#10;Diario de Aysén&#10;UACH&#10;IFOP"></textarea>
+        <label class="cfl">Fuentes activas</label>
+        <div id="fuentesPills" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:40px;padding:8px;background:var(--s1);border:1px solid var(--s2);border-radius:8px"></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" class="cfi" id="fuentesInput" placeholder="Agregar fuente..." style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarFuente();}">
+          <button class="scfg" onclick="agregarFuente()" style="margin-top:0;white-space:nowrap">+ Agregar</button>
+        </div>
       </div>
       <button class="scfg" onclick="guardarCfg('fuentes',this)">Guardar</button>
     </div>
@@ -941,14 +945,37 @@ function showCfg(id,el){
   el.classList.add('on');
 }
 
+// ── FUENTES PILLS ─────────────────────────────────────
+var DEFAULT_FUENTES=['Aqua.cl','MundoAcuícola','SERNAPESCA','SUBPESCA','Intesal','FAO','Globefish','El Llanquihue','Diario de Aysén','UACH','IFOP','IntraFish','SalmonBusiness','Mundo Marítimo','UCT'];
+
+function renderFuentesPills(fuentes){
+  var c=document.getElementById('fuentesPills'); if(!c) return;
+  c.innerHTML=fuentes.map(f=>`<span data-fuente="${esc(f)}" style="display:inline-flex;align-items:center;gap:4px;background:var(--p1);color:var(--p6);border:1px solid var(--p3);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:500">${esc(f)}<button onclick="this.parentElement.remove()" title="Eliminar" style="background:none;border:none;cursor:pointer;color:var(--s5);font-size:15px;line-height:1;padding:0 0 1px 3px">&times;</button></span>`).join('');
+}
+
+function getFuentesActivas(){
+  var c=document.getElementById('fuentesPills'); if(!c) return [];
+  return [...c.querySelectorAll('span')].map(s=>s.dataset.fuente);
+}
+
+function agregarFuente(){
+  var input=document.getElementById('fuentesInput');
+  var val=input.value.trim(); if(!val) return;
+  var activas=getFuentesActivas();
+  if(!activas.includes(val)){ activas.push(val); renderFuentesPills(activas); }
+  input.value='';
+}
+
 // ── CONFIG ────────────────────────────────────────────
 function loadCFG(){ try{ return JSON.parse(localStorage.getItem('redia_cfg')||'{}'); }catch{ return {}; } }
 function saveCFG(obj){ Object.assign(CFG,obj); localStorage.setItem('redia_cfg',JSON.stringify(CFG)); }
 function applyCFG(){
   if(CFG.tono) document.querySelectorAll('#toneGrid .tone-o').forEach(el=>el.classList.toggle('on',el.dataset.t===CFG.tono));
   if(CFG.audiencias) document.querySelectorAll('#audGrid .aud-o').forEach(el=>el.classList.toggle('on',(CFG.audiencias||[]).includes(el.dataset.a)));
-  var m={cfVoz:'voz',cfAud:'aud',cfWords:'words',cfSecc:'secc',cfEstr:'estr',cfDim:'dim',cfAnal:'anal',cfFuentes:'fuentes',cfProh:'proh'};
+  var m={cfVoz:'voz',cfAud:'aud',cfWords:'words',cfSecc:'secc',cfEstr:'estr',cfDim:'dim',cfAnal:'anal',cfProh:'proh'};
   Object.entries(m).forEach(([elId,key])=>{ var el=document.getElementById(elId); if(el&&CFG[key]) el.value=CFG[key]; });
+  var fuentesGuardadas = CFG.fuentes ? CFG.fuentes.split('\n').filter(Boolean) : DEFAULT_FUENTES;
+  renderFuentesPills(fuentesGuardadas);
 }
 function guardarCfg(sec,btn){
   var d={};
@@ -956,7 +983,7 @@ function guardarCfg(sec,btn){
   else if(sec==='audiencia'){ d.audiencias=[...document.querySelectorAll('#audGrid .aud-o.on')].map(e=>e.dataset.a); d.aud=document.getElementById('cfAud').value; }
   else if(sec==='estructura'){ d.words=document.getElementById('cfWords').value; d.secc=document.getElementById('cfSecc').value; d.estr=document.getElementById('cfEstr').value; }
   else if(sec==='analisis'){ d.dim=document.getElementById('cfDim').value; d.anal=document.getElementById('cfAnal').value; }
-  else if(sec==='fuentes'){ d.fuentes=document.getElementById('cfFuentes').value; }
+  else if(sec==='fuentes'){ d.fuentes=getFuentesActivas().join('\n'); }
   else if(sec==='prohibido'){ d.proh=document.getElementById('cfProh').value; }
   saveCFG(d);
   var orig=btn.textContent; btn.textContent='Guardado'; btn.classList.add('ok');
