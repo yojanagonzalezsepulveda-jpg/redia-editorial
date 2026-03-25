@@ -667,6 +667,12 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
             <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar archivo<input type="file" id="m-archivo" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg" style="display:none" onchange="document.getElementById('m-archivo-nm').textContent=this.files[0]?this.files[0].name:'Sin archivo'"></label>
             <span id="m-archivo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
           </div>
+          <label class="cf-lbl">Imagen del producto o servicio (opcional)</label>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar imagen<input type="file" id="m-imagen-prod" accept=".png,.jpg,.jpeg,.webp" style="display:none" onchange="previsualizarImg(this,'m-imagen-prev')"></label>
+            <img id="m-imagen-prev" src="" alt="" style="height:50px;width:80px;object-fit:cover;border-radius:6px;display:none">
+            <span id="m-imagen-prod-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
+          </div>
           <label class="cf-lbl">API key Anthropic</label>
           <input type="password" class="cf-inp" id="m-antkey" placeholder="sk-ant-...">
         </div>
@@ -696,6 +702,20 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
             <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar archivo<input type="file" id="p-archivo" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg" style="display:none" onchange="document.getElementById('p-archivo-nm').textContent=this.files[0]?this.files[0].name:'Sin archivo'"></label>
             <span id="p-archivo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
+          </div>
+          <label class="cf-lbl">Logo del cliente (opcional)</label>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar logo<input type="file" id="p-logo" accept=".png,.jpg,.jpeg,.svg,.webp" style="display:none" onchange="previsualizarImg(this,'p-logo-prev')"></label>
+            <img id="p-logo-prev" src="" alt="" style="height:40px;object-fit:contain;border-radius:6px;display:none">
+            <span id="p-logo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
+          </div>
+          <label class="cf-lbl">Imágenes del producto o servicio (opcional, máx 3)</label>
+          <div style="margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar imágenes<input type="file" id="p-imagenes" accept=".png,.jpg,.jpeg,.webp" multiple style="display:none" onchange="previsualizarMulti(this,'p-imagenes-prev')"></label>
+              <span id="p-imagenes-nm" style="font-size:12px;color:var(--s5)">Sin archivos</span>
+            </div>
+            <div id="p-imagenes-prev" style="display:flex;gap:8px;flex-wrap:wrap"></div>
           </div>
           <label class="cf-lbl">API key Anthropic</label>
           <input type="password" class="cf-inp" id="p-antkey" placeholder="sk-ant-...">
@@ -2023,6 +2043,75 @@ var CREAR_STEPS = {
   patrocinado: ['Procesando el mensaje del cliente...','Redactando con tono editorial...','Sin lenguaje publicitario...','Generando SEO y RRSS...','Generando imagen...'],
 };
 
+function previsualizarImg(input, imgId) {
+  var nmEl = document.getElementById(input.id + '-nm');
+  var file = input.files[0]; if (!file) return;
+  if (nmEl) nmEl.textContent = file.name;
+  var img = document.getElementById(imgId); if (!img) return;
+  var reader = new FileReader();
+  reader.onload = e => { img.src = e.target.result; img.style.display = 'block'; };
+  reader.readAsDataURL(file);
+}
+
+function previsualizarMulti(input, containerId) {
+  var container = document.getElementById(containerId); if (!container) return;
+  var nmEl = document.getElementById(input.id + '-nm');
+  var files = [...input.files].slice(0, 3);
+  if (nmEl) nmEl.textContent = files.length ? files.length + ' archivo' + (files.length > 1 ? 's' : '') + ' seleccionado' + (files.length > 1 ? 's' : '') : 'Sin archivos';
+  container.innerHTML = '';
+  files.forEach(file => {
+    var reader = new FileReader();
+    reader.onload = e => {
+      var img = document.createElement('img');
+      img.src = e.target.result;
+      img.style.cssText = 'height:60px;width:90px;object-fit:cover;border-radius:6px;border:1px solid var(--s2)';
+      container.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function leerImagen64(inputId) {
+  return new Promise(resolve => {
+    var input = document.getElementById(inputId);
+    if (!input || !input.files || !input.files[0]) return resolve(null);
+    var file = input.files[0];
+    var reader = new FileReader();
+    reader.onload = e => {
+      var dataUrl = e.target.result;
+      resolve({dataUrl, base64: dataUrl.split(',')[1], mimeType: file.type || 'image/png'});
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+}
+
+function leerImagenes64Multi(inputId, max) {
+  var input = document.getElementById(inputId);
+  if (!input || !input.files || !input.files.length) return Promise.resolve([]);
+  var files = [...input.files].slice(0, max);
+  return Promise.all(files.map(file => new Promise(resolve => {
+    var reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  }))).then(r => r.filter(Boolean));
+}
+
+function injectMediaIntoHTML(html, logoSrc, productImages) {
+  if (logoSrc) {
+    html = html.replace('<div class="cat">', '<div style="margin-bottom:18px"><img src="' + logoSrc + '" style="height:52px;object-fit:contain;display:block"></div><div class="cat">');
+  }
+  if (productImages && productImages.length) {
+    var cols = productImages.length === 1 ? '1fr' : productImages.length === 2 ? '1fr 1fr' : '1fr 1fr 1fr';
+    var gallery = '<div style="display:grid;grid-template-columns:' + cols + ';gap:12px;margin:28px 0">' +
+      productImages.map(s => '<img src="' + s + '" style="width:100%;border-radius:10px;object-fit:cover;aspect-ratio:16/9">').join('') +
+      '</div>';
+    html = html.replace('<div class="insight">', gallery + '<div class="insight">');
+  }
+  return html;
+}
+
 function leerArchivoAdjunto(inputId) {
   return new Promise(resolve => {
     var input = document.getElementById(inputId);
@@ -2072,9 +2161,24 @@ async function generarCrear(tipo) {
 
   try {
     var adjunto = await leerArchivoAdjunto(tipo[0] + '-archivo');
+    var logoData = tipo === 'patrocinado' ? await leerImagen64('p-logo') : null;
+    var productImages = [];
+    if (tipo === 'patrocinado') {
+      productImages = await leerImagenes64Multi('p-imagenes', 3);
+    } else if (tipo === 'mercado') {
+      var mImg = await leerImagen64('m-imagen-prod');
+      if (mImg) productImages = [mImg.dataUrl];
+    }
     var prompt  = buildPromptByTipo(tipo);
     var raw;
-    if (adjunto && adjunto.imageBase64) {
+    if (logoData) {
+      var logoTxt = prompt + '\n\nLogo del cliente adjunto como imagen. Analízalo para describir mejor la identidad visual de la empresa en el contenido.';
+      if (adjunto && adjunto.text) logoTxt += '\n\nDOCUMENTO ADJUNTO:\n' + adjunto.text.substring(0, 8000);
+      raw = await callClaude(null, key, [
+        {type:'image', source:{type:'base64', media_type:logoData.mimeType, data:logoData.base64}},
+        {type:'text', text:logoTxt}
+      ]);
+    } else if (adjunto && adjunto.imageBase64) {
       raw = await callClaude(null, key, [
         {type:'image', source:{type:'base64', media_type:adjunto.mimeType, data:adjunto.imageBase64}},
         {type:'text', text:prompt+'\n\nDOCUMENTO ADJUNTO: imagen proporcionada arriba. Analízala, extrae la información relevante y úsala como fuente primaria para el informe.'}
@@ -2088,7 +2192,12 @@ async function generarCrear(tipo) {
 
     var data = parseJSON(raw);
     crearRec  = normalizeRec(data);
+    if (logoData) crearRec._logoSrc = logoData.dataUrl;
+    if (productImages.length) crearRec._productImages = productImages;
     crearRec.html_publicable = buildHTML(crearRec);
+    if (crearRec._logoSrc || crearRec._productImages) {
+      crearRec.html_publicable = injectMediaIntoHTML(crearRec.html_publicable, crearRec._logoSrc, crearRec._productImages);
+    }
 
     // Generate image with Gemini
     if (gemKey && crearRec.imagen_prompt) {
