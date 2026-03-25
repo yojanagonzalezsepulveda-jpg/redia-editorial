@@ -987,7 +987,7 @@ function showCfg(id,el){
 }
 
 // ── FUENTES PILLS ─────────────────────────────────────
-var DEFAULT_FUENTES=['Aqua.cl','MundoAcuícola','SERNAPESCA','SUBPESCA','Intesal','FAO','Globefish','El Llanquihue','Diario de Aysén','UACH','IFOP','IntraFish','SalmonBusiness','Mundo Marítimo','UCT'];
+var DEFAULT_FUENTES=['Aqua.cl','MundoAcuícola','Intesal','SalmonExpert','Diario Acuícola','Mundo Marítimo','Portal Acuícola','Revista Aqua','SERNAPESCA','SUBPESCA','INDESPA','CORFO','SERCOTEC','ANID','FIC','FONDECYT','ProChile','SNA','SENCE','Ministerio de Economía','Ministerio del Medio Ambiente','Ministerio de Salud','Ministerio de Trabajo','Subsecretaría de Pesca','Dirección del Trabajo','SEREMI de Salud Los Lagos','SEREMI de Salud Aysén','SMA (Superintendencia del Medio Ambiente)','Contraloría General de la República','FIMA (Fiscalía del Medio Ambiente)','CONAF','DIRECTEMAR (Armada de Chile)','Gobierno Regional Los Lagos','Gobierno Regional Aysén','Gobierno Regional Magallanes','Gobierno Regional Los Ríos','Gobierno Regional Biobío','Gobierno Regional Araucanía','SalmonChile','Consejo del Salmón','Asociación de Mitilicultores','Asociación de Piscicultores','AquaPacífico','Federación de Pescadores','UACH','UCT','UCSC','PUCV','UdeC','UFRO','IFOP','Centro INCAR','Centro FONDAP','Fundación Chinquihue','ULAM','Centros de Innovación Regional Los Lagos','Centros de Innovación Regional Aysén','El Llanquihue','Diario de Aysén','La Discusión','MiradaSur','Diario Chiloé','El Sureño','IntraFish','SalmonBusiness','Fish Farmer','Undercurrent News','Eurofish','Globefish','FAO','OCDE','Banco Mundial','IUCN','OIE/OMSA','WorldFish','Nofima','Institute of Marine Research Noruega','CSIRO Australia','Cámara de Diputadas y Diputados','Senado de la República','Comisión de Pesca y Acuicultura Cámara','Comisión de Pesca y Acuicultura Senado','Comisión de Medio Ambiente Cámara','Comisión de Medio Ambiente Senado','Comisión de Trabajo Cámara','Comisión de Trabajo Senado','Comisión de Salud Cámara','Comisión de Salud Senado','Comisión de Transporte Cámara','Comisión de Hacienda Cámara','Comisión de Hacienda Senado','Comisión de Economía Cámara','Comisión de Economía Senado','Biblioteca del Congreso Nacional BCN'];
 
 function renderFuentesPills(fuentes){
   var c=document.getElementById('fuentesPills'); if(!c) return;
@@ -2430,6 +2430,11 @@ ESTRUCTURA DEL CUADRO DE ANÁLISIS ESTRATÉGICO REDIA (al final de cada publicac
 - Para quiénes es especialmente relevante y por qué (por actor/rubro)
 NO usar "beneficios/dolores/alcances" — usar estas tres secciones en su lugar.
 NUNCA recomendar en este cuadro — solo presentar perspectivas.
+
+FUENTES EXCLUIDAS — consultar solo para contexto, NUNCA citar ni mencionar en ningún texto publicado:
+- AmiChile: se puede leer para contexto pero nunca aparece como fuente ni se menciona en el texto. Si la información viene de AmiChile, buscar confirmación en SERNAPESCA, SalmonChile, Consejo del Salmón u otra fuente primaria.
+- Intemit: misma regla que AmiChile.
+EXCEPCIÓN: solo si el usuario escribe explícitamente "citar AmiChile" o "citar Intemit" en el campo de tema puntual.
 `;
 
 // ── PROMPT BUILDERS POR TIPO ───────────────────────────────────────────────
