@@ -479,10 +479,18 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
 <!-- BÚSQUEDA MANUAL -->
 <div class="page" id="page-busqueda">
   <div class="search-sb">
-    <div class="sb-sec">Especies</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="sb-sec" style="margin-bottom:0">Especies</div>
+        <div style="display:flex;gap:6px">
+          <button onclick="selAll('eGrid','chip')" style="font-size:10px;color:var(--p6);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Todas</button>
+          <button onclick="clearAll('eGrid','chip')" style="font-size:10px;color:var(--s4);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Ninguna</button>
+        </div>
+      </div>
+    <div style="font-size:10px;color:var(--s4);margin-bottom:6px;font-style:italic">Opcional — sin selección busca en todas</div>
     <div class="cgrid" id="eGrid">
-      <div class="chip on" data-v="Salmón Atlántico"><div class="chip-dot"></div>Salmón</div>
-      <div class="chip on" data-v="Trucha arcoíris"><div class="chip-dot"></div>Trucha</div>
+      <div class="chip" data-v="Salmón Atlántico"><div class="chip-dot"></div>Salmón</div>
+      <div class="chip" data-v="Trucha arcoíris"><div class="chip-dot"></div>Trucha</div>
+      <div class="chip" data-v="Salmón Coho"><div class="chip-dot"></div>Coho</div>
       <div class="chip" data-v="Mitílido / Choritos"><div class="chip-dot"></div>Choritos</div>
       <div class="chip" data-v="Ostra Chilena"><div class="chip-dot"></div>Ostra Chilena</div>
       <div class="chip" data-v="Ostra Japonesa"><div class="chip-dot"></div>Ostra Japonesa</div>
@@ -490,22 +498,36 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
       <div class="chip" data-v="Algas marinas"><div class="chip-dot"></div>Algas</div>
       <div class="chip" data-v="Erizo de mar"><div class="chip-dot"></div>Erizo</div>
       <div class="chip" data-v="Abalón"><div class="chip-dot"></div>Abalón</div>
+      <div class="chip" data-v="Acuicultura de pequeña escala"><div class="chip-dot"></div>APE</div>
       <div class="chip" data-v="Otras especies acuícolas"><div class="chip-dot"></div>Otras</div>
     </div>
-    <div class="sb-sec">Focos temáticos</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="sb-sec" style="margin-bottom:0">Focos temáticos</div>
+        <div style="display:flex;gap:6px">
+          <button onclick="selAll('fGrid','ftag')" style="font-size:10px;color:var(--p6);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Todos</button>
+          <button onclick="clearAll('fGrid','ftag')" style="font-size:10px;color:var(--s4);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Ninguno</button>
+        </div>
+      </div>
+    <div style="font-size:10px;color:var(--s4);margin-bottom:6px;font-style:italic">Opcional — sin selección busca en todos los focos</div>
     <div class="fwrap" id="fGrid">
-      <div class="ftag on" data-v="contingencia nacional">Contingencia</div>
-      <div class="ftag on" data-v="tecnología e innovación">Tecnología</div>
-      <div class="ftag on" data-v="normativa y regulación">Normativa</div>
-      <div class="ftag" data-v="comunidad y territorio">Comunidad</div>
-      <div class="ftag" data-v="medio ambiente">Medioambiente</div>
-      <div class="ftag" data-v="sostenibilidad">Sostenibilidad</div>
-      <div class="ftag on" data-v="mercado internacional">Mercado</div>
+      <div class="ftag" data-v="contingencia nacional">Contingencia</div>
+      <div class="ftag" data-v="tecnología e innovación">Tecnología</div>
+      <div class="ftag" data-v="normativa y regulación">Normativa</div>
+      <div class="ftag" data-v="sanidad acuícola">Sanidad</div>
+      <div class="ftag" data-v="exportaciones y comercio exterior">Exportaciones</div>
+      <div class="ftag" data-v="mercado nacional e internacional">Mercado</div>
+      <div class="ftag" data-v="medio ambiente y sustentabilidad">Medioambiente</div>
+      <div class="ftag" data-v="financiamiento y fondos públicos INDESPA CORFO">Financiamiento</div>
+      <div class="ftag" data-v="investigación científica e innovación">I+D / Ciencia</div>
+      <div class="ftag" data-v="comunidades costeras y territorio">Comunidad</div>
+      <div class="ftag" data-v="relaciones laborales y empleo">Empleo</div>
+      <div class="ftag" data-v="fiscalización y sanciones">Fiscalización</div>
       <div class="ftag" data-v="negocios e inversiones">Negocios</div>
       <div class="ftag" data-v="estadísticas y producción">Estadísticas</div>
-      <div class="ftag" data-v="fiscalización y sanciones">Fiscalización</div>
-      <div class="ftag" data-v="I+D y ciencia">I+D / Ciencia</div>
-      <div class="ftag" data-v="empleo">Empleo</div>
+      <div class="ftag" data-v="cambio climático y océano">Cambio climático</div>
+      <div class="ftag" data-v="certificaciones y estándares internacionales">Certificaciones</div>
+      <div class="ftag" data-v="infraestructura y logística">Infraestructura</div>
+      <div class="ftag" data-v="emprendimiento y startups acuícolas">Emprendimiento</div>
     </div>
     <div class="sb-sec" style="margin-top:12px">Tema o noticia puntual</div>
     <textarea class="kwa" id="kwIn" placeholder="Ej: nuevas zonas de salmonicultura, precio del salmón en Asia, floraciones algales en Los Lagos..."></textarea>
@@ -1048,11 +1070,10 @@ function buildCard(r){
       <div class="art-prev">${r.cuerpo_html||'<p>Sin contenido</p>'}</div>
       <div class="ibox">
         <div class="ibox-t">Análisis estratégico REDIA</div>
-        <div class="ibox-g">
-          <div class="ibox-c"><div class="ibox-l">Beneficios</div><div class="ibox-v">${sj(r.beneficios,[]).map(b=>'· '+b).join('<br>')}</div></div>
-          <div class="ibox-c"><div class="ibox-l">Dolores</div><div class="ibox-v">${sj(r.dolores,[]).map(b=>'· '+b).join('<br>')}</div></div>
-          <div class="ibox-c"><div class="ibox-l">Alcances</div><div class="ibox-v">${sj(r.alcances,[]).map(b=>'· '+b).join('<br>')}</div></div>
-          <div class="ibox-c"><div class="ibox-l">Coyuntura</div><div class="ibox-v">${r.coyuntura||''}</div></div>
+        <div class="ibox-g" style="grid-template-columns:1fr">
+          <div class="ibox-c"><div class="ibox-l">Lo que muestra este análisis</div><div class="ibox-v">${r.analisis_muestra||sj(r.beneficios,[]).map(b=>'· '+b).join('<br>')||''}</div></div>
+          <div class="ibox-c"><div class="ibox-l">Lo que no resuelve por sí solo</div><div class="ibox-v">${r.analisis_no_resuelve||sj(r.dolores,[]).map(b=>'· '+b).join('<br>')||''}</div></div>
+          <div class="ibox-c"><div class="ibox-l">Para quiénes es especialmente relevante</div><div class="ibox-v">${r.analisis_relevante_para||r.coyuntura||''}</div></div>
         </div>
       </div>
     </div>
@@ -1150,6 +1171,7 @@ async function guardarEdicion(uid){
 
 // ── BÚSQUEDA MANUAL ───────────────────────────────────
 document.querySelectorAll('#eGrid .chip').forEach(el=>el.onclick=()=>el.classList.toggle('on'));
+// Chips y tags son opcionales — sin selección = busca todo
 document.querySelectorAll('#fGrid .ftag').forEach(el=>el.onclick=()=>el.classList.toggle('on'));
 
 var STEPS=[
@@ -1169,8 +1191,7 @@ async function buscarManual(){
   var foc=[...document.querySelectorAll('#fGrid .ftag.on')].map(e=>e.dataset.v);
   var kw=document.getElementById('kwIn').value.trim();
   var key=document.getElementById('antKey').value.trim();
-  if(!esp.length) return alert('Selecciona al menos una especie.');
-  if(!foc.length) return alert('Selecciona al menos un foco temático.');
+  // Especies y focos son opcionales — sin selección busca en toda la acuicultura
   if(!key) return alert('Ingresa tu API key de Anthropic.');
   localStorage.setItem('ant_key',key);
   ANT_KEY=key;
@@ -1188,21 +1209,22 @@ async function buscarManual(){
     document.getElementById('pFill').style.width='100%';
     await sleep(300);
     var data=parseJSON(raw);
-    var rec=normalizeRec(data);
-    rec.html_publicable=buildHTML(rec);
-    rec._uid=rec.id;
-    manualRec=rec;
+    // Soporte para múltiples informes (array) o informe único (objeto)
+    var dataArr=Array.isArray(data)?data:[data];
+    var recs=dataArr.map(d=>{ var r=normalizeRec(d); r.html_publicable=buildHTML(r); r._uid=r.id; return r; });
+    manualRec=recs[0];
+    manualRecs=recs;
     document.getElementById('searchLoading').style.display='none';
     var res=document.getElementById('searchResult');
     res.style.display='block';
+    var n=recs.length;
     res.innerHTML=
-      '<div class="cards-hd"><div><div class="cards-title">Informe generado</div><div class="cards-sub">Revisa, edita si necesitas, luego descarga o guarda</div></div>'+
+      '<div class="cards-hd"><div><div class="cards-title">'+n+' informe'+(n!==1?'s generados':' generado')+'</div><div class="cards-sub">Revisa cada uno — aprueba los que quieres publicar, descarta los demás</div></div>'+
       '<div style="display:flex;gap:7px">'+
-      '<button class="rbtn" onclick="dlManual()">Descargar HTML</button>'+
-      (GS_URL?'<button class="rbtn" style="background:linear-gradient(135deg,var(--ok),var(--t5))" onclick="guardarManualEnGS()">Guardar en bandeja</button>':'')+
+      (GS_URL?'<button class="rbtn" style="background:linear-gradient(135deg,var(--ok),var(--t5))" onclick="guardarTodosEnGS()">Guardar todos en bandeja</button>':'')+
       '</div></div>'+
-      buildCard(rec);
-    setTimeout(()=>{ var b=document.getElementById('body-'+rec.id); if(b) b.classList.add('open'); },100);
+      recs.map(r=>buildCard(r)).join('');
+    setTimeout(()=>{ var b=document.getElementById('body-'+recs[0].id); if(b) b.classList.add('open'); },100);
   } catch(e){
     clearInterval(st);
     document.getElementById('searchLoading').style.display='none';
@@ -1221,15 +1243,72 @@ async function guardarManualEnGS(){
   else alert('No se pudo guardar. Verifica la conexión con Google Sheets.');
 }
 
+async function guardarTodosEnGS(){
+  var recs=manualRecs||[manualRec];
+  if(!recs.length||!GS_URL) return;
+  var ok=0;
+  for(var r of recs){
+    var id=await gsGuardar(r);
+    if(id){ r.id=id; ok++; }
+  }
+  if(ok) alert(ok+' informe'+(ok!==1?'s guardados':'  guardado')+' en la bandeja editorial.');
+  else alert('No se pudo guardar. Verifica la conexión con Google Sheets.');
+}
+
 function dlManual(){ if(manualRec) dlRec(manualRec); }
 
+var manualRecs=[];
+
 function buildPrompt(esp,foc,kw){
-  var id='REDIA es una antena de inteligencia acuícola. No replica noticias — las analiza en profundidad desde múltiples perspectivas para aportar a la toma de decisiones de todos los actores de la cadena de valor acuícola chilena.\n\nPRINCIPIOS: 1) Analiza en profundidad, nunca recomienda. 2) No toma partido entre sectores ni actores — todos son audiencia y clientes potenciales de REDIA. 3) Relevar otros rubros no significa restar al salmón — significa ampliar la mirada del sector completo. 4) EFECTO CADENA (ambas direcciones): al analizar salmones evalúa implicancias para mitilicultura/ostiones/algas/otros; al analizar otros rubros evalúa implicancias para salmonicultura. Sin forzarlo si no aplica. 5) ANTENA TECNOLÓGICA: rastrea I+D de universidades, startups, IFOP, Indespa. Explica qué significa para los actores y qué tan aplicable es en Chile hoy.\n\nVOCABULARIO: usar "sector" para la acuicultura en conjunto. "Industria" SOLO para grandes compañías. Alternativas: actividad, rubro, cadena acuícola, producción.\n\nFUENTES: Aqua.cl, MundoAcuícola, Intesal, SERNAPESCA, SUBPESCA, FAO, Globefish, UACH, UCT, IFOP, Gobierno Regional Los Lagos, El Llanquihue, Diario de Aysén, SNA, ProChile.\nNUNCA CITAR: AmiChile, Intemit.\n\nPALABRAS PROHIBIDAS: cabe destacar, es importante señalar, en el contexto de, en el marco de, sin lugar a dudas, robusto, transformador, paradigma, sin precedentes, potenciar, sinergia, punto de inflexión, industria (salvo grandes compañías).\n\nTEXTO HUMANO: Las citas reales son el corazón del análisis. Datos concretos y verificados. Audiencia: desde el mitilicultor artesanal de Chiloé hasta el gerente de una gran salmonera.\n\nESTRUCTURA ANÁLISIS ESTRATÉGICO: Lo que muestra/revela · Lo que no resuelve/desafíos · Para quiénes es relevante · Efecto cadena si aplica.';
+  var id='REDIA es una antena de inteligencia acuícola. No replica noticias — las analiza en profundidad desde múltiples perspectivas para aportar a la toma de decisiones de todos los actores de la cadena de valor acuícola chilena.\n\nPRINCIPIOS: 1) Analiza en profundidad, nunca recomienda. 2) No toma partido entre sectores ni actores — todos son audiencia y clientes potenciales de REDIA. 3) Relevar otros rubros no significa restar al salmón — significa ampliar la mirada del sector completo. 4) EFECTO CADENA (ambas direcciones): al analizar salmones evalúa implicancias para mitilicultura/ostiones/algas/otros; al analizar otros rubros evalúa implicancias para salmonicultura. Sin forzarlo si no aplica. 5) ANTENA TECNOLÓGICA: rastrea I+D de universidades, startups, IFOP, Indespa. Explica qué significa para los actores y qué tan aplicable es en Chile hoy.\n\nVOCABULARIO: usar "sector" para la acuicultura en conjunto. "Industria" SOLO para grandes compañías. Alternativas: actividad, rubro, cadena acuícola, producción.\n\nFUENTES: Aqua.cl, MundoAcuícola, Intesal, SERNAPESCA, SUBPESCA, FAO, Globefish, UACH, UCT, IFOP, Gobierno Regional Los Lagos, El Llanquihue, Diario de Aysén, SNA, ProChile.\nFUENTES EXCLUIDAS: AmiChile e Intemit — puedes leer su contenido para contexto general, pero NUNCA los cites como fuente ni los menciones en el texto. Si la información relevante proviene de ellos, búscala en una fuente primaria alternativa (SERNAPESCA, SUBPESCA, universidades, medios independientes). EXCEPCIÓN: solo si el usuario escribe explícitamente "citar AmiChile" o "citar Intemit" en el campo de tema puntual.\n\nPALABRAS PROHIBIDAS: cabe destacar, es importante señalar, en el contexto de, en el marco de, sin lugar a dudas, robusto, transformador, paradigma, sin precedentes, potenciar, sinergia, punto de inflexión, industria (salvo grandes compañías).\n\nTEXTO HUMANO: Las citas reales son el corazón del análisis. Datos concretos y verificados. Audiencia: desde el mitilicultor artesanal de Chiloé hasta el gerente de una gran salmonera.\n\nESTRUCTURA ANÁLISIS ESTRATÉGICO: Lo que muestra/revela · Lo que no resuelve/desafíos · Para quiénes es relevante · Efecto cadena si aplica.';
   var minW=CFG.words||700;
   var proh=(CFG.proh||'').split('\n').filter(Boolean).join(' · ');
   if(proh) id+='\nADICIONAL PROHIBIDO: '+proh;
   var extras=(CFG.voz?'\nVOZ: '+CFG.voz:'')+(CFG.aud?'\nAUDIENCIA: '+CFG.aud:'')+(CFG.dim?'\nDIMENSIONES: '+CFG.dim:'')+(CFG.fuentes?'\nFUENTES ADICIONALES: '+CFG.fuentes.split('\n').filter(Boolean).join(' · '):'');
-  return id+extras+'\n\nEres el editor estratégico de REDIA. Busca noticias reales y recientes en la web.\n\nESPECIES: '+esp.join(', ')+'\nFOCOS: '+foc.join(', ')+'\nTEMA: '+(kw||'noticias más relevantes últimas 48 horas')+'\n\nINSTRUCCIONES:\n1. Usa web_search. Consulta todas las fuentes indicadas.\n2. Cruza múltiples fuentes antes de escribir.\n3. Aplica identidad editorial REDIA completa.\n4. Efecto cadena en ambas direcciones cuando aplique.\n5. Registro: tercera persona periodística.\n6. Mínimo '+minW+' palabras en el cuerpo.\n\nResponde SOLO con JSON válido sin markdown: {"titulo_seo":"Título SEO máx 60 chars","descripcion_seo":"Descripción SEO máx 140 chars","tags":["t1","t2","t3","t4"],"categoria":"Categoría","tiempo_lectura":"X min","fuentes_consultadas":["F1","F2","F3","F4"],"imagen_prompt":"Prompt fotorrealista inglés para Gemini. Específico, variado, nunca genérico ni siempre peces bajo el agua.","articulo":{"titular":"Titular directo sin clichés","bajada":"2-3 oraciones con dato concreto","cuerpo":"HTML h2,h3,p,strong,blockquote. Mín '+minW+' palabras. Análisis profundo, múltiples perspectivas, efecto cadena si aplica.","beneficios":["Lo que revela 1","Lo que revela 2"],"dolores":["Lo que no resuelve 1","Lo que no resuelve 2"],"alcances":["Para quién es relevante 1","Para quién es relevante 2"],"coyuntura":"Efecto cadena y contexto para toda la cadena acuícola."},"linkedin":"Post LinkedIn voz REDIA. Emojis sectoriales. Máx 1200 chars. CTA. redia.pro","facebook":"Post Facebook conversacional. Máx 500 chars. CTA.","audio_script":"Guión narración audio. Mín 350 palabras.","video_script":"Guión YouTube timecodes, descripción visual, CTA."}';
+  return id+extras+`
+
+Eres el editor estratégico de REDIA. Busca noticias reales y recientes en la web.
+
+${esp.length ? 'ESPECIES DE INTERÉS: '+esp.join(', ') : 'ESPECIES: Toda la cadena acuícola chilena (salmón, trucha, coho, mitílidos, ostiones, ostras, algas, erizo, abalón y otras)'}
+${foc.length ? 'FOCOS TEMÁTICOS: '+foc.join(', ') : 'FOCOS: Todos los temas relevantes para la acuicultura chilena'}
+TEMA PUNTUAL: ${kw||'las noticias más relevantes e importantes de las últimas 48 horas para el sector acuícola chileno'}
+
+INSTRUCCIONES CRÍTICAS:
+1. Usa web_search. Consulta TODAS las fuentes indicadas.
+2. Identifica 3-4 noticias o ángulos DISTINTOS y RELEVANTES sobre el tema.
+3. Genera UN INFORME SEPARADO por cada noticia/ángulo — NO los mezcles en uno solo.
+4. Cada informe debe tener su propio análisis, su propia bajada y sus propias fuentes.
+5. Las fuentes consultadas SIEMPRE deben aparecer en cada informe — mínimo 3 fuentes reales.
+6. Aplica identidad editorial REDIA: tercera persona periodística, efecto cadena, sin recomendar.
+7. Análisis estratégico con 3 secciones: Lo que muestra / Lo que no resuelve / Para quiénes es relevante.
+8. NUNCA uses: punto de inflexión, sin precedentes, robusto, transformador, industria (general).
+9. Mínimo ${minW} palabras por informe.
+
+Responde SOLO con JSON válido sin markdown — un array con múltiples informes:
+[
+  {
+    "titulo_seo": "Título SEO máx 60 chars — específico al ángulo",
+    "descripcion_seo": "Descripción SEO máx 140 chars",
+    "tags": ["t1","t2","t3","t4"],
+    "categoria": "Categoría",
+    "tiempo_lectura": "X min",
+    "fuentes_consultadas": ["Nombre fuente 1 + URL o medio", "Fuente 2", "Fuente 3"],
+    "imagen_prompt": "Prompt fotorrealista en inglés para Gemini. Específico al tema, nunca genérico.",
+    "articulo": {
+      "titular": "Titular periodístico directo con dato concreto",
+      "bajada": "2-3 oraciones con el hecho más relevante y cifra concreta",
+      "cuerpo": "HTML completo: h2 con titulares directos, p, strong para datos clave, blockquote para citas verificadas. Mín ${minW} palabras. Efecto cadena si aplica.",
+      "analisis_muestra": "Lo que muestra este análisis — hechos concretos y verificados",
+      "analisis_no_resuelve": "Lo que no resuelve por sí solo — limitaciones e incógnitas pendientes",
+      "analisis_relevante_para": "Para quiénes es especialmente relevante y por qué — por actor y rubro"
+    },
+    "linkedin": "Post LinkedIn. Informativo, no publicitario. Emojis sectoriales. Máx 1200 chars. Link redia.pro.",
+    "facebook": "Post Facebook conversacional. Máx 500 chars. Link redia.pro.",
+    "audio_script": "Guión narración audio. Informativo y cercano. Mín 350 palabras.",
+    "video_script": "Guión YouTube. Timecodes 00:00. Descripción visual entre corchetes. CTA suscripción."
+  }
+]
+Genera entre 2 y 4 objetos en el array — uno por cada ángulo/noticia relevante y distinto que encuentres.\`;
 }
 
 async function callClaude(prompt,key){
@@ -1245,6 +1324,10 @@ async function callClaude(prompt,key){
 
 function parseJSON(raw){
   var clean=raw.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+  // Try array first (multiple reports)
+  var arrMatch=clean.match(/\[[\s\S]*\]/);
+  if(arrMatch){ try{ var arr=JSON.parse(arrMatch[0]); if(Array.isArray(arr)&&arr.length) return arr; }catch(e){} }
+  // Fall back to single object
   var m=clean.match(/\{[\s\S]*\}/);
   if(!m) throw new Error('No se pudo parsear la respuesta. Intenta de nuevo.');
   return JSON.parse(m[0]);
@@ -1260,6 +1343,9 @@ function normalizeRec(d){
     tiempo_lectura:d.tiempo_lectura||'5 min',
     fuentes_consultadas:d.fuentes_consultadas||[], imagen_prompt:d.imagen_prompt||'',
     titular:a.titular||'', bajada:a.bajada||'', cuerpo_html:a.cuerpo||'',
+    analisis_muestra:a.analisis_muestra||'', 
+    analisis_no_resuelve:a.analisis_no_resuelve||'',
+    analisis_relevante_para:a.analisis_relevante_para||'',
     beneficios:a.beneficios||[], dolores:a.dolores||[],
     alcances:a.alcances||[], coyuntura:a.coyuntura||'',
     linkedin:d.linkedin||'', facebook:d.facebook||'',
@@ -2398,6 +2484,13 @@ function buildPromptByTipo(tipo) {
     );
   }
   throw new Error('Tipo de contenido no reconocido: ' + tipo);
+}
+
+function selAll(gridId, cls) {
+  document.querySelectorAll('#'+gridId+' .'+cls).forEach(el=>el.classList.add('on'));
+}
+function clearAll(gridId, cls) {
+  document.querySelectorAll('#'+gridId+' .'+cls).forEach(el=>el.classList.remove('on'));
 }
 </script>
 
