@@ -596,6 +596,11 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
           <input type="text" class="cf-inp" id="n-titulo" placeholder="Ej: Nueva tecnología de recirculación reduce costos en un 30% en Los Lagos">
           <label class="cf-lbl">Tus notas, ideas o borrador</label>
           <textarea class="cf-inp xl" id="n-notas" placeholder="Escribe todo lo que sabes sobre el tema. Puede ser en puntos, párrafos sueltos, datos, nombres, fechas — cualquier formato. La IA lo organiza y desarrolla.&#10;&#10;Ej:&#10;- Empresa X lanzó sistema de recirculación&#10;- Reducción de 30% en costos operativos&#10;- Prueba piloto en salmones, funcionó bien&#10;- Director dice que planean expandir a mitílidos&#10;- Hay interés de 5 empresas más"></textarea>
+          <label class="cf-lbl">Adjuntar documento de referencia (PDF, Word, imagen, texto)</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar archivo<input type="file" id="n-archivo" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg" style="display:none" onchange="document.getElementById('n-archivo-nm').textContent=this.files[0]?this.files[0].name:'Sin archivo'"></label>
+            <span id="n-archivo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
+          </div>
           <label class="cf-lbl">Categoría en redia.pro</label>
           <select class="cf-inp" id="n-tipo" style="height:40px">
             <option value="noticia">Noticia</option>
@@ -624,6 +629,11 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
           <input type="text" class="cf-inp" id="e-contexto" placeholder="Ej: Entrevista realizada en la feria AquaSur 2026, hablamos sobre la expansión de la mitilicultura en Chiloé">
           <label class="cf-lbl">Contenido de la entrevista</label>
           <textarea class="cf-inp xl" id="e-contenido" placeholder="Pega aquí las preguntas y respuestas, la transcripción, o tus notas.&#10;&#10;Puede ser en cualquier formato:&#10;P: ¿Cómo ha cambiado la producción este año?&#10;R: Este año tuvimos un aumento del 15%...&#10;&#10;O simplemente notas tuyas:&#10;- Me habló de los desafíos del ISA&#10;- Mencionó que el precio del chorito subió&#10;- Cree que la normativa nueva es positiva"></textarea>
+          <label class="cf-lbl">Adjuntar documento de referencia (PDF, Word, imagen, texto)</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar archivo<input type="file" id="e-archivo" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg" style="display:none" onchange="document.getElementById('e-archivo-nm').textContent=this.files[0]?this.files[0].name:'Sin archivo'"></label>
+            <span id="e-archivo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
+          </div>
           <label class="cf-lbl">API key Anthropic</label>
           <input type="password" class="cf-inp" id="e-antkey" placeholder="sk-ant-...">
         </div>
@@ -652,6 +662,11 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
           <textarea class="cf-inp big" id="m-descripcion" placeholder="Describe qué ofreces, qué buscas, cuáles son las condiciones, precios si aplica, zona geográfica, contacto, etc.&#10;&#10;Mientras más detalles, mejor resultado."></textarea>
           <label class="cf-lbl">Precio o rango (opcional)</label>
           <input type="text" class="cf-inp" id="m-precio" placeholder="Ej: $500 por tonelada · Precio a convenir · Inversión desde $10M">
+          <label class="cf-lbl">Adjuntar documento de referencia (PDF, Word, imagen, texto)</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar archivo<input type="file" id="m-archivo" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg" style="display:none" onchange="document.getElementById('m-archivo-nm').textContent=this.files[0]?this.files[0].name:'Sin archivo'"></label>
+            <span id="m-archivo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
+          </div>
           <label class="cf-lbl">API key Anthropic</label>
           <input type="password" class="cf-inp" id="m-antkey" placeholder="sk-ant-...">
         </div>
@@ -677,6 +692,11 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
             <option value="opinion">Columna de opinión del cliente</option>
             <option value="producto">Presentación de producto/servicio</option>
           </select>
+          <label class="cf-lbl">Adjuntar documento de referencia (PDF, Word, imagen, texto)</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar archivo<input type="file" id="p-archivo" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg" style="display:none" onchange="document.getElementById('p-archivo-nm').textContent=this.files[0]?this.files[0].name:'Sin archivo'"></label>
+            <span id="p-archivo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
+          </div>
           <label class="cf-lbl">API key Anthropic</label>
           <input type="password" class="cf-inp" id="p-antkey" placeholder="sk-ant-...">
         </div>
@@ -1390,11 +1410,11 @@ Responde SOLO con JSON válido sin markdown — un array con múltiples informes
 Genera entre 2 y 4 objetos en el array — uno por cada ángulo/noticia relevante y distinto que encuentres.`;
 }
 
-async function callClaude(prompt,key){
+async function callClaude(prompt,key,contentOverride){
   var res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:8096,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:prompt}]})
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:8096,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:contentOverride||prompt}]})
   });
   if(!res.ok){ var e=await res.json().catch(()=>({})); throw new Error(e.error?.message||'Error HTTP '+res.status); }
   var d=await res.json();
@@ -2003,6 +2023,28 @@ var CREAR_STEPS = {
   patrocinado: ['Procesando el mensaje del cliente...','Redactando con tono editorial...','Sin lenguaje publicitario...','Generando SEO y RRSS...','Generando imagen...'],
 };
 
+function leerArchivoAdjunto(inputId) {
+  return new Promise(resolve => {
+    var input = document.getElementById(inputId);
+    if (!input || !input.files || !input.files[0]) return resolve(null);
+    var file = input.files[0];
+    var name = file.name.toLowerCase();
+    var reader = new FileReader();
+    if (name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg')) {
+      reader.onload = e => {
+        var b64 = e.target.result.split(',')[1];
+        resolve({imageBase64: b64, mimeType: name.endsWith('.png') ? 'image/png' : 'image/jpeg'});
+      };
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    } else {
+      reader.onload = e => resolve({text: e.target.result});
+      reader.onerror = () => resolve(null);
+      reader.readAsText(file, 'UTF-8');
+    }
+  });
+}
+
 async function generarCrear(tipo) {
   var keyField = document.getElementById(tipo[0] + '-antkey') || document.getElementById('n-antkey');
   var key = (keyField ? keyField.value.trim() : '') || ANT_KEY;
@@ -2029,8 +2071,18 @@ async function generarCrear(tipo) {
   }, 40000 / steps.length);
 
   try {
-    var prompt = buildPromptByTipo(tipo);
-    var raw    = await callClaude(prompt, key);
+    var adjunto = await leerArchivoAdjunto(tipo[0] + '-archivo');
+    var prompt  = buildPromptByTipo(tipo);
+    var raw;
+    if (adjunto && adjunto.imageBase64) {
+      raw = await callClaude(null, key, [
+        {type:'image', source:{type:'base64', media_type:adjunto.mimeType, data:adjunto.imageBase64}},
+        {type:'text', text:prompt+'\n\nDOCUMENTO ADJUNTO: imagen proporcionada arriba. Analízala, extrae la información relevante y úsala como fuente primaria para el informe.'}
+      ]);
+    } else {
+      if (adjunto && adjunto.text) prompt += '\n\nDOCUMENTO ADJUNTO:\n' + adjunto.text.substring(0, 8000) + '\n\nAnaliza este documento, extrae la información relevante y úsala como fuente primaria para el informe.';
+      raw = await callClaude(prompt, key);
+    }
     clearInterval(st);
     document.getElementById('crear-pfill').style.width = '90%';
 
