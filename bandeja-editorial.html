@@ -1701,7 +1701,7 @@ function selProvSearch(p, init) {
 }
 
 async function callGemini(prompt, key, signal, useSearch, maxTok) {
-  var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + key;
+  var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17:generateContent?key=' + key;
   var bodyObj = {
     contents: [{role:'user', parts:[{text:prompt}]}],
     generationConfig: {maxOutputTokens: maxTok || 8192}
