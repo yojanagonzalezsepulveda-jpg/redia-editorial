@@ -1785,7 +1785,7 @@ async function callGemini(prompt, key, signal, useSearch, maxTok, contentOverrid
   });
   if (!res.ok) { var e = await res.json().catch(()=>({})); throw new Error(e.error?.message || 'Error HTTP ' + res.status); }
   var d = await res.json();
-  return (d.candidates?.[0]?.content?.parts || []).filter(p => p.text).map(p => p.text).join('');
+  return (d.candidates?.[0]?.content?.parts || []).filter(p => p.text && !p.thought).map(p => p.text).join('');
 }
 
 async function searchTavily(query, key) {
