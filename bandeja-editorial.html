@@ -1538,12 +1538,13 @@ ${hechosList}
 Citas disponibles:
 ${citasList}
 
-Fuentes consultadas: ${fuentesStr}
+Fuentes consultadas en la investigación: ${fuentesStr}
 
 Redacta el informe completo con voz REDIA. Mín ${minW} palabras en el cuerpo.
+IMPORTANTE: en fuentes_consultadas y fuentes_con_links lista TODAS las fuentes reales usadas en la investigación, no solo la principal.
 
 Responde SOLO con JSON válido:
-{"titulo_seo":"máx 60 chars","descripcion_seo":"máx 140 chars","tags":["t1","t2","t3","t4"],"categoria":"noticia","tiempo_lectura":"X min","fuentes_consultadas":["${inv.fuente||''}"],"fuentes_con_links":[{"nombre":"${inv.fuente||''}","url":"${inv.url||''}","descripcion":"fuente principal"}],"imagen_prompt":"Prompt fotorrealista en inglés para Gemini Imagen 3. Específico al tema. 16:9","articulo":{"titular":"titular periodístico directo con dato concreto","bajada":"2-3 oraciones con el hecho más relevante y cifra concreta","cuerpo":"HTML completo: h2 subtítulos directos, p, strong datos clave, blockquote citas. Mín ${minW} palabras.","analisis_muestra":"Lo que muestra este análisis","analisis_no_resuelve":"Lo que no resuelve por sí solo","analisis_relevante_para":"Para quiénes es especialmente relevante"}}`;
+{"titulo_seo":"máx 60 chars","descripcion_seo":"máx 140 chars","tags":["t1","t2","t3","t4"],"categoria":"noticia","tiempo_lectura":"X min","fuentes_consultadas":["Medio o fuente 1","Medio o fuente 2","Medio o fuente 3"],"fuentes_con_links":[{"nombre":"Nombre real del medio","url":"https://url-real.cl/nota","descripcion":"Qué aportó esta fuente"},{"nombre":"Fuente 2","url":"https://url2.cl","descripcion":"Qué aportó"},{"nombre":"Fuente 3","url":"https://url3.cl","descripcion":"Qué aportó"}],"imagen_prompt":"Prompt fotorrealista en inglés para Gemini Imagen 3. Específico al tema. 16:9","articulo":{"titular":"titular periodístico directo con dato concreto","bajada":"2-3 oraciones con el hecho más relevante y cifra concreta","cuerpo":"HTML completo: h2 subtítulos directos, p, strong datos clave, blockquote citas. Mín ${minW} palabras.","analisis_muestra":"Lo que muestra este análisis — qué revela para el sector acuícola, en 2-4 puntos concretos"}}`;
 }
 
 function buildPromptDistribuir(titular,bajada,analisisMuestra){
