@@ -1360,9 +1360,12 @@ async function buscarManual(){
   document.getElementById('searchLoading').style.display='block';
   document.getElementById('pFill').style.width='0%';
   var si=0;
-  var st=setInterval(()=>{ if(si<STEPS.length){ document.getElementById('lStep').innerHTML=STEPS[si].t; document.getElementById('pFill').style.width=STEPS[si].p+'%'; si++; } },38000/STEPS.length);
+  var st=setInterval(()=>{ if(si<STEPS.length){ document.getElementById('lStep').innerHTML=STEPS[si].t; document.getElementById('pFill').style.width=STEPS[si].p+'%'; si++; } },8000);
+  var abortCtrl=new AbortController();
+  var timeoutId=setTimeout(()=>abortCtrl.abort(),180000);
   try {
-    var raw=await callClaude(buildPrompt(esp,foc,kw),key);
+    var raw=await callClaude(buildPrompt(esp,foc,kw),key,null,abortCtrl.signal);
+    clearTimeout(timeoutId);
     clearInterval(st);
     document.getElementById('pFill').style.width='100%';
     await sleep(300);
@@ -1385,9 +1388,13 @@ async function buscarManual(){
     setTimeout(()=>{ var b=document.getElementById('body-'+recs[0].id); if(b) b.classList.add('open'); },100);
   } catch(e){
     clearInterval(st);
+    clearTimeout(timeoutId);
     document.getElementById('searchLoading').style.display='none';
     document.getElementById('searchEmpty').style.display='flex';
-    document.getElementById('searchEmpty').innerHTML='<div style="background:var(--errb);border:1px solid var(--errbr);border-radius:14px;padding:20px;max-width:400px;color:var(--err);font-size:13px;line-height:1.6"><strong>Error:</strong><br>'+e.message+'</div>';
+    var msg=(e.name==='AbortError'||e.message==='signal is aborted without reason')
+      ? 'La búsqueda tardó demasiado. Intenta con un tema más específico o reduce los focos seleccionados.'
+      : e.message;
+    document.getElementById('searchEmpty').innerHTML='<div style="background:var(--errb);border:1px solid var(--errbr);border-radius:14px;padding:20px;max-width:400px;color:var(--err);font-size:13px;line-height:1.6"><strong>Error:</strong><br>'+msg+'</div>';
   } finally {
     btn.disabled=false;
     btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora';
@@ -1466,11 +1473,12 @@ Responde SOLO con JSON válido sin markdown — un array con múltiples informes
 Genera entre 2 y 4 objetos en el array — uno por cada ángulo/noticia relevante y distinto que encuentres.`;
 }
 
-async function callClaude(prompt,key,contentOverride){
+async function callClaude(prompt,key,contentOverride,signal){
   var res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:8096,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:contentOverride||prompt}]})
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:8096,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:contentOverride||prompt}]}),
+    signal:signal||undefined
   });
   if(!res.ok){ var e=await res.json().catch(()=>({})); throw new Error(e.error?.message||'Error HTTP '+res.status); }
   var d=await res.json();
