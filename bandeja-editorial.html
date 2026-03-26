@@ -1349,21 +1349,17 @@ function buildPromptDescubrir(esp,foc,kw){
   var _cfgF=CFG.fuentes?CFG.fuentes.split('\n').filter(Boolean):[];
   var _fArr=_cfgF.length>0?_cfgF:(typeof DEFAULT_FUENTES!=='undefined'?DEFAULT_FUENTES:[]);
   var fLib=_fArr.slice(0,25).join(', ');
-  return `Eres un buscador de noticias para el sector acuícola chileno. Usa web_search.
+  return `Eres un editor del sector acuícola chileno. Usa web_search para buscar noticias reales.
 
-TEMA: ${kw||'noticias más relevantes del sector acuícola chileno en las últimas 48 horas'}
-${esp.length?'ESPECIES: '+esp.join(', '):''}
+TEMA: ${kw||'la noticia más relevante del sector acuícola chileno en las últimas 48 horas'}
+${esp.length?'ESPECIES DE INTERÉS: '+esp.join(', '):''}
 ${foc.length?'FOCOS: '+foc.join(', '):''}
-FUENTES PRIORITARIAS (usa las más relevantes): ${fLib}
+FUENTES PRIORITARIAS: ${fLib}
 
-Busca y encuentra 3 noticias reales, recientes y distintas sobre el tema.
+Busca y elige LA noticia más importante y reciente sobre el tema.
 
 Responde ÚNICAMENTE con este JSON — sin texto antes ni después, sin markdown:
-[
-  {"titulo":"título de la noticia","url":"https://url","fuente":"nombre del medio","resumen":"1-2 oraciones con el hecho principal"},
-  {"titulo":"...","url":"...","fuente":"...","resumen":"..."},
-  {"titulo":"...","url":"...","fuente":"...","resumen":"..."}
-]`;
+{"titulo":"título de la noticia","url":"https://url-directa","fuente":"nombre del medio","resumen":"2-3 oraciones con el hecho principal y cifras si las hay"}`;
 }
 
 async function buscarManual(){
@@ -1380,121 +1376,73 @@ async function buscarManual(){
   document.getElementById('searchResult').style.display='none';
   document.getElementById('searchLoading').style.display='block';
   var minW=parseInt(CFG.words||'600');
-  var recs=[];
 
-  function setProgress(pct,txt){
-    document.getElementById('pFill').style.width=pct+'%';
-    document.getElementById('lStep').innerHTML=txt;
-  }
+  function setProgress(pct,txt){ document.getElementById('pFill').style.width=pct+'%'; document.getElementById('lStep').innerHTML=txt; }
+  function mostrarError(msg){ document.getElementById('searchLoading').style.display='none'; document.getElementById('searchEmpty').style.display='flex'; document.getElementById('searchEmpty').innerHTML='<div style="background:var(--errb);border:1px solid var(--errbr);border-radius:14px;padding:20px;max-width:400px;color:var(--err);font-size:13px;line-height:1.6"><strong>Error:</strong><br>'+msg+'</div>'; }
+  function newAbort(ms){ _busquedaAbort=new AbortController(); return setTimeout(()=>_busquedaAbort.abort(),ms); }
+  function resetBtn(){ btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora'; }
 
-  function mostrarError(msg){
-    document.getElementById('searchLoading').style.display='none';
-    document.getElementById('searchEmpty').style.display='flex';
-    document.getElementById('searchEmpty').innerHTML='<div style="background:var(--errb);border:1px solid var(--errbr);border-radius:14px;padding:20px;max-width:400px;color:var(--err);font-size:13px;line-height:1.6"><strong>Error:</strong><br>'+msg+'</div>';
-  }
-
-  function newAbort(ms){
-    _busquedaAbort=new AbortController();
-    return setTimeout(()=>_busquedaAbort.abort(),ms);
-  }
-
-  // ── PASO 1: Descubrir noticias ──
-  setProgress(5,'Paso 1/2 — Buscando noticias relevantes en la web...');
-  var tid=newAbort(90000);
+  // ── PASO 1: Encontrar la noticia más relevante ──
+  setProgress(10,'Paso 1/2 — Buscando la noticia más relevante...');
+  var tid1=newAbort(90000);
+  var raw1;
   try {
-    var raw1=await callClaude(buildPromptDescubrir(esp,foc,kw),key,null,_busquedaAbort.signal);
-    clearTimeout(tid);
+    raw1=await callClaude(buildPromptDescubrir(esp,foc,kw),key,null,_busquedaAbort.signal);
+    clearTimeout(tid1);
   } catch(e){
-    clearTimeout(tid); _busquedaAbort=null;
-    var msg1=(e.name==='AbortError'||e.message==='signal is aborted without reason')
-      ?'La búsqueda inicial tardó demasiado. Intenta con un tema más específico.':e.message;
-    mostrarError(msg1);
-    btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora';
-    return;
+    clearTimeout(tid1); _busquedaAbort=null;
+    mostrarError((e.name==='AbortError')?'Tiempo agotado en la búsqueda. Intenta con un tema más específico.':e.message);
+    resetBtn(); return;
   }
 
-  var noticias;
-  try { noticias=parseJSON(raw1); } catch(e){ mostrarError('Paso 1 falló — Claude no devolvió JSON válido. Respuesta recibida:<br><pre style="font-size:10px;white-space:pre-wrap;margin-top:8px;max-height:120px;overflow:auto">'+esc(raw1.substring(0,500))+'</pre>'); btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora'; return; }
-  if(!Array.isArray(noticias)) noticias=[noticias];
-  noticias=noticias.slice(0,4);
-
-  // Mostrar contenedor de resultados (se llena progresivamente)
-  var res=document.getElementById('searchResult');
-  res.style.display='block';
-  res.innerHTML='<div class="cards-hd" id="cardsHd"><div><div class="cards-title" id="cardsTitle">Generando '+noticias.length+' informes...</div><div class="cards-sub">Los informes aparecen uno a uno — puedes leer mientras se generan los demás</div></div></div><div id="cardsContainer"></div>';
-
-  // ── PASO 2: Desarrollar cada noticia ──
-  for(var i=0;i<noticias.length;i++){
-    var n=noticias[i];
-    // Pausa entre llamadas para respetar el rate limit (30k tokens/min)
-    if(i>0){
-      for(var s=60;s>0;s--){
-        var pctW=20+Math.round(((i-1)/noticias.length)*75);
-        setProgress(pctW,'Pausa rate limit — próximo informe en '+s+'s...');
-        await sleep(1000);
-        if(!_busquedaAbort||_busquedaAbort.signal.aborted) break;
-      }
-    }
-    var pct=20+Math.round(((i)/noticias.length)*75);
-    setProgress(pct,'Paso 2/2 — Informe '+(i+1)+' de '+noticias.length+': <em>'+esc(n.titulo||'').substring(0,60)+'</em>');
-    var tid2=newAbort(90000);
-    var raw2;
-    try {
-      raw2=await callClaude(buildPromptNoticia(n.titulo,n.url,n.resumen,'noticia',minW),key,null,_busquedaAbort.signal);
-      clearTimeout(tid2);
-    } catch(e){
-      clearTimeout(tid2);
-      // Si es rate limit, esperar 60s y reintentar una vez
-      if(e.message&&e.message.startsWith('RATE_LIMIT')){
-        for(var rs=60;rs>0;rs--){
-          setProgress(pct,'Rate limit — reintentando en '+rs+'s...');
-          await sleep(1000);
-          if(!_busquedaAbort||_busquedaAbort.signal.aborted) break;
-        }
-        var tid3=newAbort(90000);
-        try {
-          raw2=await callClaude(buildPromptNoticia(n.titulo,n.url,n.resumen,'noticia',minW),key,null,_busquedaAbort.signal);
-          clearTimeout(tid3);
-        } catch(e2){
-          clearTimeout(tid3); _busquedaAbort=null;
-          var errMsg2=(e2.name==='AbortError')?'Tiempo agotado':'Error: '+e2.message;
-          var cont0=document.getElementById('cardsContainer');
-          if(cont0) cont0.insertAdjacentHTML('beforeend','<div style="padding:14px 18px;background:var(--errb);border:1px solid var(--errbr);border-radius:12px;margin-bottom:12px;color:var(--err);font-size:12.5px"><strong>Informe '+(i+1)+' no generado:</strong> '+errMsg2+'</div>');
-          if(e2.name==='AbortError') break;
-          continue;
-        }
-      } else {
-        _busquedaAbort=null;
-        var errMsg=(e.name==='AbortError'||e.message==='signal is aborted without reason')?'Tiempo agotado':'Error: '+e.message;
-        var cont=document.getElementById('cardsContainer');
-        if(cont) cont.insertAdjacentHTML('beforeend','<div style="padding:14px 18px;background:var(--errb);border:1px solid var(--errbr);border-radius:12px;margin-bottom:12px;color:var(--err);font-size:12.5px"><strong>Informe '+(i+1)+' no generado:</strong> '+errMsg+'</div>');
-        if(e.name==='AbortError') break;
-        continue;
-      }
-    }
-    try {
-      var data=parseJSON(raw2);
-      var r=normalizeRec(data); r.html_publicable=buildHTML(r); r._uid=r.id;
-      recs.push(r);
-      manualRec=recs[0]; manualRecs=recs;
-      var cont2=document.getElementById('cardsContainer');
-      if(cont2) cont2.insertAdjacentHTML('beforeend',buildCard(r));
-    } catch(pe){ /* parse error en un informe individual — ignorar y continuar */ }
+  var noticia;
+  try {
+    var parsed=parseJSON(raw1);
+    noticia=Array.isArray(parsed)?parsed[0]:parsed;
+  } catch(e){
+    mostrarError('Paso 1 no devolvió JSON válido.<br><pre style="font-size:10px;white-space:pre-wrap;margin-top:8px;max-height:100px;overflow:auto">'+esc((raw1||'').substring(0,400))+'</pre>');
+    resetBtn(); return;
   }
 
+  // ── PASO 2: Generar el informe completo ──
+  setProgress(40,'Paso 2/2 — Redactando informe: <em>'+esc((noticia.titulo||'').substring(0,60))+'</em>...');
+  var tid2=newAbort(90000);
+  var raw2;
+  try {
+    raw2=await callClaude(buildPromptNoticia(noticia.titulo,noticia.url,noticia.resumen,'noticia',minW),key,null,_busquedaAbort.signal);
+    clearTimeout(tid2);
+  } catch(e){
+    clearTimeout(tid2); _busquedaAbort=null;
+    var isRL=e.message&&e.message.startsWith('RATE_LIMIT');
+    mostrarError(isRL?'Límite de tokens/minuto alcanzado. Espera 60 segundos e intenta de nuevo.':((e.name==='AbortError')?'Tiempo agotado generando el informe.':e.message));
+    resetBtn(); return;
+  }
+
+  setProgress(95,'Procesando respuesta...');
+  var r;
+  try {
+    var data=parseJSON(raw2);
+    r=normalizeRec(data); r.html_publicable=buildHTML(r); r._uid=r.id;
+  } catch(e){
+    mostrarError('No se pudo procesar el informe generado: '+e.message);
+    resetBtn(); return;
+  }
+
+  manualRec=r; manualRecs=[r];
   setProgress(100,'Listo');
-  await sleep(300);
+  await sleep(200);
   document.getElementById('searchLoading').style.display='none';
 
-  // Actualizar encabezado
-  var ct=document.getElementById('cardsTitle');
-  if(ct) ct.textContent=recs.length+' informe'+(recs.length!==1?'s generados':' generado');
-  var hd=document.getElementById('cardsHd');
-  if(hd&&GS_URL) hd.insertAdjacentHTML('beforeend','<div style="display:flex;gap:7px"><button class="rbtn" style="background:linear-gradient(135deg,var(--ok),var(--t5))" onclick="guardarTodosEnGS()">Guardar todos en bandeja</button></div>');
-  if(recs.length) setTimeout(()=>{ var b=document.getElementById('body-'+recs[0].id); if(b) b.classList.add('open'); },100);
-
-  btn.disabled=false;
-  btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora';
+  var res=document.getElementById('searchResult');
+  res.style.display='block';
+  res.innerHTML=
+    '<div class="cards-hd"><div><div class="cards-title">Informe generado</div><div class="cards-sub">Revisa, edita y publica cuando esté listo</div></div>'+
+    '<div style="display:flex;gap:7px">'+
+    (GS_URL?'<button class="rbtn" style="background:linear-gradient(135deg,var(--ok),var(--t5))" onclick="guardarTodosEnGS()">Guardar en bandeja</button>':'')+
+    '</div></div>'+
+    buildCard(r);
+  setTimeout(()=>{ var b=document.getElementById('body-'+r.id); if(b) b.classList.add('open'); },100);
+  resetBtn();
 }
 
 async function guardarManualEnGS(){
