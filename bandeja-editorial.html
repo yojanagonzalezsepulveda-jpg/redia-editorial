@@ -2607,10 +2607,23 @@ async function generarCrear(tipo) {
 
     res.innerHTML =
       '<div class="cards-hd"><div><div class="cards-title">Publicación generada</div><div class="cards-sub">Revisa, edita si necesitas, luego publica</div></div>' +
-      '<div style="display:flex;gap:7px">' +
+      '<div style="display:flex;gap:7px;flex-wrap:wrap">' +
       '<button class="rbtn" onclick="dlCrear()">Descargar HTML</button>' +
+      '<button class="rbtn" onclick="copiarHTMLCrear(this)">Copiar HTML</button>' +
       (GS_URL ? '<button class="rbtn" style="background:linear-gradient(135deg,var(--ok),var(--t5))" onclick="guardarCrearEnGS()">Guardar en bandeja</button>' : '') +
       '</div></div>' +
+      '<div style="background:var(--s1);border:1px solid var(--s2);border-radius:12px;padding:16px;margin-bottom:16px">' +
+      '<div style="font-size:12px;font-weight:700;color:var(--s7);margin-bottom:10px">Editar antes de publicar</div>' +
+      '<label style="font-size:11px;color:var(--s5);display:block;margin-bottom:4px">Titular</label>' +
+      '<input id="edit-titular" value="'+esc(crearRec.articulo?.titular||'')+'" style="width:100%;padding:8px 10px;border:1px solid var(--s3);border-radius:8px;font-size:13px;font-weight:600;background:var(--s0);color:var(--s8);box-sizing:border-box;margin-bottom:8px">' +
+      '<label style="font-size:11px;color:var(--s5);display:block;margin-bottom:4px">Bajada</label>' +
+      '<textarea id="edit-bajada" rows="2" style="width:100%;padding:8px 10px;border:1px solid var(--s3);border-radius:8px;font-size:12px;background:var(--s0);color:var(--s8);box-sizing:border-box;resize:vertical;margin-bottom:10px">'+esc(crearRec.articulo?.bajada||'')+'</textarea>' +
+      '<button onclick="aplicarEdicionManual()" style="padding:7px 14px;background:var(--p6);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-right:8px">Aplicar cambios</button>' +
+      '<span style="font-size:11px;color:var(--s4)">— o —</span>' +
+      '<div style="margin-top:10px"><label style="font-size:11px;color:var(--s5);display:block;margin-bottom:4px">Pedir corrección a la IA</label>' +
+      '<div style="display:flex;gap:8px"><input id="edit-ia-instruccion" placeholder="Ej: acorta el titular, cambia el tono a más formal, agrega contexto sobre Chile..." style="flex:1;padding:8px 10px;border:1px solid var(--s3);border-radius:8px;font-size:12px;background:var(--s0);color:var(--s8)">' +
+      '<button onclick="corregirConIA()" style="padding:7px 14px;background:var(--t5);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Corregir con IA</button></div></div>' +
+      '</div>' +
       imgBlock +
       buildCard(crearRec);
 
@@ -2776,6 +2789,54 @@ async function guardarCrearEnGS() {
 
 function dlCrear() {
   if (crearRec) dlRec(crearRec);
+}
+
+function copiarHTMLCrear(btn) {
+  if (!crearRec) return;
+  navigator.clipboard.writeText(crearRec.html_publicable || '').then(function() {
+    var orig = btn.textContent; btn.textContent = 'Copiado!';
+    setTimeout(function(){ btn.textContent = orig; }, 2000);
+  });
+}
+
+function aplicarEdicionManual() {
+  if (!crearRec) return;
+  var t = document.getElementById('edit-titular');
+  var b = document.getElementById('edit-bajada');
+  if (t && crearRec.articulo) crearRec.articulo.titular = t.value;
+  if (b && crearRec.articulo) crearRec.articulo.bajada = b.value;
+  crearRec.html_publicable = buildHTML(crearRec);
+  // Actualizar titular visible en la card
+  var tEl = document.querySelector('#body-' + crearRec.id + ' .art-titular, #card-' + crearRec.id + ' .art-titular');
+  if (tEl) tEl.textContent = crearRec.articulo.titular;
+  var bEl = document.querySelector('#body-' + crearRec.id + ' .art-bajada, #card-' + crearRec.id + ' .art-bajada');
+  if (bEl) bEl.textContent = crearRec.articulo.bajada;
+  alert('Cambios aplicados. El HTML descargable está actualizado.');
+}
+
+async function corregirConIA() {
+  var instruccion = document.getElementById('edit-ia-instruccion');
+  if (!instruccion || !instruccion.value.trim()) return alert('Escribe qué quieres corregir.');
+  if (!crearRec) return;
+  var btn = document.querySelector('[onclick="corregirConIA()"]');
+  if (btn) { btn.textContent = 'Corrigiendo...'; btn.disabled = true; }
+  try {
+    var prompt = 'Eres el editor de REDIA. Tienes este contenido ya generado:\n\nTITULAR: ' + (crearRec.articulo?.titular||'') + '\nBAJADA: ' + (crearRec.articulo?.bajada||'') + '\nCUERPO:\n' + (crearRec.articulo?.cuerpo||'').replace(/<[^>]+>/g,' ').substring(0,3000) +
+      '\n\nINSTRUCCIÓN DE CORRECCIÓN: ' + instruccion.value.trim() +
+      '\n\nResponde SOLO con JSON válido sin markdown con los campos que deban cambiar. Ejemplo: {"titular":"nuevo titular","bajada":"nueva bajada"} o {"cuerpo":"<p>nuevo cuerpo html</p>"}. Solo incluye los campos que cambian.';
+    var raw = await callAI(prompt, false, (CFG&&CFG.antModel2)||'claude-haiku-4-5-20251001', 4000, null);
+    var data = parseJSON(raw);
+    if (data.titular && crearRec.articulo) { crearRec.articulo.titular = data.titular; var t = document.getElementById('edit-titular'); if(t) t.value = data.titular; }
+    if (data.bajada && crearRec.articulo) { crearRec.articulo.bajada = data.bajada; var b = document.getElementById('edit-bajada'); if(b) b.value = data.bajada; }
+    if (data.cuerpo && crearRec.articulo) crearRec.articulo.cuerpo = data.cuerpo;
+    crearRec.html_publicable = buildHTML(crearRec);
+    instruccion.value = '';
+    alert('Corrección aplicada.');
+  } catch(e) {
+    alert('Error: ' + e.message);
+  } finally {
+    if (btn) { btn.textContent = 'Corregir con IA'; btn.disabled = false; }
+  }
 }
 
 
