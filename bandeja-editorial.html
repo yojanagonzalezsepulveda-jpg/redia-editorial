@@ -2706,18 +2706,37 @@ function buildCrearPrompt(tipo) {
 }
 
 async function generarImagenGemini(prompt, key) {
+  var model = (CFG&&CFG.imagenModel) || 'imagen-3.0-generate-001';
   try {
-    var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=' + key, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({instances:[{prompt}], parameters:{sampleCount:1, aspectRatio:'16:9'}})
-    });
-    if (!res.ok) return null;
-    var d = await res.json();
-    var b64 = d.predictions?.[0]?.bytesBase64Encoded;
-    if (!b64) return null;
-    var mime = d.predictions[0].mimeType || 'image/png';
-    return 'data:' + mime + ';base64,' + b64;
+    if (model.startsWith('gemini')) {
+      // Gemini nativo con responseModalities
+      var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          contents: [{parts:[{text: prompt}]}],
+          generationConfig: {responseModalities: ['IMAGE', 'TEXT']}
+        })
+      });
+      if (!res.ok) return null;
+      var d = await res.json();
+      var parts = d.candidates?.[0]?.content?.parts || [];
+      var imgPart = parts.find(function(p){ return p.inlineData; });
+      if (!imgPart) return null;
+      return 'data:' + imgPart.inlineData.mimeType + ';base64,' + imgPart.inlineData.data;
+    } else {
+      // Imagen 3 (predict)
+      var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':predict?key=' + key, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({instances:[{prompt}], parameters:{sampleCount:1, aspectRatio:'16:9'}})
+      });
+      if (!res.ok) return null;
+      var d = await res.json();
+      var b64 = d.predictions?.[0]?.bytesBase64Encoded;
+      if (!b64) return null;
+      return 'data:' + (d.predictions[0].mimeType||'image/png') + ';base64,' + b64;
+    }
   } catch { return null; }
 }
 
