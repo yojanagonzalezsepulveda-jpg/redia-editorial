@@ -1601,7 +1601,7 @@ async function buscarManual(){
 
   var rec;
   try { rec=normalizeRec(parseJSON(r2)); }
-  catch(e){ err('No se pudo procesar el artículo: '+e.message); rb(); return; }
+  catch(e){ err('No se pudo procesar el artículo: '+e.message+'<br><pre style="font-size:10px;white-space:pre-wrap;margin-top:8px;max-height:120px;overflow:auto">'+esc((r2||'').substring(0,400))+'</pre>'); rb(); return; }
 
   // ── PASO 3: Distribución (web_search OFF) ──
   sp(72,'Paso 3/3 — Generando LinkedIn, Facebook y guiones...');
