@@ -1452,8 +1452,9 @@ function buildPromptInvestigar(esp,foc,kw){
   });
   // Si no hay focos, usar las primeras 15 de DEFAULT_FUENTES
   if(foc.length===0){
-    var _cfgF=CFG.fuentes?CFG.fuentes.split('\n').filter(Boolean):[];
-    var _fArr=_cfgF.length>0?_cfgF:DEFAULT_FUENTES;
+    var _cfgF=(CFG&&CFG.fuentes)?CFG.fuentes.split('\n').filter(Boolean):[];
+    var _defF=(typeof DEFAULT_FUENTES!=='undefined'&&Array.isArray(DEFAULT_FUENTES))?DEFAULT_FUENTES:[];
+    var _fArr=_cfgF.length>0?_cfgF:_defF;
     _fArr.slice(0,15).forEach(function(s){ if(!fuentesCl.includes(s)) fuentesCl.push(s); });
   }
   // Construir librería: chilenas + internacionales (max 30 total)
