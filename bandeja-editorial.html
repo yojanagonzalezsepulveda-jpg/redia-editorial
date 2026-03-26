@@ -1426,6 +1426,14 @@ async function buscarManual(){
   // ── PASO 2: Desarrollar cada noticia ──
   for(var i=0;i<noticias.length;i++){
     var n=noticias[i];
+    // Pausa entre llamadas para respetar el rate limit (30k tokens/min)
+    if(i>0){
+      for(var s=20;s>0;s--){
+        setProgress(pct,'Esperando para no superar el límite de la API... ('+s+'s)');
+        await sleep(1000);
+        if(!_busquedaAbort||_busquedaAbort.signal.aborted) break;
+      }
+    }
     var pct=20+Math.round(((i)/noticias.length)*75);
     setProgress(pct,'Paso 2/2 — Informe '+(i+1)+' de '+noticias.length+': <em>'+esc(n.titulo||'').substring(0,60)+'</em>');
     var tid2=newAbort(90000);
