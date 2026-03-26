@@ -983,6 +983,8 @@ vale la pena señalar</textarea>
         <div style="font-weight:700;font-size:12px;color:var(--p6);margin-bottom:8px;margin-top:4px">Gemini (Google)</div>
         <label class="cfl">Texto y búsqueda</label>
         <input class="cfi" id="cfGeminiModel" placeholder="gemini-1.5-flash">
+        <button onclick="listarModelosGemini()" style="margin-top:6px;padding:5px 10px;font-size:11px;background:var(--s1);border:1px solid var(--s3);border-radius:6px;cursor:pointer;color:var(--s7)">Ver modelos disponibles</button>
+        <div id="geminiModelList" style="margin-top:6px;font-size:11px;color:var(--s6);max-height:160px;overflow-y:auto"></div>
         <label class="cfl" style="margin-top:8px">Generación de imágenes</label>
         <input class="cfi" id="cfImagenModel" placeholder="imagen-3.0-generate-001">
         <div style="font-weight:700;font-size:12px;color:var(--p6);margin-bottom:8px;margin-top:16px">Anthropic</div>
@@ -1733,6 +1735,23 @@ function selProvSearch(p, init) {
     var on = id === p;
     if (b) { b.style.background = on ? 'var(--p)' : 'transparent'; b.style.color = on ? '#fff' : 'var(--s5)'; b.style.borderColor = on ? 'var(--p)' : 'var(--s2)'; }
   });
+}
+
+async function listarModelosGemini() {
+  var key = (CFG&&CFG.gemKey) || '';
+  var div = document.getElementById('geminiModelList');
+  if (!key) { div.textContent = 'Sin key Gemini configurada.'; return; }
+  div.textContent = 'Consultando...';
+  try {
+    var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + key);
+    var d = await res.json();
+    var models = (d.models || [])
+      .filter(function(m){ return m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'); })
+      .map(function(m){ return m.name.replace('models/',''); });
+    div.innerHTML = models.length
+      ? '<strong>Disponibles:</strong><br>' + models.map(function(n){ return '<span style="cursor:pointer;color:var(--p6)" onclick="document.getElementById(\'cfGeminiModel\').value=\''+n+'\'">' + n + '</span>'; }).join('<br>')
+      : 'No se encontraron modelos.';
+  } catch(e) { div.textContent = 'Error: ' + e.message; }
 }
 
 async function callGemini(prompt, key, signal, useSearch, maxTok, contentOverride) {
