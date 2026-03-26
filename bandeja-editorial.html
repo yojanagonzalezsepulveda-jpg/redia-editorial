@@ -1348,22 +1348,22 @@ var STEPS=[
 function buildPromptDescubrir(esp,foc,kw){
   var _cfgF=CFG.fuentes?CFG.fuentes.split('\n').filter(Boolean):[];
   var _fArr=_cfgF.length>0?_cfgF:(typeof DEFAULT_FUENTES!=='undefined'?DEFAULT_FUENTES:[]);
-  var fLib=_fArr.join(' · ');
-  return REDIA_IDENTITY+`
+  var fLib=_fArr.slice(0,25).join(', ');
+  return `Eres un buscador de noticias para el sector acuícola chileno. Usa web_search.
 
-TAREA: Búsqueda de noticias — solo descubrimiento, sin desarrollar.
+TEMA: ${kw||'noticias más relevantes del sector acuícola chileno en las últimas 48 horas'}
+${esp.length?'ESPECIES: '+esp.join(', '):''}
+${foc.length?'FOCOS: '+foc.join(', '):''}
+FUENTES PRIORITARIAS (usa las más relevantes): ${fLib}
 
-${esp.length?'ESPECIES: '+esp.join(', '):'Toda la cadena acuícola chilena'}
-${foc.length?'FOCOS: '+foc.join(', '):'Todos los temas relevantes'}
-TEMA: ${kw||'noticias más relevantes de las últimas 48 horas del sector acuícola chileno'}
+Busca y encuentra 3 noticias reales, recientes y distintas sobre el tema.
 
-FUENTES (selecciona 4-6 más relevantes para este tema):
-${fLib}
-
-INSTRUCCIÓN: Usa web_search para encontrar noticias reales y recientes.
-Identifica 3-4 noticias DISTINTAS y RELEVANTES — cada una con ángulo propio.
-Responde SOLO con JSON válido — sin análisis ni texto adicional:
-[{"titulo":"Título exacto o descriptivo de la noticia","url":"https://url-directa","fuente":"Nombre del medio","resumen":"2-3 oraciones con el hecho principal y cifras si las hay"}]`;
+Responde ÚNICAMENTE con este JSON — sin texto antes ni después, sin markdown:
+[
+  {"titulo":"título de la noticia","url":"https://url","fuente":"nombre del medio","resumen":"1-2 oraciones con el hecho principal"},
+  {"titulo":"...","url":"...","fuente":"...","resumen":"..."},
+  {"titulo":"...","url":"...","fuente":"...","resumen":"..."}
+]`;
 }
 
 async function buscarManual(){
@@ -1414,7 +1414,7 @@ async function buscarManual(){
   }
 
   var noticias;
-  try { noticias=parseJSON(raw1); } catch(e){ mostrarError('No se pudo interpretar la lista de noticias: '+e.message); btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora'; return; }
+  try { noticias=parseJSON(raw1); } catch(e){ mostrarError('Paso 1 falló — Claude no devolvió JSON válido. Respuesta recibida:<br><pre style="font-size:10px;white-space:pre-wrap;margin-top:8px;max-height:120px;overflow:auto">'+esc(raw1.substring(0,500))+'</pre>'); btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora'; return; }
   if(!Array.isArray(noticias)) noticias=[noticias];
   noticias=noticias.slice(0,4);
 
