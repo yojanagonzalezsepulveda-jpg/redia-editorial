@@ -1430,7 +1430,8 @@ function buildPrompt(esp,foc,kw){
   var proh=(CFG.proh||'').split('\n').filter(Boolean).join(' · ');
   if(proh) id+='\nADICIONAL PROHIBIDO: '+proh;
   var extras=(CFG.voz?'\nVOZ: '+CFG.voz:'')+(CFG.sensible?'\nINSTRUCCIONES ESPECIALES: '+CFG.sensible:'')+(CFG.aud?'\nAUDIENCIA: '+CFG.aud:'')+(CFG.dim?'\nDIMENSIONES: '+CFG.dim:'');
-  var _fArr=(CFG.fuentes&&CFG.fuentes.split('\n').filter(Boolean).length>0)?CFG.fuentes.split('\n').filter(Boolean):DEFAULT_FUENTES;
+  var _cfgF=CFG.fuentes?CFG.fuentes.split('\n').filter(Boolean):[];
+  var _fArr=_cfgF.length>0?_cfgF:(typeof DEFAULT_FUENTES!=='undefined'?DEFAULT_FUENTES:[]);
   var fuentesLib=_fArr.join(' · ');
   return id+extras+`
 
