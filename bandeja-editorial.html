@@ -2556,6 +2556,7 @@ async function generarCrear(tipo) {
       if (mImg) productImages = [mImg.dataUrl];
     }
     var prompt  = buildPromptByTipo(tipo);
+    var searchQ = document.getElementById(tipo[0]+'-titulo')?.value.trim() || document.getElementById(tipo[0]+'-persona')?.value.trim() || '';
     var raw;
     if (logoData) {
       var logoTxt = prompt + '\n\nLogo del cliente adjunto como imagen. Analízalo para describir mejor la identidad visual de la empresa en el contenido.';
@@ -2565,13 +2566,13 @@ async function generarCrear(tipo) {
         {type:'text', text:logoTxt}
       ]);
     } else if (adjunto && adjunto.imageBase64) {
-      raw = await callAI(null, false, (CFG&&CFG.antModel1)||'claude-sonnet-4-20250514', null, null, null, [
+      raw = await callAI(null, true, (CFG&&CFG.antModel1)||'claude-sonnet-4-20250514', null, null, searchQ, [
         {type:'image', source:{type:'base64', media_type:adjunto.mimeType, data:adjunto.imageBase64}},
         {type:'text', text:prompt+'\n\nDOCUMENTO ADJUNTO: imagen proporcionada arriba. Analízala, extrae la información relevante y úsala como fuente primaria para el informe.'}
       ]);
     } else {
       if (adjunto && adjunto.text) prompt += '\n\nDOCUMENTO ADJUNTO:\n' + adjunto.text.substring(0, 8000) + '\n\nAnaliza este documento, extrae la información relevante y úsala como fuente primaria para el informe.';
-      raw = await callAI(prompt, false, (CFG&&CFG.antModel1)||'claude-sonnet-4-20250514', null, null, null);
+      raw = await callAI(prompt, true, (CFG&&CFG.antModel1)||'claude-sonnet-4-20250514', null, null, searchQ);
     }
     clearInterval(st);
     document.getElementById('crear-pfill').style.width = '90%';
