@@ -1345,21 +1345,62 @@ var STEPS=[
   {t:'Empaquetando para <strong>redia.pro</strong>...',p:99},
 ];
 
-function buildPromptDescubrir(esp,foc,kw){
+function buildPromptInvestigar(esp,foc,kw){
   var _cfgF=CFG.fuentes?CFG.fuentes.split('\n').filter(Boolean):[];
   var _fArr=_cfgF.length>0?_cfgF:(typeof DEFAULT_FUENTES!=='undefined'?DEFAULT_FUENTES:[]);
   var fLib=_fArr.slice(0,25).join(', ');
-  return `Eres un editor del sector acuícola chileno. Usa web_search para buscar noticias reales.
+  return `Eres un investigador del sector acuícola chileno. Usa web_search.
 
 TEMA: ${kw||'la noticia más relevante del sector acuícola chileno en las últimas 48 horas'}
-${esp.length?'ESPECIES DE INTERÉS: '+esp.join(', '):''}
+${esp.length?'ESPECIES: '+esp.join(', '):''}
 ${foc.length?'FOCOS: '+foc.join(', '):''}
 FUENTES PRIORITARIAS: ${fLib}
 
-Busca y elige LA noticia más importante y reciente sobre el tema.
+TAREA: Busca y encuentra la noticia más relevante. Recopila todos los datos necesarios para escribir un análisis editorial completo.
 
-Responde ÚNICAMENTE con este JSON — sin texto antes ni después, sin markdown:
-{"titulo":"título de la noticia","url":"https://url-directa","fuente":"nombre del medio","resumen":"2-3 oraciones con el hecho principal y cifras si las hay"}`;
+Responde ÚNICAMENTE con JSON — sin texto antes ni después:
+{"titulo":"título de la noticia","url":"https://url-directa","fuente":"nombre del medio","fecha":"fecha publicación","hechos":["hecho clave con cifra concreta","hecho 2","hecho 3"],"citas":[{"texto":"cita literal","autor":"nombre","cargo":"cargo/empresa"}],"contexto":"antecedentes sectoriales relevantes","angulo":"el ángulo más importante para la acuicultura chilena","fuentes_adicionales":[{"nombre":"medio o institución","url":"https://url","aporte":"qué información aportó"}]}`;
+}
+
+function buildPromptRedactar(inv,minW){
+  var fuentesStr=(inv.fuentes_adicionales||[]).map(f=>f.nombre+(f.url?' ('+f.url+')':'')).join(', ')||inv.fuente||'';
+  var hechosList=(inv.hechos||[]).map((h,i)=>(i+1)+'. '+h).join('\n');
+  var citasList=(inv.citas||[]).filter(c=>c.texto).map(c=>'"'+c.texto+'" — '+c.autor+(c.cargo?', '+c.cargo:'')).join('\n')||'(ninguna)';
+  return REDIA_IDENTITY+`
+
+TAREA: Redactar análisis editorial REDIA. NO busques en la web — usa solo los datos de la investigación.
+
+INVESTIGACIÓN:
+Noticia: ${inv.titulo}
+URL: ${inv.url||''}
+Fuente principal: ${inv.fuente||''}
+Fecha: ${inv.fecha||'reciente'}
+Ángulo: ${inv.angulo||''}
+Contexto: ${inv.contexto||''}
+
+Hechos clave:
+${hechosList}
+
+Citas disponibles:
+${citasList}
+
+Fuentes consultadas: ${fuentesStr}
+
+Redacta el informe completo con voz REDIA. Mín ${minW} palabras en el cuerpo.
+
+Responde SOLO con JSON válido:
+{"titulo_seo":"máx 60 chars","descripcion_seo":"máx 140 chars","tags":["t1","t2","t3","t4"],"categoria":"noticia","tiempo_lectura":"X min","fuentes_consultadas":["${inv.fuente||''}"],"fuentes_con_links":[{"nombre":"${inv.fuente||''}","url":"${inv.url||''}","descripcion":"fuente principal"}],"imagen_prompt":"Prompt fotorrealista en inglés para Gemini Imagen 3. Específico al tema. 16:9","articulo":{"titular":"titular periodístico directo con dato concreto","bajada":"2-3 oraciones con el hecho más relevante y cifra concreta","cuerpo":"HTML completo: h2 subtítulos directos, p, strong datos clave, blockquote citas. Mín ${minW} palabras.","analisis_muestra":"Lo que muestra este análisis","analisis_no_resuelve":"Lo que no resuelve por sí solo","analisis_relevante_para":"Para quiénes es especialmente relevante"}}`;
+}
+
+function buildPromptDistribuir(titular,bajada,analisisMuestra){
+  return `Redacta el contenido de distribución para este artículo de REDIA — Centro de Inteligencia Acuícola de Chile.
+
+TITULAR: ${titular}
+BAJADA: ${bajada}
+ANÁLISIS: ${analisisMuestra}
+
+Responde SOLO con JSON válido:
+{"linkedin":"Post LinkedIn. Informativo, no publicitario. Emojis sectoriales. Máx 1200 chars. Link redia.pro.","facebook":"Post Facebook conversacional. Máx 500 chars. Link redia.pro.","audio_script":"Guión narración audio. Informativo y cercano. Mín 350 palabras.","video_script":"Guión YouTube. Timecodes 00:00. [Descripción visual]. CTA suscripción. Mín 300 palabras."}`;
 }
 
 async function buscarManual(){
@@ -1377,59 +1418,45 @@ async function buscarManual(){
   document.getElementById('searchLoading').style.display='block';
   var minW=parseInt(CFG.words||'600');
 
-  function setProgress(pct,txt){ document.getElementById('pFill').style.width=pct+'%'; document.getElementById('lStep').innerHTML=txt; }
-  function mostrarError(msg){ document.getElementById('searchLoading').style.display='none'; document.getElementById('searchEmpty').style.display='flex'; document.getElementById('searchEmpty').innerHTML='<div style="background:var(--errb);border:1px solid var(--errbr);border-radius:14px;padding:20px;max-width:400px;color:var(--err);font-size:13px;line-height:1.6"><strong>Error:</strong><br>'+msg+'</div>'; }
-  function newAbort(ms){ _busquedaAbort=new AbortController(); return setTimeout(()=>_busquedaAbort.abort(),ms); }
-  function resetBtn(){ btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora'; }
+  function sp(pct,txt){ document.getElementById('pFill').style.width=pct+'%'; document.getElementById('lStep').innerHTML=txt; }
+  function err(msg){ document.getElementById('searchLoading').style.display='none'; document.getElementById('searchEmpty').style.display='flex'; document.getElementById('searchEmpty').innerHTML='<div style="background:var(--errb);border:1px solid var(--errbr);border-radius:14px;padding:20px;max-width:400px;color:var(--err);font-size:13px;line-height:1.6"><strong>Error:</strong><br>'+msg+'</div>'; }
+  function na(ms){ _busquedaAbort=new AbortController(); return setTimeout(()=>_busquedaAbort.abort(),ms); }
+  function rb(){ btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora'; }
+  function isRL(e){ return e.message&&e.message.startsWith('RATE_LIMIT'); }
+  function errMsg(e){ return isRL(e)?'Límite de tokens/minuto. Espera 60s e intenta de nuevo.':(e.name==='AbortError'?'Tiempo agotado.':e.message); }
 
-  // ── PASO 1: Encontrar la noticia más relevante ──
-  setProgress(10,'Paso 1/2 — Buscando la noticia más relevante...');
-  var tid1=newAbort(90000);
-  var raw1;
-  try {
-    raw1=await callClaude(buildPromptDescubrir(esp,foc,kw),key,null,_busquedaAbort.signal);
-    clearTimeout(tid1);
-  } catch(e){
-    clearTimeout(tid1); _busquedaAbort=null;
-    mostrarError((e.name==='AbortError')?'Tiempo agotado en la búsqueda. Intenta con un tema más específico.':e.message);
-    resetBtn(); return;
-  }
+  // ── PASO 1: Investigar (web_search ON) ──
+  sp(5,'Paso 1/3 — Investigando la noticia...');
+  var t1=na(90000); var r1;
+  try { r1=await callClaude(buildPromptInvestigar(esp,foc,kw),key,null,_busquedaAbort.signal,true); clearTimeout(t1); }
+  catch(e){ clearTimeout(t1); _busquedaAbort=null; err(errMsg(e)); rb(); return; }
 
-  var noticia;
-  try {
-    var parsed=parseJSON(raw1);
-    noticia=Array.isArray(parsed)?parsed[0]:parsed;
-  } catch(e){
-    mostrarError('Paso 1 no devolvió JSON válido.<br><pre style="font-size:10px;white-space:pre-wrap;margin-top:8px;max-height:100px;overflow:auto">'+esc((raw1||'').substring(0,400))+'</pre>');
-    resetBtn(); return;
-  }
+  var inv;
+  try { var p1=parseJSON(r1); inv=Array.isArray(p1)?p1[0]:p1; }
+  catch(e){ err('Investigación sin JSON válido.<br><pre style="font-size:10px;white-space:pre-wrap;margin-top:8px;max-height:80px;overflow:auto">'+esc((r1||'').substring(0,300))+'</pre>'); rb(); return; }
 
-  // ── PASO 2: Generar el informe completo ──
-  setProgress(40,'Paso 2/2 — Redactando informe: <em>'+esc((noticia.titulo||'').substring(0,60))+'</em>...');
-  var tid2=newAbort(150000);
-  var raw2;
-  try {
-    raw2=await callClaude(buildPromptNoticia(noticia.titulo,noticia.url,noticia.resumen,'noticia',minW),key,null,_busquedaAbort.signal);
-    clearTimeout(tid2);
-  } catch(e){
-    clearTimeout(tid2); _busquedaAbort=null;
-    var isRL=e.message&&e.message.startsWith('RATE_LIMIT');
-    mostrarError(isRL?'Límite de tokens/minuto alcanzado. Espera 60 segundos e intenta de nuevo.':((e.name==='AbortError')?'Tiempo agotado generando el informe.':e.message));
-    resetBtn(); return;
-  }
+  // ── PASO 2: Redactar artículo (web_search OFF) ──
+  sp(38,'Paso 2/3 — Redactando: <em>'+esc((inv.titulo||'').substring(0,55))+'</em>...');
+  var t2=na(90000); var r2;
+  try { r2=await callClaude(buildPromptRedactar(inv,minW),key,null,_busquedaAbort.signal,false); clearTimeout(t2); }
+  catch(e){ clearTimeout(t2); _busquedaAbort=null; err(errMsg(e)); rb(); return; }
 
-  setProgress(95,'Procesando respuesta...');
-  var r;
-  try {
-    var data=parseJSON(raw2);
-    r=normalizeRec(data); r.html_publicable=buildHTML(r); r._uid=r.id;
-  } catch(e){
-    mostrarError('No se pudo procesar el informe generado: '+e.message);
-    resetBtn(); return;
-  }
+  var rec;
+  try { rec=normalizeRec(parseJSON(r2)); }
+  catch(e){ err('No se pudo procesar el artículo: '+e.message); rb(); return; }
 
-  manualRec=r; manualRecs=[r];
-  setProgress(100,'Listo');
+  // ── PASO 3: Distribución (web_search OFF) ──
+  sp(72,'Paso 3/3 — Generando LinkedIn, Facebook y guiones...');
+  var t3=na(60000); var r3;
+  try { r3=await callClaude(buildPromptDistribuir(rec.titular,rec.bajada,rec.analisis_muestra),key,null,_busquedaAbort.signal,false); clearTimeout(t3); }
+  catch(e){ clearTimeout(t3); /* distribución es opcional — si falla igual mostramos el artículo */ r3=null; }
+
+  if(r3){ try{ var dist=parseJSON(r3); rec.linkedin=dist.linkedin||''; rec.facebook=dist.facebook||''; rec.audio_script=dist.audio_script||''; rec.video_script=dist.video_script||''; }catch(e){} }
+
+  rec.html_publicable=buildHTML(rec); rec._uid=rec.id;
+  manualRec=rec; manualRecs=[rec];
+
+  sp(100,'Listo');
   await sleep(200);
   document.getElementById('searchLoading').style.display='none';
 
@@ -1437,12 +1464,10 @@ async function buscarManual(){
   res.style.display='block';
   res.innerHTML=
     '<div class="cards-hd"><div><div class="cards-title">Informe generado</div><div class="cards-sub">Revisa, edita y publica cuando esté listo</div></div>'+
-    '<div style="display:flex;gap:7px">'+
-    (GS_URL?'<button class="rbtn" style="background:linear-gradient(135deg,var(--ok),var(--t5))" onclick="guardarTodosEnGS()">Guardar en bandeja</button>':'')+
-    '</div></div>'+
-    buildCard(r);
-  setTimeout(()=>{ var b=document.getElementById('body-'+r.id); if(b) b.classList.add('open'); },100);
-  resetBtn();
+    '<div style="display:flex;gap:7px">'+(GS_URL?'<button class="rbtn" style="background:linear-gradient(135deg,var(--ok),var(--t5))" onclick="guardarTodosEnGS()">Guardar en bandeja</button>':'')+
+    '</div></div>'+buildCard(rec);
+  setTimeout(()=>{ var b=document.getElementById('body-'+rec.id); if(b) b.classList.add('open'); },100);
+  rb();
 }
 
 async function guardarManualEnGS(){
@@ -1530,11 +1555,13 @@ Responde SOLO con JSON válido sin markdown — un array con múltiples informes
 Genera entre 2 y 4 objetos en el array — uno por cada ángulo/noticia relevante y distinto que encuentres.`;
 }
 
-async function callClaude(prompt,key,contentOverride,signal){
+async function callClaude(prompt,key,contentOverride,signal,useSearch){
+  var bodyObj={model:'claude-sonnet-4-20250514',max_tokens:8096,messages:[{role:'user',content:contentOverride||prompt}]};
+  if(useSearch!==false) bodyObj.tools=[{type:'web_search_20250305',name:'web_search'}];
   var res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:8096,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:contentOverride||prompt}]}),
+    body:JSON.stringify(bodyObj),
     signal:signal||undefined
   });
   if(!res.ok){ var e=await res.json().catch(()=>({})); var em=e.error?.message||'Error HTTP '+res.status; if(res.status===429) em='RATE_LIMIT:'+em; throw new Error(em); }
