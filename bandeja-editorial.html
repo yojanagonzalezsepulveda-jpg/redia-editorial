@@ -1366,7 +1366,15 @@ var STEPS=[
 function buildPromptInvestigar(esp,foc,kw){
   var _cfgF=CFG.fuentes?CFG.fuentes.split('\n').filter(Boolean):[];
   var _fArr=_cfgF.length>0?_cfgF:(typeof DEFAULT_FUENTES!=='undefined'?DEFAULT_FUENTES:[]);
-  var fLib=_fArr.slice(0,25).join(', ');
+  // Fuentes chilenas base (primeras 15)
+  var fChile=_fArr.slice(0,15);
+  // Fuentes internacionales fijas
+  var fIntl=['IntraFish','SalmonBusiness','Undercurrent News','Fish Farmer','Globefish','FAO','OCDE','Nofima','Institute of Marine Research Noruega','WorldFish','CSIRO Australia','Eurofish'];
+  // Detectar si el tema es de alcance internacional
+  var kwLow=(kw||'').toLowerCase();
+  var focStr=foc.join(' ').toLowerCase();
+  var esIntl=['export','mercado','internacional','certif','global','precio','norueg','china','asia','eeuu','europa','fao','ocde'].some(function(t){return kwLow.includes(t)||focStr.includes(t);});
+  var fLib=esIntl ? fChile.concat(fIntl).join(', ') : fChile.concat(_fArr.slice(15,25)).join(', ');
   return `Eres un investigador del sector acuícola chileno. Usa web_search.
 
 TEMA: ${kw||'la noticia más relevante del sector acuícola chileno en las últimas 48 horas'}
