@@ -557,6 +557,7 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
         <div class="plogo"><span class="r">RED</span><span class="i">IA</span></div>
         <div class="ptrack"><div class="pfill" id="pFill" style="width:0%"></div></div>
         <div class="lstep" id="lStep">Iniciando búsqueda...</div>
+        <button onclick="cancelarBusqueda()" style="margin-top:16px;padding:7px 18px;background:none;border:1.5px solid var(--s3);border-radius:8px;color:var(--s5);font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif">Cancelar búsqueda</button>
       </div>
     </div>
     <div id="searchResult" style="display:none"></div>
@@ -1361,10 +1362,10 @@ async function buscarManual(){
   document.getElementById('pFill').style.width='0%';
   var si=0;
   var st=setInterval(()=>{ if(si<STEPS.length){ document.getElementById('lStep').innerHTML=STEPS[si].t; document.getElementById('pFill').style.width=STEPS[si].p+'%'; si++; } },8000);
-  var abortCtrl=new AbortController();
-  var timeoutId=setTimeout(()=>abortCtrl.abort(),180000);
+  _busquedaAbort=new AbortController();
+  var timeoutId=setTimeout(()=>_busquedaAbort.abort(),120000);
   try {
-    var raw=await callClaude(buildPrompt(esp,foc,kw),key,null,abortCtrl.signal);
+    var raw=await callClaude(buildPrompt(esp,foc,kw),key,null,_busquedaAbort.signal);
     clearTimeout(timeoutId);
     clearInterval(st);
     document.getElementById('pFill').style.width='100%';
@@ -1389,6 +1390,7 @@ async function buscarManual(){
   } catch(e){
     clearInterval(st);
     clearTimeout(timeoutId);
+    _busquedaAbort=null;
     document.getElementById('searchLoading').style.display='none';
     document.getElementById('searchEmpty').style.display='flex';
     var msg=(e.name==='AbortError'||e.message==='signal is aborted without reason')
@@ -1423,6 +1425,11 @@ async function guardarTodosEnGS(){
 function dlManual(){ if(manualRec) dlRec(manualRec); }
 
 var manualRecs=[];
+var _busquedaAbort=null;
+
+function cancelarBusqueda(){
+  if(_busquedaAbort) _busquedaAbort.abort();
+}
 
 function buildPrompt(esp,foc,kw){
   var id='REDIA es una antena de inteligencia acuícola. No replica noticias — las analiza en profundidad desde múltiples perspectivas para aportar a la toma de decisiones de todos los actores de la cadena de valor acuícola chilena.\n\nPRINCIPIOS: 1) Analiza en profundidad, nunca recomienda. 2) No toma partido entre sectores ni actores — todos son audiencia y clientes potenciales de REDIA. 3) Relevar otros rubros no significa restar al salmón — significa ampliar la mirada del sector completo. 4) EFECTO CADENA (ambas direcciones): al analizar salmones evalúa implicancias para mitilicultura/ostiones/algas/otros; al analizar otros rubros evalúa implicancias para salmonicultura. Sin forzarlo si no aplica. 5) ANTENA TECNOLÓGICA: rastrea I+D de universidades, startups, IFOP, Indespa. Explica qué significa para los actores y qué tan aplicable es en Chile hoy.\n\nVOCABULARIO: usar "sector" para la acuicultura en conjunto. "Industria" SOLO para grandes compañías. Alternativas: actividad, rubro, cadena acuícola, producción.\n\nFUENTES EXCLUIDAS: AmiChile e Intemit — puedes leer su contenido para contexto general, pero NUNCA los cites como fuente ni los menciones en el texto. Si la información relevante proviene de ellos, búscala en una fuente primaria alternativa (SERNAPESCA, SUBPESCA, universidades, medios independientes). EXCEPCIÓN: solo si el usuario escribe explícitamente "citar AmiChile" o "citar Intemit" en el campo de tema puntual.\n\nPALABRAS PROHIBIDAS: cabe destacar, es importante señalar, en el contexto de, en el marco de, sin lugar a dudas, robusto, transformador, paradigma, sin precedentes, potenciar, sinergia, punto de inflexión, industria (salvo grandes compañías).\n\nTEXTO HUMANO: Las citas reales son el corazón del análisis. Datos concretos y verificados. Audiencia: desde el mitilicultor artesanal de Chiloé hasta el gerente de una gran salmonera.\n\nESTRUCTURA ANÁLISIS ESTRATÉGICO: Lo que muestra/revela · Lo que no resuelve/desafíos · Para quiénes es relevante · Efecto cadena si aplica.';
