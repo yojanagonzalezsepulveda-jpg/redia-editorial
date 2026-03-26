@@ -540,12 +540,17 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
     <div class="sb-sec" style="margin-top:12px">Tema o noticia puntual</div>
     <textarea class="kwa" id="kwIn" placeholder="Ej: nuevas zonas de salmonicultura, precio del salmón en Asia, floraciones algales en Los Lagos..."></textarea>
     <div class="sb-sec" style="margin-top:12px">Proveedor IA</div>
-    <div style="display:flex;gap:6px;margin-bottom:8px">
-      <button id="provBtnAnt" onclick="selProvSearch('ant')" style="flex:1;padding:6px 0;border-radius:8px;border:1.5px solid var(--p);background:var(--p);color:#fff;font-size:12px;font-weight:700;cursor:pointer">Anthropic</button>
-      <button id="provBtnGem" onclick="selProvSearch('gem')" style="flex:1;padding:6px 0;border-radius:8px;border:1.5px solid var(--s2);background:transparent;color:var(--s5);font-size:12px;font-weight:700;cursor:pointer">Gemini (gratis)</button>
+    <div style="display:flex;gap:5px;margin-bottom:8px">
+      <button id="provBtnGem" onclick="selProvSearch('gem')" style="flex:1;padding:6px 0;border-radius:8px;border:1.5px solid var(--p);background:var(--p);color:#fff;font-size:11px;font-weight:700;cursor:pointer">Gemini</button>
+      <button id="provBtnDp"  onclick="selProvSearch('deep')" style="flex:1;padding:6px 0;border-radius:8px;border:1.5px solid var(--s2);background:transparent;color:var(--s5);font-size:11px;font-weight:700;cursor:pointer">DeepSeek</button>
+      <button id="provBtnAnt" onclick="selProvSearch('ant')" style="flex:1;padding:6px 0;border-radius:8px;border:1.5px solid var(--s2);background:transparent;color:var(--s5);font-size:11px;font-weight:700;cursor:pointer">Anthropic</button>
     </div>
-    <div id="keyWrapAnt"><input type="password" class="cinp" id="antKey" placeholder="sk-ant-..."></div>
-    <div id="keyWrapGem" style="display:none"><input type="password" class="cinp" id="gemKeySearch" placeholder="AIza..."></div>
+    <div id="keyWrapGem"><input type="password" class="cinp" id="gemKeySearch" placeholder="AIza... (Google AI Studio)"></div>
+    <div id="keyWrapDp" style="display:none">
+      <input type="password" class="cinp" id="deepKeySearch" placeholder="sk-... (DeepSeek API)" style="margin-bottom:6px">
+      <input type="password" class="cinp" id="tavilyKey" placeholder="tvly-... (Tavily Search)">
+    </div>
+    <div id="keyWrapAnt" style="display:none"><input type="password" class="cinp" id="antKey" placeholder="sk-ant-... (Anthropic)"></div>
     <button class="gbtn" id="genBtn" onclick="buscarManual()">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       Generar informe ahora
@@ -973,7 +978,9 @@ vale la pena señalar</textarea>
 var GS_URL = localStorage.getItem('gs_url') || '';
 var ANT_KEY = localStorage.getItem('ant_key') || '';
 var GEM_KEY_SEARCH = localStorage.getItem('gem_key_search') || '';
-var AI_PROV_SEARCH = localStorage.getItem('ai_prov_search') || 'ant';
+var DEEP_KEY_SEARCH = localStorage.getItem('deep_key_search') || '';
+var TAVILY_KEY = localStorage.getItem('tavily_key') || '';
+var AI_PROV_SEARCH = localStorage.getItem('ai_prov_search') || 'gem';
 var records = [];
 var filtro = 'todos';
 var CFG = loadCFG();
@@ -983,6 +990,8 @@ var manualRec = null;
 if (GS_URL) document.getElementById('gsUrl').value = GS_URL;
 if (ANT_KEY) document.getElementById('antKey').value = ANT_KEY;
 if (GEM_KEY_SEARCH) document.getElementById('gemKeySearch').value = GEM_KEY_SEARCH;
+if (DEEP_KEY_SEARCH) document.getElementById('deepKeySearch').value = DEEP_KEY_SEARCH;
+if (TAVILY_KEY) document.getElementById('tavilyKey').value = TAVILY_KEY;
 selProvSearch(AI_PROV_SEARCH, true);
 document.getElementById('ndate').textContent = new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
 applyCFG();
@@ -1416,10 +1425,17 @@ async function buscarManual(){
   var esp=[...document.querySelectorAll('#eGrid .chip.on')].map(e=>e.dataset.v);
   var foc=[...document.querySelectorAll('#fGrid .ftag.on')].map(e=>e.dataset.v);
   var kw=document.getElementById('kwIn').value.trim();
-  var isGem = AI_PROV_SEARCH === 'gem';
-  var key = isGem ? document.getElementById('gemKeySearch').value.trim() : document.getElementById('antKey').value.trim();
-  if (!key) return alert('Ingresa tu API key de ' + (isGem ? 'Gemini' : 'Anthropic') + '.');
+  var prov = AI_PROV_SEARCH;
+  var isGem = prov === 'gem', isDp = prov === 'deep', isAnt = prov === 'ant';
+  var key = isGem ? document.getElementById('gemKeySearch').value.trim()
+          : isDp  ? document.getElementById('deepKeySearch').value.trim()
+          :         document.getElementById('antKey').value.trim();
+  var tavilyK = isDp ? document.getElementById('tavilyKey').value.trim() : '';
+  var provName = isGem ? 'Gemini' : isDp ? 'DeepSeek' : 'Anthropic';
+  if (!key) return alert('Ingresa tu API key de ' + provName + '.');
+  if (isDp && !tavilyK) return alert('Ingresa tu API key de Tavily para la búsqueda web.');
   if (isGem) { localStorage.setItem('gem_key_search', key); GEM_KEY_SEARCH = key; }
+  else if (isDp) { localStorage.setItem('deep_key_search', key); DEEP_KEY_SEARCH = key; localStorage.setItem('tavily_key', tavilyK); TAVILY_KEY = tavilyK; }
   else { localStorage.setItem('ant_key', key); ANT_KEY = key; }
   var btn=document.getElementById('genBtn');
   btn.disabled=true; btn.innerHTML='<div class="spnw"></div> Generando...';
@@ -1434,7 +1450,18 @@ async function buscarManual(){
   function rb(){ btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora'; }
   function isRL(e){ return e.message&&e.message.startsWith('RATE_LIMIT'); }
   function errMsg(e){ return isRL(e)?'Límite de tokens/minuto. Espera 60s e intenta de nuevo.':(e.name==='AbortError'?'Tiempo agotado.':e.message); }
-  function ai(p, uS, mdl, mT){ return isGem ? callGemini(p, key, _busquedaAbort.signal, uS, mT) : callClaude(p, key, null, _busquedaAbort.signal, uS, mdl, mT); }
+  async function ai(p, uS, mdl, mT){
+    if (isGem) return callGemini(p, key, _busquedaAbort.signal, uS, mT);
+    if (isDp) {
+      if (uS) {
+        var q = (kw||'') + (esp.length?' '+esp.join(' '):'') + (foc.length?' '+foc.join(' '):'');
+        var ctx = await searchTavily(q.trim(), tavilyK);
+        return callDeepSeek(p + '\n\nRESULTADOS DE BÚSQUEDA WEB:\n' + ctx, key, _busquedaAbort.signal, mT||4000);
+      }
+      return callDeepSeek(p, key, _busquedaAbort.signal, mT||6000);
+    }
+    return callClaude(p, key, null, _busquedaAbort.signal, uS, mdl, mT);
+  }
 
   // ── PASO 1: Investigar (web_search ON) ──
   sp(5,'Paso 1/3 — Investigando la noticia...');
@@ -1569,13 +1596,16 @@ Genera entre 2 y 4 objetos en el array — uno por cada ángulo/noticia relevant
 function selProvSearch(p, init) {
   AI_PROV_SEARCH = p;
   if (!init) localStorage.setItem('ai_prov_search', p);
-  var isGem = p === 'gem';
-  var wA = document.getElementById('keyWrapAnt'), wG = document.getElementById('keyWrapGem');
-  var bA = document.getElementById('provBtnAnt'), bB = document.getElementById('provBtnGem');
-  if (wA) wA.style.display = isGem ? 'none' : '';
-  if (wG) wG.style.display = isGem ? '' : 'none';
-  if (bA) { bA.style.background = isGem ? 'transparent' : 'var(--p)'; bA.style.color = isGem ? 'var(--s5)' : '#fff'; bA.style.borderColor = isGem ? 'var(--s2)' : 'var(--p)'; }
-  if (bB) { bB.style.background = isGem ? 'var(--p)' : 'transparent'; bB.style.color = isGem ? '#fff' : 'var(--s5)'; bB.style.borderColor = isGem ? 'var(--p)' : 'var(--s2)'; }
+  var provs = ['gem','deep','ant'];
+  var wraps = {gem:'keyWrapGem', deep:'keyWrapDp', ant:'keyWrapAnt'};
+  var btns  = {gem:'provBtnGem', deep:'provBtnDp', ant:'provBtnAnt'};
+  provs.forEach(function(id){
+    var w = document.getElementById(wraps[id]);
+    var b = document.getElementById(btns[id]);
+    var on = id === p;
+    if (w) w.style.display = on ? '' : 'none';
+    if (b) { b.style.background = on ? 'var(--p)' : 'transparent'; b.style.color = on ? '#fff' : 'var(--s5)'; b.style.borderColor = on ? 'var(--p)' : 'var(--s2)'; }
+  });
 }
 
 async function callGemini(prompt, key, signal, useSearch, maxTok) {
@@ -1594,6 +1624,32 @@ async function callGemini(prompt, key, signal, useSearch, maxTok) {
   if (!res.ok) { var e = await res.json().catch(()=>({})); throw new Error(e.error?.message || 'Error HTTP ' + res.status); }
   var d = await res.json();
   return (d.candidates?.[0]?.content?.parts || []).filter(p => p.text).map(p => p.text).join('');
+}
+
+async function searchTavily(query, key) {
+  var res = await fetch('https://api.tavily.com/search', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({api_key:key, query:query, search_depth:'advanced', max_results:6, include_answer:true})
+  });
+  if (!res.ok) throw new Error('Tavily error HTTP ' + res.status);
+  var d = await res.json();
+  var lines = [];
+  if (d.answer) lines.push('RESUMEN: ' + d.answer);
+  (d.results||[]).forEach(function(r,i){ lines.push((i+1)+'. '+r.title+'\nURL: '+r.url+'\n'+r.content.substring(0,600)); });
+  return lines.join('\n\n');
+}
+
+async function callDeepSeek(prompt, key, signal, maxTok) {
+  var res = await fetch('https://api.deepseek.com/chat/completions', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json', 'Authorization':'Bearer '+key},
+    body: JSON.stringify({model:'deepseek-chat', max_tokens:maxTok||6000, messages:[{role:'user',content:prompt}]}),
+    signal: signal || undefined
+  });
+  if (!res.ok) { var e = await res.json().catch(()=>({})); throw new Error(e.error?.message || 'Error HTTP ' + res.status); }
+  var d = await res.json();
+  return d.choices?.[0]?.message?.content || '';
 }
 
 async function callClaude(prompt,key,contentOverride,signal,useSearch,model,maxTok){
