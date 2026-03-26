@@ -1406,7 +1406,7 @@ async function buscarManual(){
 
   // ── PASO 2: Generar el informe completo ──
   setProgress(40,'Paso 2/2 — Redactando informe: <em>'+esc((noticia.titulo||'').substring(0,60))+'</em>...');
-  var tid2=newAbort(90000);
+  var tid2=newAbort(150000);
   var raw2;
   try {
     raw2=await callClaude(buildPromptNoticia(noticia.titulo,noticia.url,noticia.resumen,'noticia',minW),key,null,_busquedaAbort.signal);
