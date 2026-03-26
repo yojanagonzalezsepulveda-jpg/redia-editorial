@@ -1428,8 +1428,9 @@ async function buscarManual(){
     var n=noticias[i];
     // Pausa entre llamadas para respetar el rate limit (30k tokens/min)
     if(i>0){
-      for(var s=20;s>0;s--){
-        setProgress(pct,'Esperando para no superar el límite de la API... ('+s+'s)');
+      for(var s=60;s>0;s--){
+        var pctW=20+Math.round(((i-1)/noticias.length)*75);
+        setProgress(pctW,'Pausa rate limit — próximo informe en '+s+'s...');
         await sleep(1000);
         if(!_busquedaAbort||_busquedaAbort.signal.aborted) break;
       }
@@ -1442,13 +1443,34 @@ async function buscarManual(){
       raw2=await callClaude(buildPromptNoticia(n.titulo,n.url,n.resumen,'noticia',minW),key,null,_busquedaAbort.signal);
       clearTimeout(tid2);
     } catch(e){
-      clearTimeout(tid2); _busquedaAbort=null;
-      // Si falla un informe, agrega nota pero continúa con los demás
-      var errMsg=(e.name==='AbortError'||e.message==='signal is aborted without reason')?'Tiempo agotado':'Error: '+e.message;
-      var cont=document.getElementById('cardsContainer');
-      if(cont) cont.insertAdjacentHTML('beforeend','<div style="padding:14px 18px;background:var(--errb);border:1px solid var(--errbr);border-radius:12px;margin-bottom:12px;color:var(--err);font-size:12.5px"><strong>Informe '+(i+1)+' no generado:</strong> '+errMsg+'</div>');
-      if(e.name==='AbortError') break; // si fue abort manual, detener
-      continue;
+      clearTimeout(tid2);
+      // Si es rate limit, esperar 60s y reintentar una vez
+      if(e.message&&e.message.startsWith('RATE_LIMIT')){
+        for(var rs=60;rs>0;rs--){
+          setProgress(pct,'Rate limit — reintentando en '+rs+'s...');
+          await sleep(1000);
+          if(!_busquedaAbort||_busquedaAbort.signal.aborted) break;
+        }
+        var tid3=newAbort(90000);
+        try {
+          raw2=await callClaude(buildPromptNoticia(n.titulo,n.url,n.resumen,'noticia',minW),key,null,_busquedaAbort.signal);
+          clearTimeout(tid3);
+        } catch(e2){
+          clearTimeout(tid3); _busquedaAbort=null;
+          var errMsg2=(e2.name==='AbortError')?'Tiempo agotado':'Error: '+e2.message;
+          var cont0=document.getElementById('cardsContainer');
+          if(cont0) cont0.insertAdjacentHTML('beforeend','<div style="padding:14px 18px;background:var(--errb);border:1px solid var(--errbr);border-radius:12px;margin-bottom:12px;color:var(--err);font-size:12.5px"><strong>Informe '+(i+1)+' no generado:</strong> '+errMsg2+'</div>');
+          if(e2.name==='AbortError') break;
+          continue;
+        }
+      } else {
+        _busquedaAbort=null;
+        var errMsg=(e.name==='AbortError'||e.message==='signal is aborted without reason')?'Tiempo agotado':'Error: '+e.message;
+        var cont=document.getElementById('cardsContainer');
+        if(cont) cont.insertAdjacentHTML('beforeend','<div style="padding:14px 18px;background:var(--errb);border:1px solid var(--errbr);border-radius:12px;margin-bottom:12px;color:var(--err);font-size:12.5px"><strong>Informe '+(i+1)+' no generado:</strong> '+errMsg+'</div>');
+        if(e.name==='AbortError') break;
+        continue;
+      }
     }
     try {
       var data=parseJSON(raw2);
@@ -1567,7 +1589,7 @@ async function callClaude(prompt,key,contentOverride,signal){
     body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:8096,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:contentOverride||prompt}]}),
     signal:signal||undefined
   });
-  if(!res.ok){ var e=await res.json().catch(()=>({})); throw new Error(e.error?.message||'Error HTTP '+res.status); }
+  if(!res.ok){ var e=await res.json().catch(()=>({})); var em=e.error?.message||'Error HTTP '+res.status; if(res.status===429) em='RATE_LIMIT:'+em; throw new Error(em); }
   var d=await res.json();
   return d.content.filter(b=>b.type==='text').map(b=>b.text).join('');
 }
