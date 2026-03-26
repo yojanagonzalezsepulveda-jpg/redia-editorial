@@ -1345,12 +1345,32 @@ var STEPS=[
   {t:'Empaquetando para <strong>redia.pro</strong>...',p:99},
 ];
 
+function buildPromptDescubrir(esp,foc,kw){
+  var _cfgF=CFG.fuentes?CFG.fuentes.split('\n').filter(Boolean):[];
+  var _fArr=_cfgF.length>0?_cfgF:(typeof DEFAULT_FUENTES!=='undefined'?DEFAULT_FUENTES:[]);
+  var fLib=_fArr.join(' · ');
+  return REDIA_IDENTITY+`
+
+TAREA: Búsqueda de noticias — solo descubrimiento, sin desarrollar.
+
+${esp.length?'ESPECIES: '+esp.join(', '):'Toda la cadena acuícola chilena'}
+${foc.length?'FOCOS: '+foc.join(', '):'Todos los temas relevantes'}
+TEMA: ${kw||'noticias más relevantes de las últimas 48 horas del sector acuícola chileno'}
+
+FUENTES (selecciona 4-6 más relevantes para este tema):
+${fLib}
+
+INSTRUCCIÓN: Usa web_search para encontrar noticias reales y recientes.
+Identifica 3-4 noticias DISTINTAS y RELEVANTES — cada una con ángulo propio.
+Responde SOLO con JSON válido — sin análisis ni texto adicional:
+[{"titulo":"Título exacto o descriptivo de la noticia","url":"https://url-directa","fuente":"Nombre del medio","resumen":"2-3 oraciones con el hecho principal y cifras si las hay"}]`;
+}
+
 async function buscarManual(){
   var esp=[...document.querySelectorAll('#eGrid .chip.on')].map(e=>e.dataset.v);
   var foc=[...document.querySelectorAll('#fGrid .ftag.on')].map(e=>e.dataset.v);
   var kw=document.getElementById('kwIn').value.trim();
   var key=document.getElementById('antKey').value.trim();
-  // Especies y focos son opcionales — sin selección busca en toda la acuicultura
   if(!key) return alert('Ingresa tu API key de Anthropic.');
   localStorage.setItem('ant_key',key);
   ANT_KEY=key;
@@ -1359,48 +1379,92 @@ async function buscarManual(){
   document.getElementById('searchEmpty').style.display='none';
   document.getElementById('searchResult').style.display='none';
   document.getElementById('searchLoading').style.display='block';
-  document.getElementById('pFill').style.width='0%';
-  var si=0;
-  var st=setInterval(()=>{ if(si<STEPS.length){ document.getElementById('lStep').innerHTML=STEPS[si].t; document.getElementById('pFill').style.width=STEPS[si].p+'%'; si++; } },8000);
-  _busquedaAbort=new AbortController();
-  var timeoutId=setTimeout(()=>_busquedaAbort.abort(),120000);
-  try {
-    var raw=await callClaude(buildPrompt(esp,foc,kw),key,null,_busquedaAbort.signal);
-    clearTimeout(timeoutId);
-    clearInterval(st);
-    document.getElementById('pFill').style.width='100%';
-    await sleep(300);
-    var data=parseJSON(raw);
-    // Soporte para múltiples informes (array) o informe único (objeto)
-    var dataArr=Array.isArray(data)?data:[data];
-    var recs=dataArr.map(d=>{ var r=normalizeRec(d); r.html_publicable=buildHTML(r); r._uid=r.id; return r; });
-    manualRec=recs[0];
-    manualRecs=recs;
-    document.getElementById('searchLoading').style.display='none';
-    var res=document.getElementById('searchResult');
-    res.style.display='block';
-    var n=recs.length;
-    res.innerHTML=
-      '<div class="cards-hd"><div><div class="cards-title">'+n+' informe'+(n!==1?'s generados':' generado')+'</div><div class="cards-sub">Revisa cada uno — aprueba los que quieres publicar, descarta los demás</div></div>'+
-      '<div style="display:flex;gap:7px">'+
-      (GS_URL?'<button class="rbtn" style="background:linear-gradient(135deg,var(--ok),var(--t5))" onclick="guardarTodosEnGS()">Guardar todos en bandeja</button>':'')+
-      '</div></div>'+
-      recs.map(r=>buildCard(r)).join('');
-    setTimeout(()=>{ var b=document.getElementById('body-'+recs[0].id); if(b) b.classList.add('open'); },100);
-  } catch(e){
-    clearInterval(st);
-    clearTimeout(timeoutId);
-    _busquedaAbort=null;
+  var minW=parseInt(CFG.words||'600');
+  var recs=[];
+
+  function setProgress(pct,txt){
+    document.getElementById('pFill').style.width=pct+'%';
+    document.getElementById('lStep').innerHTML=txt;
+  }
+
+  function mostrarError(msg){
     document.getElementById('searchLoading').style.display='none';
     document.getElementById('searchEmpty').style.display='flex';
-    var msg=(e.name==='AbortError'||e.message==='signal is aborted without reason')
-      ? 'La búsqueda tardó demasiado. Intenta con un tema más específico o reduce los focos seleccionados.'
-      : e.message;
     document.getElementById('searchEmpty').innerHTML='<div style="background:var(--errb);border:1px solid var(--errbr);border-radius:14px;padding:20px;max-width:400px;color:var(--err);font-size:13px;line-height:1.6"><strong>Error:</strong><br>'+msg+'</div>';
-  } finally {
-    btn.disabled=false;
-    btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora';
   }
+
+  function newAbort(ms){
+    _busquedaAbort=new AbortController();
+    return setTimeout(()=>_busquedaAbort.abort(),ms);
+  }
+
+  // ── PASO 1: Descubrir noticias ──
+  setProgress(5,'Paso 1/2 — Buscando noticias relevantes en la web...');
+  var tid=newAbort(90000);
+  try {
+    var raw1=await callClaude(buildPromptDescubrir(esp,foc,kw),key,null,_busquedaAbort.signal);
+    clearTimeout(tid);
+  } catch(e){
+    clearTimeout(tid); _busquedaAbort=null;
+    var msg1=(e.name==='AbortError'||e.message==='signal is aborted without reason')
+      ?'La búsqueda inicial tardó demasiado. Intenta con un tema más específico.':e.message;
+    mostrarError(msg1);
+    btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora';
+    return;
+  }
+
+  var noticias;
+  try { noticias=parseJSON(raw1); } catch(e){ mostrarError('No se pudo interpretar la lista de noticias: '+e.message); btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora'; return; }
+  if(!Array.isArray(noticias)) noticias=[noticias];
+  noticias=noticias.slice(0,4);
+
+  // Mostrar contenedor de resultados (se llena progresivamente)
+  var res=document.getElementById('searchResult');
+  res.style.display='block';
+  res.innerHTML='<div class="cards-hd" id="cardsHd"><div><div class="cards-title" id="cardsTitle">Generando '+noticias.length+' informes...</div><div class="cards-sub">Los informes aparecen uno a uno — puedes leer mientras se generan los demás</div></div></div><div id="cardsContainer"></div>';
+
+  // ── PASO 2: Desarrollar cada noticia ──
+  for(var i=0;i<noticias.length;i++){
+    var n=noticias[i];
+    var pct=20+Math.round(((i)/noticias.length)*75);
+    setProgress(pct,'Paso 2/2 — Informe '+(i+1)+' de '+noticias.length+': <em>'+esc(n.titulo||'').substring(0,60)+'</em>');
+    var tid2=newAbort(90000);
+    var raw2;
+    try {
+      raw2=await callClaude(buildPromptNoticia(n.titulo,n.url,n.resumen,'noticia',minW),key,null,_busquedaAbort.signal);
+      clearTimeout(tid2);
+    } catch(e){
+      clearTimeout(tid2); _busquedaAbort=null;
+      // Si falla un informe, agrega nota pero continúa con los demás
+      var errMsg=(e.name==='AbortError'||e.message==='signal is aborted without reason')?'Tiempo agotado':'Error: '+e.message;
+      var cont=document.getElementById('cardsContainer');
+      if(cont) cont.insertAdjacentHTML('beforeend','<div style="padding:14px 18px;background:var(--errb);border:1px solid var(--errbr);border-radius:12px;margin-bottom:12px;color:var(--err);font-size:12.5px"><strong>Informe '+(i+1)+' no generado:</strong> '+errMsg+'</div>');
+      if(e.name==='AbortError') break; // si fue abort manual, detener
+      continue;
+    }
+    try {
+      var data=parseJSON(raw2);
+      var r=normalizeRec(data); r.html_publicable=buildHTML(r); r._uid=r.id;
+      recs.push(r);
+      manualRec=recs[0]; manualRecs=recs;
+      var cont2=document.getElementById('cardsContainer');
+      if(cont2) cont2.insertAdjacentHTML('beforeend',buildCard(r));
+    } catch(pe){ /* parse error en un informe individual — ignorar y continuar */ }
+  }
+
+  setProgress(100,'Listo');
+  await sleep(300);
+  document.getElementById('searchLoading').style.display='none';
+
+  // Actualizar encabezado
+  var ct=document.getElementById('cardsTitle');
+  if(ct) ct.textContent=recs.length+' informe'+(recs.length!==1?'s generados':' generado');
+  var hd=document.getElementById('cardsHd');
+  if(hd&&GS_URL) hd.insertAdjacentHTML('beforeend','<div style="display:flex;gap:7px"><button class="rbtn" style="background:linear-gradient(135deg,var(--ok),var(--t5))" onclick="guardarTodosEnGS()">Guardar todos en bandeja</button></div>');
+  if(recs.length) setTimeout(()=>{ var b=document.getElementById('body-'+recs[0].id); if(b) b.classList.add('open'); },100);
+
+  btn.disabled=false;
+  btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora';
 }
 
 async function guardarManualEnGS(){
