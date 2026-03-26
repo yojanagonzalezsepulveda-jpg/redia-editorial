@@ -1021,6 +1021,82 @@ function showCfg(id,el){
 // ── FUENTES PILLS ─────────────────────────────────────
 var DEFAULT_FUENTES=['Aqua.cl','MundoAcuícola','Intesal','SalmonExpert','Diario Acuícola','Mundo Marítimo','Portal Acuícola','Revista Aqua','SERNAPESCA','SUBPESCA','INDESPA','CORFO','SERCOTEC','ANID','FIC','FONDECYT','ProChile','SNA','SENCE','Ministerio de Economía','Ministerio del Medio Ambiente','Ministerio de Salud','Ministerio de Trabajo','Subsecretaría de Pesca','Dirección del Trabajo','SEREMI de Salud Los Lagos','SEREMI de Salud Aysén','SMA (Superintendencia del Medio Ambiente)','Contraloría General de la República','FIMA (Fiscalía del Medio Ambiente)','CONAF','DIRECTEMAR (Armada de Chile)','Gobierno Regional Los Lagos','Gobierno Regional Aysén','Gobierno Regional Magallanes','Gobierno Regional Los Ríos','Gobierno Regional Biobío','Gobierno Regional Araucanía','SalmonChile','Consejo del Salmón','Asociación de Mitilicultores','Asociación de Piscicultores','AquaPacífico','Federación de Pescadores','UACH','UCT','UCSC','PUCV','UdeC','UFRO','IFOP','Centro INCAR','Centro FONDAP','Fundación Chinquihue','ULAM','Centros de Innovación Regional Los Lagos','Centros de Innovación Regional Aysén','El Llanquihue','Diario de Aysén','La Discusión','MiradaSur','Diario Chiloé','El Sureño','IntraFish','SalmonBusiness','Fish Farmer','Undercurrent News','Eurofish','Globefish','FAO','OCDE','Banco Mundial','IUCN','OIE/OMSA','WorldFish','Nofima','Institute of Marine Research Noruega','CSIRO Australia','Cámara de Diputadas y Diputados','Senado de la República','Comisión de Pesca y Acuicultura Cámara','Comisión de Pesca y Acuicultura Senado','Comisión de Medio Ambiente Cámara','Comisión de Medio Ambiente Senado','Comisión de Trabajo Cámara','Comisión de Trabajo Senado','Comisión de Salud Cámara','Comisión de Salud Senado','Comisión de Transporte Cámara','Comisión de Hacienda Cámara','Comisión de Hacienda Senado','Comisión de Economía Cámara','Comisión de Economía Senado','Biblioteca del Congreso Nacional BCN'];
 
+// Mapeo foco → fuentes prioritarias por categoría
+var FUENTES_POR_FOCO = {
+  'normativa y regulación': {
+    cl:  ['SERNAPESCA','SUBPESCA','SMA','Contraloría General de la República','BCN','Comisión de Pesca y Acuicultura Cámara','Comisión de Pesca y Acuicultura Senado','Comisión de Medio Ambiente Cámara','Comisión de Asuntos Indígenas','Comisión de Transporte Cámara','Cámara de Diputadas y Diputados','Senado de la República'],
+    intl:['EFSA','Comisión Europea DG SANTE','FDA','GACC China (Aduana China)','MAFF Japón','Rosselkhoznadzor Rusia','Codex Alimentarius']
+  },
+  'exportaciones y comercio exterior': {
+    cl:  ['ProChile','SERNAPESCA','SalmonChile','Consejo del Salmón','Aduanas Chile'],
+    intl:['IntraFish','SalmonBusiness','Undercurrent News','Globefish','FAO','USDA','Eurofish']
+  },
+  'mercado nacional e internacional': {
+    cl:  ['Aqua.cl','MundoAcuícola','SalmonChile','SalmonExpert','Intesal'],
+    intl:['IntraFish','SalmonBusiness','Undercurrent News','Globefish','FAO']
+  },
+  'tecnología e innovación': {
+    cl:  ['IFOP','Centro INCAR','ANID','CORFO','UACH','UCT','UCSC','PUCV','UdeC','Fundación Chinquihue'],
+    intl:['Nofima','Institute of Marine Research Noruega','CSIRO Australia','University of Stirling','Global Seafood Alliance','WorldFish','FAO']
+  },
+  'investigación científica e innovación': {
+    cl:  ['IFOP','Centro INCAR','ANID','FONDECYT','UACH','UCT','UCSC','PUCV','UdeC','UFRO'],
+    intl:['Nofima','Institute of Marine Research Noruega','CSIRO Australia','University of Stirling','WorldFish','FAO']
+  },
+  'certificaciones y estándares internacionales': {
+    cl:  ['SERNAPESCA','APL-CORFO','SalmonChile','ProChile'],
+    intl:['ASC (Aquaculture Stewardship Council)','BAP Global Seafood Alliance','Friend of the Sea','MSC','GlobalG.A.P.','Naturland']
+  },
+  'sanidad acuícola': {
+    cl:  ['SERNAPESCA','INDESPA','ISP','UACH'],
+    intl:['OIE/OMSA','WOAH','Nofima','Institute of Marine Research Noruega']
+  },
+  'medio ambiente y sustentabilidad': {
+    cl:  ['SMA','CONAF','DIRECTEMAR','Ministerio del Medio Ambiente','FIMA'],
+    intl:['IUCN','OCDE','IPCC','UNEP','FAO','WWF']
+  },
+  'cambio climático y océano': {
+    cl:  ['SMA','DIRECTEMAR','Ministerio del Medio Ambiente','INACH','IFOP'],
+    intl:['IPCC','IUCN','OCDE','FAO','NOAA']
+  },
+  'financiamiento y fondos públicos INDESPA CORFO': {
+    cl:  ['CORFO','INDESPA','ANID','FIC','FONDECYT','SERCOTEC'],
+    intl:['BID','Banco Mundial','FAO','GEF']
+  },
+  'estadísticas y producción': {
+    cl:  ['SERNAPESCA','SUBPESCA','INDESPA','SalmonChile','Intesal'],
+    intl:['FAO','Globefish','OCDE']
+  },
+  'comunidades costeras y territorio': {
+    cl:  ['Gobierno Regional Los Lagos','Gobierno Regional Aysén','Gobierno Regional Magallanes','El Llanquihue','Diario de Aysén','La Discusión','Diario Chiloé','CONAF','DIRECTEMAR'],
+    intl:[]
+  },
+  'relaciones laborales y empleo': {
+    cl:  ['Dirección del Trabajo','Ministerio de Trabajo','SENCE','SalmonChile','Federación de Pescadores'],
+    intl:['OIT']
+  },
+  'fiscalización y sanciones': {
+    cl:  ['SMA','SERNAPESCA','Contraloría General de la República','FIMA','DIRECTEMAR'],
+    intl:[]
+  },
+  'negocios e inversiones': {
+    cl:  ['Aqua.cl','MundoAcuícola','SalmonChile','Mundo Marítimo'],
+    intl:['IntraFish','SalmonBusiness','Bloomberg','Reuters']
+  },
+  'contingencia nacional': {
+    cl:  ['Aqua.cl','MundoAcuícola','SERNAPESCA','El Llanquihue','Diario de Aysén','La Discusión'],
+    intl:[]
+  },
+  'infraestructura y logística': {
+    cl:  ['Mundo Marítimo','DIRECTEMAR','Ministerio de Obras Públicas','Ministerio de Transporte'],
+    intl:[]
+  },
+  'emprendimiento y startups acuícolas': {
+    cl:  ['CORFO','INDESPA','ANID','StartUp Chile','Fundación Chinquihue'],
+    intl:['Hatch','Aqua-Spark','Global Seafood Alliance']
+  }
+};
+
 function renderFuentesPills(fuentes){
   var c=document.getElementById('fuentesPills'); if(!c) return;
   c.innerHTML=fuentes.map(f=>`<span data-fuente="${esc(f)}" style="display:inline-flex;align-items:center;gap:4px;background:var(--p1);color:var(--p6);border:1px solid var(--p3);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:500">${esc(f)}<button onclick="this.parentElement.remove()" title="Eliminar" style="background:none;border:none;cursor:pointer;color:var(--s5);font-size:15px;line-height:1;padding:0 0 1px 3px">&times;</button></span>`).join('');
@@ -1364,17 +1440,24 @@ var STEPS=[
 ];
 
 function buildPromptInvestigar(esp,foc,kw){
-  var _cfgF=CFG.fuentes?CFG.fuentes.split('\n').filter(Boolean):[];
-  var _fArr=_cfgF.length>0?_cfgF:(typeof DEFAULT_FUENTES!=='undefined'?DEFAULT_FUENTES:[]);
-  // Fuentes chilenas base (primeras 15)
-  var fChile=_fArr.slice(0,15);
-  // Fuentes internacionales fijas
-  var fIntl=['IntraFish','SalmonBusiness','Undercurrent News','Fish Farmer','Globefish','FAO','OCDE','Nofima','Institute of Marine Research Noruega','WorldFish','CSIRO Australia','Eurofish'];
-  // Detectar si el tema es de alcance internacional
-  var kwLow=(kw||'').toLowerCase();
-  var focStr=foc.join(' ').toLowerCase();
-  var esIntl=['export','mercado','internacional','certif','global','precio','norueg','china','asia','eeuu','europa','fao','ocde'].some(function(t){return kwLow.includes(t)||focStr.includes(t);});
-  var fLib=esIntl ? fChile.concat(fIntl).join(', ') : fChile.concat(_fArr.slice(15,25)).join(', ');
+  // Fuentes base siempre presentes
+  var BASE_CL=['Aqua.cl','MundoAcuícola','SERNAPESCA','SUBPESCA','Intesal'];
+  var fuentesCl=BASE_CL.slice(), fuentesIntl=[];
+  // Agregar fuentes por cada foco seleccionado
+  foc.forEach(function(f){
+    var m=FUENTES_POR_FOCO[f];
+    if(!m) return;
+    m.cl.forEach(function(s){ if(!fuentesCl.includes(s)) fuentesCl.push(s); });
+    m.intl.forEach(function(s){ if(!fuentesIntl.includes(s)) fuentesIntl.push(s); });
+  });
+  // Si no hay focos, usar las primeras 15 de DEFAULT_FUENTES
+  if(foc.length===0){
+    var _cfgF=CFG.fuentes?CFG.fuentes.split('\n').filter(Boolean):[];
+    var _fArr=_cfgF.length>0?_cfgF:DEFAULT_FUENTES;
+    _fArr.slice(0,15).forEach(function(s){ if(!fuentesCl.includes(s)) fuentesCl.push(s); });
+  }
+  // Construir librería: chilenas + internacionales (max 30 total)
+  var fLib=fuentesCl.slice(0,20).concat(fuentesIntl.slice(0,10)).join(', ');
   return `Eres un investigador del sector acuícola chileno. Usa web_search.
 
 TEMA: ${kw||'la noticia más relevante del sector acuícola chileno en las últimas 48 horas'}
