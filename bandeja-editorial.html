@@ -1581,6 +1581,20 @@ async function buscarManual(){
   function rb(){ btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora'; }
   function isRL(e){ return e.message&&e.message.startsWith('RATE_LIMIT'); }
   function errMsg(e){ return e.message&&e.message.startsWith('RATE_LIMIT')?'Límite de tokens/minuto. Espera 60s e intenta de nuevo.':(e.name==='AbortError'?'Tiempo agotado.':e.message); }
+  // Limpiar URLs de tracking (Mailchimp, UTM, etc.) para extraer solo la URL base o el dominio
+  function cleanTrackingUrl(s){
+    if(!s) return s;
+    // Si tiene parámetros UTM o parece un fragmento de URL de campaña
+    if(/utm_|mailchimp|mc_eid|mc_cid|EMAIL_CAMPAIGN/i.test(s)){
+      // Intentar extraer la URL real (antes del ?) o el texto más útil sin los params
+      var urlMatch=s.match(/https?:\/\/[^\s?&]+/);
+      if(urlMatch) return urlMatch[0];
+      // Si no hay URL completa, limpiar los parámetros de tracking
+      return s.replace(/[?&]?(utm_\w+|mc_eid|mc_cid|EMAIL_CAMPAIGN)[^&]*/g,'').replace(/^[?&]/,'').trim();
+    }
+    return s;
+  }
+  kw = cleanTrackingUrl(kw);
   var searchQ=((kw||'')+' '+(esp.join(' '))+' '+(foc.join(' '))).trim();
 
   // ── PASO 1: Investigar (web_search ON) ──
@@ -1591,7 +1605,24 @@ async function buscarManual(){
 
   var inv;
   try { var p1=parseJSON(r1); inv=Array.isArray(p1)?p1[0]:p1; }
-  catch(e){ err('Investigación sin JSON válido.<br><pre style="font-size:10px;white-space:pre-wrap;margin-top:8px;max-height:80px;overflow:auto">'+esc((r1||'').substring(0,300))+'</pre>'); rb(); return; }
+  catch(e){
+    // Intentar reparación: pedir al modelo que extraiga solo el JSON
+    if(r1 && r1.length > 20){
+      sp(22,'Reparando formato de respuesta...');
+      try {
+        var t1b=na(30000); var r1b;
+        r1b=await callAI('Extrae el objeto JSON de la siguiente respuesta y devuelve SOLO el JSON sin texto adicional:\n\n'+r1, false, null, 2000, _busquedaAbort.signal);
+        clearTimeout(t1b);
+        var p1b=parseJSON(r1b); inv=Array.isArray(p1b)?p1b[0]:p1b;
+      } catch(e2){
+        err('Investigación sin JSON válido. La IA no devolvió el formato esperado.<br><pre style="font-size:10px;white-space:pre-wrap;margin-top:8px;max-height:100px;overflow:auto;background:rgba(0,0,0,.15);padding:6px;border-radius:6px">'+esc((r1||'(respuesta vacía)').substring(0,400))+'</pre>');
+        rb(); return;
+      }
+    } else {
+      err('La IA devolvió una respuesta vacía o inválida. Intenta con otro tema o verifica que la URL sea accesible.<br><pre style="font-size:10px;white-space:pre-wrap;margin-top:8px;max-height:80px;overflow:auto;background:rgba(0,0,0,.15);padding:6px;border-radius:6px">'+esc((r1||'(sin respuesta)').substring(0,400))+'</pre>');
+      rb(); return;
+    }
+  }
 
   // ── PASO 2: Redactar artículo (web_search OFF) ──
   sp(38,'Paso 2/3 — Redactando: <em>'+esc((inv.titulo||'').substring(0,55))+'</em>...');
