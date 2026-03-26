@@ -1871,6 +1871,10 @@ function parseJSON(raw){
   throw new Error('No se pudo procesar la respuesta. Intenta de nuevo.');
 }
 
+function mdToHtml(s){
+  if(!s) return s;
+  return s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\*([^*]+)\*/g,'<em>$1</em>');
+}
 function normalizeRec(d){
   var a=d.articulo||{};
   var uid='M'+Date.now();
@@ -1880,7 +1884,7 @@ function normalizeRec(d){
     tags:d.tags||[], categoria:d.categoria||'Análisis REDIA',
     tiempo_lectura:d.tiempo_lectura||'5 min',
     fuentes_consultadas:d.fuentes_consultadas||[], fuentes_con_links:d.fuentes_con_links||[], imagen_prompt:d.imagen_prompt||'',
-    titular:a.titular||'', bajada:a.bajada||'', cuerpo_html:a.cuerpo||'',
+    titular:a.titular||'', bajada:a.bajada||'', cuerpo_html:mdToHtml(a.cuerpo||''),
     analisis_muestra:a.analisis_muestra||'', 
     analisis_no_resuelve:a.analisis_no_resuelve||'',
     analisis_relevante_para:a.analisis_relevante_para||'',
