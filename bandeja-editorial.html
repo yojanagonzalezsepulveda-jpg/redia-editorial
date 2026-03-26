@@ -1438,7 +1438,7 @@ async function buscarManual(){
   // ── PASO 2: Redactar artículo (web_search OFF) ──
   sp(38,'Paso 2/3 — Redactando: <em>'+esc((inv.titulo||'').substring(0,55))+'</em>...');
   var t2=na(90000); var r2;
-  try { r2=await callClaude(buildPromptRedactar(inv,minW),key,null,_busquedaAbort.signal,false); clearTimeout(t2); }
+  try { r2=await callClaude(buildPromptRedactar(inv,minW),key,null,_busquedaAbort.signal,false,'claude-haiku-4-5-20251001',6000); clearTimeout(t2); }
   catch(e){ clearTimeout(t2); _busquedaAbort=null; err(errMsg(e)); rb(); return; }
 
   var rec;
@@ -1448,7 +1448,7 @@ async function buscarManual(){
   // ── PASO 3: Distribución (web_search OFF) ──
   sp(72,'Paso 3/3 — Generando LinkedIn, Facebook y guiones...');
   var t3=na(60000); var r3;
-  try { r3=await callClaude(buildPromptDistribuir(rec.titular,rec.bajada,rec.analisis_muestra),key,null,_busquedaAbort.signal,false); clearTimeout(t3); }
+  try { r3=await callClaude(buildPromptDistribuir(rec.titular,rec.bajada,rec.analisis_muestra),key,null,_busquedaAbort.signal,false,'claude-haiku-4-5-20251001',2000); clearTimeout(t3); }
   catch(e){ clearTimeout(t3); /* distribución es opcional — si falla igual mostramos el artículo */ r3=null; }
 
   if(r3){ try{ var dist=parseJSON(r3); rec.linkedin=dist.linkedin||''; rec.facebook=dist.facebook||''; rec.audio_script=dist.audio_script||''; rec.video_script=dist.video_script||''; }catch(e){} }
@@ -1555,8 +1555,8 @@ Responde SOLO con JSON válido sin markdown — un array con múltiples informes
 Genera entre 2 y 4 objetos en el array — uno por cada ángulo/noticia relevante y distinto que encuentres.`;
 }
 
-async function callClaude(prompt,key,contentOverride,signal,useSearch){
-  var bodyObj={model:'claude-sonnet-4-20250514',max_tokens:8096,messages:[{role:'user',content:contentOverride||prompt}]};
+async function callClaude(prompt,key,contentOverride,signal,useSearch,model,maxTok){
+  var bodyObj={model:model||'claude-sonnet-4-20250514',max_tokens:maxTok||8096,messages:[{role:'user',content:contentOverride||prompt}]};
   if(useSearch!==false) bodyObj.tools=[{type:'web_search_20250305',name:'web_search'}];
   var res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
