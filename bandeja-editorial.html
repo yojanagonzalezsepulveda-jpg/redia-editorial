@@ -2795,6 +2795,7 @@ async function guardarCrearEnGS() {
   if (id) {
     crearRec.id = id;
     records.unshift(crearRec);
+    renderBandeja();
     alert('Guardado en la bandeja editorial.');
   } else {
     alert('Error al guardar. Verifica la conexión con Google Sheets.');
