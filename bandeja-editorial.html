@@ -860,6 +860,7 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
     <div class="cni" onclick="showCfg('analisis',this)">Análisis estratégico</div>
     <div class="cni" onclick="showCfg('fuentes',this)">Fuentes</div>
     <div class="cni" onclick="showCfg('prohibido',this)">Palabras prohibidas</div>
+    <div class="cni" onclick="showCfg('modelos',this)">Modelos IA</div>
   </div>
   <div class="cfg-main">
     <div class="cpg on" id="cfg-voz">
@@ -969,6 +970,27 @@ cabe mencionar
 vale la pena señalar</textarea>
       </div>
       <button class="scfg" onclick="guardarCfg('prohibido',this)">Guardar</button>
+    </div>
+
+    <div class="cpg" id="cfg-modelos">
+      <div class="csec">
+        <div class="cs-t">Modelos IA</div>
+        <div class="cs-s">Cuando un modelo queda obsoleto o sale uno mejor, cámbialo aquí sin tocar el código. Deja en blanco para usar el valor por defecto.</div>
+        <div style="font-weight:700;font-size:12px;color:var(--p6);margin-bottom:8px;margin-top:4px">Gemini (Google)</div>
+        <label class="cfl">Texto y búsqueda</label>
+        <input class="cfi" id="cfGeminiModel" placeholder="gemini-2.0-flash-001">
+        <label class="cfl" style="margin-top:8px">Generación de imágenes</label>
+        <input class="cfi" id="cfImagenModel" placeholder="imagen-3.0-generate-001">
+        <div style="font-weight:700;font-size:12px;color:var(--p6);margin-bottom:8px;margin-top:16px">Anthropic</div>
+        <label class="cfl">Paso 1 — Investigar (con búsqueda web)</label>
+        <input class="cfi" id="cfAntModel1" placeholder="claude-sonnet-4-20250514">
+        <label class="cfl" style="margin-top:8px">Pasos 2 y 3 — Redactar y distribuir</label>
+        <input class="cfi" id="cfAntModel2" placeholder="claude-haiku-4-5-20251001">
+        <div style="font-weight:700;font-size:12px;color:var(--p6);margin-bottom:8px;margin-top:16px">DeepSeek</div>
+        <label class="cfl">Modelo de texto</label>
+        <input class="cfi" id="cfDeepModel" placeholder="deepseek-chat">
+      </div>
+      <button class="scfg" onclick="guardarCfg('modelos',this)">Guardar</button>
     </div>
   </div>
 </div>
@@ -1121,7 +1143,7 @@ function saveCFG(obj){ Object.assign(CFG,obj); localStorage.setItem('redia_cfg',
 function applyCFG(){
   if(CFG.tono) document.querySelectorAll('#toneGrid .tone-o').forEach(el=>el.classList.toggle('on',el.dataset.t===CFG.tono));
   if(CFG.audiencias) document.querySelectorAll('#audGrid .aud-o').forEach(el=>el.classList.toggle('on',(CFG.audiencias||[]).includes(el.dataset.a)));
-  var m={cfVoz:'voz',cfSensible:'sensible',cfAud:'aud',cfWords:'words',cfSecc:'secc',cfEstr:'estr',cfDim:'dim',cfAnal:'anal',cfProh:'proh'};
+  var m={cfVoz:'voz',cfSensible:'sensible',cfAud:'aud',cfWords:'words',cfSecc:'secc',cfEstr:'estr',cfDim:'dim',cfAnal:'anal',cfProh:'proh',cfGeminiModel:'geminiModel',cfImagenModel:'imagenModel',cfAntModel1:'antModel1',cfAntModel2:'antModel2',cfDeepModel:'deepModel'};
   Object.entries(m).forEach(([elId,key])=>{ var el=document.getElementById(elId); if(el&&CFG[key]) el.value=CFG[key]; });
   var fuentesGuardadas = CFG.fuentes ? CFG.fuentes.split('\n').filter(Boolean) : DEFAULT_FUENTES;
   renderFuentesPills(fuentesGuardadas);
@@ -1134,6 +1156,7 @@ function guardarCfg(sec,btn){
   else if(sec==='analisis'){ d.dim=document.getElementById('cfDim').value; d.anal=document.getElementById('cfAnal').value; }
   else if(sec==='fuentes'){ d.fuentes=getFuentesActivas().join('\n'); }
   else if(sec==='prohibido'){ d.proh=document.getElementById('cfProh').value; }
+  else if(sec==='modelos'){ d.geminiModel=document.getElementById('cfGeminiModel').value.trim(); d.imagenModel=document.getElementById('cfImagenModel').value.trim(); d.antModel1=document.getElementById('cfAntModel1').value.trim(); d.antModel2=document.getElementById('cfAntModel2').value.trim(); d.deepModel=document.getElementById('cfDeepModel').value.trim(); }
   saveCFG(d);
   var orig=btn.textContent; btn.textContent='Guardado'; btn.classList.add('ok');
   setTimeout(()=>{ btn.textContent=orig; btn.classList.remove('ok'); },2000);
@@ -1568,7 +1591,7 @@ async function buscarManual(){
   // ── PASO 2: Redactar artículo (web_search OFF) ──
   sp(38,'Paso 2/3 — Redactando: <em>'+esc((inv.titulo||'').substring(0,55))+'</em>...');
   var t2=na(90000); var r2;
-  try { r2=await ai(buildPromptRedactar(inv,minW), false, 'claude-haiku-4-5-20251001', 6000); clearTimeout(t2); }
+  try { r2=await ai(buildPromptRedactar(inv,minW), false, (CFG&&CFG.antModel2)||'claude-haiku-4-5-20251001', 6000); clearTimeout(t2); }
   catch(e){ clearTimeout(t2); _busquedaAbort=null; err(errMsg(e)); rb(); return; }
 
   var rec;
@@ -1578,7 +1601,7 @@ async function buscarManual(){
   // ── PASO 3: Distribución (web_search OFF) ──
   sp(72,'Paso 3/3 — Generando LinkedIn, Facebook y guiones...');
   var t3=na(60000); var r3;
-  try { r3=await ai(buildPromptDistribuir(rec.titular,rec.bajada,rec.analisis_muestra), false, 'claude-haiku-4-5-20251001', 2000); clearTimeout(t3); }
+  try { r3=await ai(buildPromptDistribuir(rec.titular,rec.bajada,rec.analisis_muestra), false, (CFG&&CFG.antModel2)||'claude-haiku-4-5-20251001', 2000); clearTimeout(t3); }
   catch(e){ clearTimeout(t3); /* distribución es opcional — si falla igual mostramos el artículo */ r3=null; }
 
   if(r3){ try{ var dist=parseJSON(r3); rec.linkedin=dist.linkedin||''; rec.facebook=dist.facebook||''; rec.audio_script=dist.audio_script||''; rec.video_script=dist.video_script||''; }catch(e){} }
@@ -1701,7 +1724,8 @@ function selProvSearch(p, init) {
 }
 
 async function callGemini(prompt, key, signal, useSearch, maxTok) {
-  var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-04-17:generateContent?key=' + key;
+  var gemModel = (CFG&&CFG.geminiModel) || 'gemini-2.0-flash-001';
+  var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + gemModel + ':generateContent?key=' + key;
   var bodyObj = {
     contents: [{role:'user', parts:[{text:prompt}]}],
     generationConfig: {maxOutputTokens: maxTok || 8192}
@@ -1736,7 +1760,7 @@ async function callDeepSeek(prompt, key, signal, maxTok) {
   var res = await fetch('https://api.deepseek.com/chat/completions', {
     method: 'POST',
     headers: {'Content-Type':'application/json', 'Authorization':'Bearer '+key},
-    body: JSON.stringify({model:'deepseek-chat', max_tokens:maxTok||6000, messages:[{role:'user',content:prompt}]}),
+    body: JSON.stringify({model:(CFG&&CFG.deepModel)||'deepseek-chat', max_tokens:maxTok||6000, messages:[{role:'user',content:prompt}]}),
     signal: signal || undefined
   });
   if (!res.ok) { var e = await res.json().catch(()=>({})); throw new Error(e.error?.message || 'Error HTTP ' + res.status); }
@@ -1745,7 +1769,7 @@ async function callDeepSeek(prompt, key, signal, maxTok) {
 }
 
 async function callClaude(prompt,key,contentOverride,signal,useSearch,model,maxTok){
-  var bodyObj={model:model||'claude-sonnet-4-20250514',max_tokens:maxTok||8096,messages:[{role:'user',content:contentOverride||prompt}]};
+  var bodyObj={model:model||(CFG&&CFG.antModel1)||'claude-sonnet-4-20250514',max_tokens:maxTok||8096,messages:[{role:'user',content:contentOverride||prompt}]};
   if(useSearch!==false) bodyObj.tools=[{type:'web_search_20250305',name:'web_search'}];
   var res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
