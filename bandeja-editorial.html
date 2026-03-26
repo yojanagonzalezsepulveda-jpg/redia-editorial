@@ -1019,15 +1019,27 @@ var filtro = 'todos';
 var CFG = loadCFG();
 var manualRec = null;
 
+// Migrar modelos obsoletos
+(function migrarModelos(){
+  var obsoletos = ['gemini-2.0-flash-001','gemini-2.0-flash','gemini-2.0-flash-lite','gemini-2.0-flash-lite-latest','gemini-1.5-flash','gemini-1.5-pro'];
+  if (obsoletos.includes(CFG.geminiModel)) { CFG.geminiModel = 'gemini-2.5-flash'; saveCFG({geminiModel:'gemini-2.5-flash'}); }
+})();
+
 // prefill
 if (GS_URL) document.getElementById('gsUrl').value = GS_URL;
-if (ANT_KEY) document.getElementById('antKey').value = ANT_KEY;
-if (GEM_KEY_SEARCH) document.getElementById('gemKeySearch').value = GEM_KEY_SEARCH;
-if (DEEP_KEY_SEARCH) document.getElementById('deepKeySearch').value = DEEP_KEY_SEARCH;
-if (TAVILY_KEY) document.getElementById('tavilyKey').value = TAVILY_KEY;
 selProvSearch(AI_PROV_SEARCH, true);
 document.getElementById('ndate').textContent = new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
 applyCFG();
+
+// Auto-conectar Google Sheets si ya hay URL guardada
+if (GS_URL) {
+  var st = document.getElementById('gsSt');
+  st.textContent = 'Conectando...'; st.className = 'cst cs-w';
+  gsCall({action:'listar'}).then(function(d){
+    if (d.ok) { st.textContent = 'Conectado'; st.className = 'cst cs-ok'; records = d.records || []; renderBandeja(); }
+    else { st.textContent = 'Error al conectar'; st.className = 'cst cs-err'; }
+  }).catch(function(){ st.textContent = 'Sin conexión'; st.className = 'cst cs-err'; });
+}
 
 // ── NAV ───────────────────────────────────────────────
 function showPage(id,btn){
