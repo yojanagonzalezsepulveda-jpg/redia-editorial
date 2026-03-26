@@ -593,11 +593,6 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
         <div class="tipo-icon" style="background:#fef9c3">⭐</div>
         <div class="tipo-info"><div class="tipo-name">Contenido patrocinado</div><div class="tipo-desc">Clientes y aliados</div></div>
       </div>
-      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--s2)">
-        <div class="sb-sec" style="margin-bottom:8px">API key Gemini</div>
-        <input type="password" class="gemini-inp" id="crear-gemini-key" placeholder="AIza... (para imágenes)">
-        <div style="font-size:10px;color:var(--s4);line-height:1.5">Gratis en aistudio.google.com</div>
-      </div>
     </div>
 
     <div class="crear-main" id="crearMain">
@@ -624,8 +619,6 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
             <option value="mercado">Mercado</option>
             <option value="sostenibilidad">Sostenibilidad</option>
           </select>
-          <label class="cf-lbl">API key Anthropic</label>
-          <input type="password" class="cf-inp" id="n-antkey" placeholder="sk-ant-...">
         </div>
         <button class="crear-btn" id="n-btn" onclick="generarCrear('noticia')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
@@ -649,8 +642,6 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
             <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar archivo<input type="file" id="e-archivo" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg" style="display:none" onchange="document.getElementById('e-archivo-nm').textContent=this.files[0]?this.files[0].name:'Sin archivo'"></label>
             <span id="e-archivo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
           </div>
-          <label class="cf-lbl">API key Anthropic</label>
-          <input type="password" class="cf-inp" id="e-antkey" placeholder="sk-ant-...">
         </div>
         <button class="crear-btn" id="e-btn" onclick="generarCrear('entrevista')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
@@ -689,8 +680,6 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
             <img id="m-imagen-prev" src="" alt="" style="height:50px;width:80px;object-fit:cover;border-radius:6px;display:none">
             <span id="m-imagen-prod-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
           </div>
-          <label class="cf-lbl">API key Anthropic</label>
-          <input type="password" class="cf-inp" id="m-antkey" placeholder="sk-ant-...">
         </div>
         <button class="crear-btn" id="m-btn" onclick="generarCrear('mercado')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
@@ -733,8 +722,6 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
             </div>
             <div id="p-imagenes-prev" style="display:flex;gap:8px;flex-wrap:wrap"></div>
           </div>
-          <label class="cf-lbl">API key Anthropic</label>
-          <input type="password" class="cf-inp" id="p-antkey" placeholder="sk-ant-...">
         </div>
         <button class="crear-btn" id="p-btn" onclick="generarCrear('patrocinado')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
@@ -1399,8 +1386,6 @@ async function guardarEdicion(uid){
 // ── GENERAR DISTRIBUCIÓN ──────────────────────────────
 async function generarDistribucion(uid){
   var rec=getRec(uid); if(!rec) return;
-  var key=ANT_KEY;
-  if(!key){ alert('Ingresa tu API key de Anthropic en Configuración.'); return; }
   var btn=document.getElementById('distbtn-'+uid);
   if(btn){ btn.textContent='Generando...'; btn.disabled=true; }
   try {
@@ -1422,7 +1407,7 @@ Responde SOLO con JSON válido sin markdown:
   "audio_script": "Guión narración audio. Informativo y cercano. Mín 350 palabras.",
   "video_script": "Guión YouTube con timecodes 00:00. Descripción visual entre corchetes. CTA suscripción."
 }`;
-    var raw=await callClaude(prompt,key);
+    var raw=await callAI(prompt, false, (CFG&&CFG.antModel2)||'claude-haiku-4-5-20251001', 4000, null);
     var data=parseJSON(raw);
     if(data&&!Array.isArray(data)){
       if(data.linkedin)    rec.linkedin=data.linkedin;
@@ -1715,7 +1700,7 @@ function buildProvOrder(pref){
   return [pref].concat(all.filter(function(p){ return p!==pref; }));
 }
 
-async function callAI(prompt, useSearch, antModel, maxTok, signal, searchQ){
+async function callAI(prompt, useSearch, antModel, maxTok, signal, searchQ, contentOverride){
   var order=buildProvOrder(AI_PROV_SEARCH);
   if(!order.length) throw new Error('Sin proveedores disponibles — configura una API key en Credenciales → API Keys IA.');
   var lastErr;
@@ -1723,8 +1708,9 @@ async function callAI(prompt, useSearch, antModel, maxTok, signal, searchQ){
     var p=order[i]; var key=getAIKey(p);
     if(!key) continue;
     try{
-      if(p==='gem') return await callGemini(prompt,key,signal,useSearch,maxTok);
+      if(p==='gem') return await callGemini(prompt,key,signal,useSearch,maxTok,contentOverride);
       if(p==='deep'){
+        if(contentOverride){ lastErr=new Error('DeepSeek no soporta imágenes'); continue; }
         if(useSearch){
           var tKey=CFG.tavilyKey||''; if(!tKey){ lastErr=new Error('Sin key Tavily'); continue; }
           var ctx=await searchTavily(searchQ||prompt.substring(0,200),tKey);
@@ -1732,7 +1718,7 @@ async function callAI(prompt, useSearch, antModel, maxTok, signal, searchQ){
         }
         return await callDeepSeek(prompt,key,signal,maxTok||6000);
       }
-      if(p==='ant') return await callClaude(prompt,key,null,signal,useSearch,antModel,maxTok);
+      if(p==='ant') return await callClaude(prompt,key,contentOverride||null,signal,useSearch,antModel,maxTok);
     }catch(e){ lastErr=e; /* continúa al siguiente proveedor */ }
   }
   throw lastErr||new Error('Todos los proveedores fallaron.');
@@ -1749,14 +1735,24 @@ function selProvSearch(p, init) {
   });
 }
 
-async function callGemini(prompt, key, signal, useSearch, maxTok) {
+async function callGemini(prompt, key, signal, useSearch, maxTok, contentOverride) {
   var gemModel = (CFG&&CFG.geminiModel) || 'gemini-2.0-flash-001';
   var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + gemModel + ':generateContent?key=' + key;
+  var parts;
+  if (contentOverride && Array.isArray(contentOverride)) {
+    parts = contentOverride.map(function(b) {
+      if (b.type === 'image') return {inline_data:{mime_type:b.source.media_type, data:b.source.data}};
+      if (b.type === 'text') return {text:b.text};
+      return {text:''};
+    });
+  } else {
+    parts = [{text: prompt}];
+  }
   var bodyObj = {
-    contents: [{role:'user', parts:[{text:prompt}]}],
+    contents: [{role:'user', parts: parts}],
     generationConfig: {maxOutputTokens: maxTok || 8192}
   };
-  if (useSearch !== false) bodyObj.tools = [{google_search:{}}];
+  if (useSearch !== false && !contentOverride) bodyObj.tools = [{google_search:{}}];
   var res = await fetch(url, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
@@ -2507,13 +2503,7 @@ function leerArchivoAdjunto(inputId) {
 }
 
 async function generarCrear(tipo) {
-  var keyField = document.getElementById(tipo[0] + '-antkey') || document.getElementById('n-antkey');
-  var key = (keyField ? keyField.value.trim() : '') || ANT_KEY;
-  if (!key) return alert('Ingresa tu API key de Anthropic.');
-  localStorage.setItem('ant_key', key); ANT_KEY = key;
-
-  var gemKey = document.getElementById('crear-gemini-key').value.trim() || localStorage.getItem('cr_gemini_key') || '';
-  if (gemKey) localStorage.setItem('cr_gemini_key', gemKey);
+  var gemKey = (CFG&&CFG.gemKey) || '';
 
   // Hide forms, show loading
   document.getElementById('form-' + tipo).style.display = 'none';
@@ -2546,18 +2536,18 @@ async function generarCrear(tipo) {
     if (logoData) {
       var logoTxt = prompt + '\n\nLogo del cliente adjunto como imagen. Analízalo para describir mejor la identidad visual de la empresa en el contenido.';
       if (adjunto && adjunto.text) logoTxt += '\n\nDOCUMENTO ADJUNTO:\n' + adjunto.text.substring(0, 8000);
-      raw = await callClaude(null, key, [
+      raw = await callAI(null, false, (CFG&&CFG.antModel1)||'claude-sonnet-4-20250514', null, null, null, [
         {type:'image', source:{type:'base64', media_type:logoData.mimeType, data:logoData.base64}},
         {type:'text', text:logoTxt}
       ]);
     } else if (adjunto && adjunto.imageBase64) {
-      raw = await callClaude(null, key, [
+      raw = await callAI(null, false, (CFG&&CFG.antModel1)||'claude-sonnet-4-20250514', null, null, null, [
         {type:'image', source:{type:'base64', media_type:adjunto.mimeType, data:adjunto.imageBase64}},
         {type:'text', text:prompt+'\n\nDOCUMENTO ADJUNTO: imagen proporcionada arriba. Analízala, extrae la información relevante y úsala como fuente primaria para el informe.'}
       ]);
     } else {
       if (adjunto && adjunto.text) prompt += '\n\nDOCUMENTO ADJUNTO:\n' + adjunto.text.substring(0, 8000) + '\n\nAnaliza este documento, extrae la información relevante y úsala como fuente primaria para el informe.';
-      raw = await callClaude(prompt, key);
+      raw = await callAI(prompt, false, (CFG&&CFG.antModel1)||'claude-sonnet-4-20250514', null, null, null);
     }
     clearInterval(st);
     document.getElementById('crear-pfill').style.width = '90%';
@@ -2709,8 +2699,8 @@ async function generarImagenGemini(prompt, key) {
 
 async function generarImgManual() {
   if (!crearRec) return;
-  var gemKey = document.getElementById('crear-gemini-key').value.trim() || localStorage.getItem('cr_gemini_key') || '';
-  if (!gemKey) return alert('Ingresa tu API key de Gemini en el panel izquierdo.');
+  var gemKey = (CFG&&CFG.gemKey) || '';
+  if (!gemKey) return alert('Ingresa tu API key de Gemini en Credenciales → API Keys IA.');
   var src = await generarImagenGemini(crearRec.imagen_prompt, gemKey);
   if (src) {
     crearRec._imagenSrc = src;
@@ -2745,11 +2735,6 @@ function dlCrear() {
   if (crearRec) dlRec(crearRec);
 }
 
-// Load gemini key from storage
-var savedGemini = localStorage.getItem('cr_gemini_key') || '';
-if (savedGemini && document.getElementById('crear-gemini-key')) {
-  document.getElementById('crear-gemini-key').value = savedGemini;
-}
 
 // ══════════════════════════════════════════════════════
 // IDENTIDAD EDITORIAL REDIA — v4 COMPLETA
