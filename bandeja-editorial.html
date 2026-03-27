@@ -1460,11 +1460,11 @@ FACEBOOK:
     console.log('[distribucion raw]', raw);
     if(!raw||raw.trim().length<10) throw new Error('Respuesta vacía de Gemini');
 
-    // Parsear formato de texto plano
-    var liMatch=raw.match(/LINKEDIN:\s*\n([\s\S]*?)(?=\nFACEBOOK:|$)/i);
-    var fbMatch=raw.match(/FACEBOOK:\s*\n([\s\S]*?)$/i);
-    var li=(liMatch?.[1]||'').trim();
-    var fb=(fbMatch?.[1]||'').trim();
+    // Parsear formato de texto plano — acepta variantes de formato
+    var liMatch=raw.match(/LINKEDIN[:\s]+\n?([\s\S]*?)(?=\n\s*FACEBOOK[:\s]|$)/i);
+    var fbMatch=raw.match(/FACEBOOK[:\s]+\n?([\s\S]*?)$/i);
+    var li=(liMatch?.[1]||'').trim().replace(/^\[|\]$/g,'');
+    var fb=(fbMatch?.[1]||'').trim().replace(/^\[|\]$/g,'');
     if(!li) throw new Error('No se encontró el post de LinkedIn en la respuesta');
 
     rec.linkedin=li;
