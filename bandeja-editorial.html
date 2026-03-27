@@ -3269,19 +3269,17 @@ async function generarImagenGemini(prompt, key) {
   // Modelos soportados: gemini-2.0-flash-preview-image-generation (default, clave estándar)
   // Para Imagen 3 configura imagenModel='imagen-3.0-generate-001' en Configuración editorial (requiere plan pago)
   var model = (CFG&&CFG.imagenModel) || '';
-  // Cascade completo de modelos imagen. Si hay modelo configurado lo intenta primero.
-  // gemini-2.0-flash NO soporta image generation — se omite del cascade.
-  // Probamos con v1 Y v1beta ya que los modelos de imagen suelen estar solo en v1
+  // Cascade: solo v1beta (v1 no acepta responseModalities)
+  // gemini-3.1-flash-image-preview = Nano Banana 2 (modelo principal REDIA)
   var IMG_MODELS = [
-    {m: 'gemini-2.0-flash-preview-image-generation', mod: ['IMAGE'],        api: 'v1'},
-    {m: 'gemini-2.0-flash-preview-image-generation', mod: ['IMAGE'],        api: 'v1beta'},
-    {m: 'gemini-2.0-flash-preview-image-generation', mod: ['TEXT','IMAGE'], api: 'v1'},
-    {m: 'gemini-2.0-flash-exp-image-generation',     mod: ['TEXT','IMAGE'], api: 'v1'},
-    {m: 'gemini-2.0-flash-exp-image-generation',     mod: ['IMAGE'],        api: 'v1'},
+    {m: 'gemini-3.1-flash-image-preview',            mod: ['IMAGE']},
+    {m: 'gemini-3.1-flash-image-preview',            mod: ['TEXT','IMAGE']},
+    {m: 'gemini-2.0-flash-preview-image-generation', mod: ['IMAGE']},
+    {m: 'gemini-2.0-flash-exp-image-generation',     mod: ['TEXT','IMAGE']},
   ];
-  // Solo honrar modelo configurado si es específicamente de generación de imagen
+  // Honrar modelo configurado solo si es de generación de imagen (contiene "image"/"imagen")
   var customOk = model && (model.includes('image') || model.includes('imagen') || model.includes('imgen'))
-                       && !model.startsWith('imagen'); // imagen-3 va por la rama predict
+                       && !model.startsWith('imagen');
   var GEMINI_TRIES = model.startsWith('imagen') ? [] :
     (customOk
       ? [{m:model,mod:['IMAGE']},{m:model,mod:['TEXT','IMAGE']}].concat(IMG_MODELS)
@@ -3332,6 +3330,8 @@ async function generarImagenGemini(prompt, key) {
             reader.onerror = reject;
             reader.readAsDataURL(blob);
           });
+        } else {
+          allErrs.push('pollinations: HTTP ' + polRes.status);
         }
       } catch(pe) { allErrs.push('pollinations: ' + pe.message); }
       throw new Error('Sin modelos disponibles. Errores:\n' + allErrs.join('\n'));
