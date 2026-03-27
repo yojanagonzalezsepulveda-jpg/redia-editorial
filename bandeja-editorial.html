@@ -1346,10 +1346,10 @@ function buildCard(r){
       </div>
     </div>
     <div class="cpanel" id="cp-${uid}-rrss">
-      <div class="sgrid">
+      ${!r.linkedin ? `<div style="text-align:center;padding:24px 0"><p style="color:#94a3b8;font-size:13px;margin-bottom:12px">Sin contenido RRSS generado aún</p><button class="rbtn" style="background:linear-gradient(135deg,#0077b5,#00a0dc)" onclick="generarDistribucion('${uid}')">Generar LinkedIn y Facebook</button></div>` : `<div class="sgrid">
         <div class="sc"><div class="sl">LinkedIn</div><div class="sbox">${esc(r.linkedin||'').replace(/\n/g,'<br>')}</div><button class="cpbtn" onclick="cpRec('${uid}','linkedin',this)">Copiar LinkedIn</button></div>
         <div class="sc"><div class="sl">Facebook</div><div class="sbox">${esc(r.facebook||'').replace(/\n/g,'<br>')}</div><button class="cpbtn" onclick="cpRec('${uid}','facebook',this)">Copiar Facebook</button></div>
-      </div>
+      </div>`}
     </div>
     <div class="cpanel" id="cp-${uid}-media">
       <div class="sgrid">
@@ -1619,7 +1619,7 @@ IMPORTANTE: en fuentes_consultadas y fuentes_con_links lista TODAS las fuentes r
 IMPORTANTE JSON: el campo "cuerpo" debe estar en Markdown puro — NO uses HTML. Así el JSON no tendrá problemas de comillas. Usa ## para subtítulos, **texto** para negritas, párrafos separados por línea en blanco.
 
 Responde SOLO con JSON válido:
-{"titulo_seo":"máx 60 chars","descripcion_seo":"MÁXIMO 140 CARACTERES exactos — frase completa, sin punto final","tags":["t1","t2","t3","t4"],"categoria":"noticia","tiempo_lectura":"X min","fuentes_consultadas":["Medio o fuente 1","Medio o fuente 2","Medio o fuente 3"],"fuentes_con_links":[{"nombre":"Nombre real del medio","url":"https://url-real.cl/nota","descripcion":"Qué aportó esta fuente"},{"nombre":"Fuente 2","url":"https://url2.cl","descripcion":"Qué aportó"},{"nombre":"Fuente 3","url":"https://url3.cl","descripcion":"Qué aportó"}],"imagen_prompt":"Prompt fotorrealista en inglés para Gemini Imagen 3. Específico al tema. 16:9","articulo":{"titular":"titular periodístico directo con dato concreto","bajada":"2-3 oraciones con el hecho más relevante y cifra concreta, con fuente entre paréntesis","cuerpo":"MARKDOWN: ## subtítulos, **datos clave** en negrita, párrafos con fuente entre paréntesis. Sin citas textuales. Mín ${minW} palabras.","analisis_muestra":"Lo que muestra este análisis — qué revela para el sector acuícola, en 2-4 puntos concretos basados solo en los datos entregados"}}`;
+{"titulo_seo":"máx 60 chars","descripcion_seo":"MÁXIMO 140 CARACTERES exactos — frase completa, sin punto final","tags":["t1","t2","t3","t4"],"categoria":"noticia","tiempo_lectura":"X min","fuentes_consultadas":["Medio o fuente 1","Medio o fuente 2","Medio o fuente 3"],"fuentes_con_links":[{"nombre":"Nombre real del medio","url":"https://url-real.cl/nota","descripcion":"Qué aportó esta fuente"},{"nombre":"Fuente 2","url":"https://url2.cl","descripcion":"Qué aportó"},{"nombre":"Fuente 3","url":"https://url3.cl","descripcion":"Qué aportó"}],"imagen_prompt":"Prompt fotorrealista en inglés para Gemini Imagen 3. Específico al tema. 16:9","linkedin":"Post LinkedIn informativo sobre el eje central. Tono profesional, no publicitario. Emojis sectoriales (🐟🌊⚓). Incluye link redia.pro al final. Máx 1200 caracteres.","facebook":"Post Facebook conversacional sobre el mismo eje. Más cercano. Incluye link redia.pro. Máx 500 caracteres.","articulo":{"titular":"titular periodístico directo con dato concreto","bajada":"2-3 oraciones con el hecho más relevante y cifra concreta, con fuente entre paréntesis","cuerpo":"MARKDOWN: ## subtítulos, **datos clave** en negrita, párrafos con fuente entre paréntesis. Sin citas textuales. Mín ${minW} palabras.","analisis_muestra":"Lo que muestra este análisis — qué revela para el sector acuícola, en 2-4 puntos concretos basados solo en los datos entregados"}}`;
 }
 
 function buildPromptDistribuir(titular,bajada,analisisMuestra){
