@@ -1348,12 +1348,12 @@ function buildCard(r){
     <div class="cpanel" id="cp-${uid}-rrss">
       <div class="sgrid">
         <div class="sc">
-          <div class="sl">LinkedIn <button class="cpbtn" style="margin-left:6px" onclick="generarRedSocial('${uid}','linkedin',this)">↺ Generar</button>${r.linkedin?`<button class="cpbtn" onclick="cpRec('${uid}','linkedin',this)">Copiar</button>`:''}</div>
-          <div class="sbox" id="rrss-li-${uid}">${r.linkedin ? esc(r.linkedin).replace(/\n/g,'<br>') : '<span style="color:#94a3b8;font-size:12px">Sin contenido — haz clic en Generar</span>'}</div>
+          <div class="sl">LinkedIn <button class="cpbtn" style="margin-left:6px" onclick="generarRedSocial('${uid}','linkedin',this)">↺ Generar</button><button class="cpbtn" onclick="cp(document.getElementById('rrss-li-${uid}').value,this)">Copiar</button><button class="cpbtn" style="background:#15803d;color:#fff" onclick="guardarRRSS('${uid}','linkedin')">Guardar</button></div>
+          <textarea class="efi" id="rrss-li-${uid}" rows="6" oninput="dirtyRRSS('${uid}','linkedin')">${esc(r.linkedin||'')}</textarea>
         </div>
         <div class="sc">
-          <div class="sl">Facebook <button class="cpbtn" style="margin-left:6px" onclick="generarRedSocial('${uid}','facebook',this)">↺ Generar</button>${r.facebook?`<button class="cpbtn" onclick="cpRec('${uid}','facebook',this)">Copiar</button>`:''}</div>
-          <div class="sbox" id="rrss-fb-${uid}">${r.facebook ? esc(r.facebook).replace(/\n/g,'<br>') : '<span style="color:#94a3b8;font-size:12px">Sin contenido — haz clic en Generar</span>'}</div>
+          <div class="sl">Facebook <button class="cpbtn" style="margin-left:6px" onclick="generarRedSocial('${uid}','facebook',this)">↺ Generar</button><button class="cpbtn" onclick="cp(document.getElementById('rrss-fb-${uid}').value,this)">Copiar</button><button class="cpbtn" style="background:#15803d;color:#fff" onclick="guardarRRSS('${uid}','facebook')">Guardar</button></div>
+          <textarea class="efi" id="rrss-fb-${uid}" rows="4" oninput="dirtyRRSS('${uid}','facebook')">${esc(r.facebook||'')}</textarea>
         </div>
       </div>
     </div>
@@ -1436,6 +1436,23 @@ async function guardarEdicion(uid){
 }
 
 // ── GENERAR DISTRIBUCIÓN ──────────────────────────────
+function dirtyRRSS(uid, red){
+  var btn=document.querySelector('#cp-'+uid+'-rrss .sl button[onclick*="guardarRRSS(\''+uid+'\',\''+red+'\'"]');
+  if(btn){ btn.textContent='Guardar *'; btn.style.background='#d97706'; }
+}
+
+async function guardarRRSS(uid, red){
+  var rec=getRec(uid); if(!rec) return;
+  var elId = red==='linkedin' ? 'rrss-li-'+uid : 'rrss-fb-'+uid;
+  var texto=(document.getElementById(elId)?.value||'').trim();
+  rec[red]=texto;
+  localAddRec(rec);
+  if(rec.id) await gsActualizar(rec.id, red, texto);
+  // Feedback visual
+  var btns=document.querySelectorAll('#cp-'+uid+'-rrss .sl button');
+  btns.forEach(function(b){ if(b.textContent.startsWith('Guardar')){ b.textContent='Guardado ✓'; b.style.background='#15803d'; setTimeout(function(){ b.textContent='Guardar'; b.style.background='#15803d'; },2000); } });
+}
+
 async function generarRedSocial(uid, red, btn){
   var rec=getRec(uid); if(!rec) return;
   var gemKey=getAIKey('gem');
@@ -1465,19 +1482,10 @@ Responde SOLO con el texto del post, sin explicaciones ni etiquetas.`;
     rec[red]=texto;
     localAddRec(rec);
     if(rec.id) await gsActualizar(rec.id, red, texto);
-    // Actualizar DOM sin re-renderizar toda la tarjeta
+    // Actualizar textarea
     var box=document.getElementById('rrss-'+(esLI?'li':'fb')+'-'+uid);
-    if(box) box.innerHTML=esc(texto).replace(/\n/g,'<br>');
+    if(box) box.value=texto;
     btn.textContent='↺ Generar'; btn.disabled=false;
-    // Agregar botón Copiar si no existe
-    var sl=btn.closest('.sl');
-    if(sl&&!sl.querySelector('.cpbtn[data-copied]')&&!sl.querySelector('.cp-rrss-'+red)){
-      var cb=document.createElement('button');
-      cb.className='cpbtn cp-rrss-'+red;
-      cb.textContent='Copiar';
-      cb.onclick=function(){ cpRec(uid,red,cb); };
-      sl.appendChild(cb);
-    }
   } catch(e){
     btn.textContent=orig; btn.disabled=false;
     alert('Error: '+e.message);
