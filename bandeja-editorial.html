@@ -2909,9 +2909,27 @@ async function confirmarPublicar() {
       var token = (await authRes.json()).token;
       var slug  = titulo.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,'-').substring(0,80);
       var tags  = Array.isArray(rec.tags) ? rec.tags : (rec.tags||'').split(',').map(t=>t.trim()).filter(Boolean);
+      // Usar FormData para poder adjuntar imagen (PocketBase requiere multipart para uploads)
+      var fd = new FormData();
+      fd.append('titulo', titulo);
+      fd.append('descripcion_corta', desc);
+      fd.append('contenido', rec.cuerpo_html||'');
+      fd.append('tipo', tipo);
+      fd.append('publicado', 'true');
+      fd.append('slug', slug);
+      fd.append('fecha_publicacion', new Date().toISOString().replace('T',' ').substring(0,19));
+      tags.forEach(function(t){ if(t) fd.append('Tags', t); });
+      // Adjuntar imagen si existe (base64 → Blob)
+      if(rec.imagen_src && rec.imagen_src.startsWith('data:')){
+        try {
+          var arr=rec.imagen_src.split(','), mime=arr[0].match(/:(.*?);/)[1], bstr=atob(arr[1]);
+          var u8=new Uint8Array(bstr.length); for(var i=0;i<bstr.length;i++) u8[i]=bstr.charCodeAt(i);
+          fd.append('imagen', new Blob([u8],{type:mime}), 'redia-'+slug+'.jpg');
+        } catch(imgErr){ /* si falla la conversión, publicar sin imagen */ }
+      }
       var pubRes = await fetch(pbUrl + '/api/collections/post/records', {
-        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-        body: JSON.stringify({titulo, descripcion_corta: desc, contenido: rec.cuerpo_html||'', tipo, publicado: true, slug, fecha_publicacion: new Date().toISOString().split('T')[0], Tags: tags})
+        method:'POST', headers:{'Authorization':'Bearer '+token},
+        body: fd
       });
       if (!pubRes.ok) { var ed = await pubRes.json().catch(()=>({})); throw new Error(ed.message||'Error '+pubRes.status); }
       var pubData = await pubRes.json();
