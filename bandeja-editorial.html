@@ -1549,10 +1549,10 @@ REGLAS DE REDACCIÓN (obligatorias, sin excepción):
 
 Redacta el informe completo con voz REDIA. Mín ${minW} palabras en el cuerpo.
 IMPORTANTE: en fuentes_consultadas y fuentes_con_links lista TODAS las fuentes reales usadas en la investigación, no solo la principal.
-IMPORTANTE JSON: En el campo "cuerpo", usa comillas simples en todos los atributos HTML (ej: href='url' no href="url") para que el JSON sea válido.
+IMPORTANTE JSON: el campo "cuerpo" debe estar en Markdown puro — NO uses HTML. Así el JSON no tendrá problemas de comillas. Usa ## para subtítulos, **texto** para negritas, párrafos separados por línea en blanco.
 
 Responde SOLO con JSON válido:
-{"titulo_seo":"máx 60 chars","descripcion_seo":"máx 140 chars","tags":["t1","t2","t3","t4"],"categoria":"noticia","tiempo_lectura":"X min","fuentes_consultadas":["Medio o fuente 1","Medio o fuente 2","Medio o fuente 3"],"fuentes_con_links":[{"nombre":"Nombre real del medio","url":"https://url-real.cl/nota","descripcion":"Qué aportó esta fuente"},{"nombre":"Fuente 2","url":"https://url2.cl","descripcion":"Qué aportó"},{"nombre":"Fuente 3","url":"https://url3.cl","descripcion":"Qué aportó"}],"imagen_prompt":"Prompt fotorrealista en inglés para Gemini Imagen 3. Específico al tema. 16:9","articulo":{"titular":"titular periodístico directo con dato concreto","bajada":"2-3 oraciones con el hecho más relevante y cifra concreta, con fuente entre paréntesis","cuerpo":"HTML: usa comillas simples en atributos. h2 subtítulos, p, strong datos con fuente. Sin blockquote ni citas. Mín ${minW} palabras.","analisis_muestra":"Lo que muestra este análisis — qué revela para el sector acuícola, en 2-4 puntos concretos basados solo en los datos entregados"}}`;
+{"titulo_seo":"máx 60 chars","descripcion_seo":"máx 140 chars","tags":["t1","t2","t3","t4"],"categoria":"noticia","tiempo_lectura":"X min","fuentes_consultadas":["Medio o fuente 1","Medio o fuente 2","Medio o fuente 3"],"fuentes_con_links":[{"nombre":"Nombre real del medio","url":"https://url-real.cl/nota","descripcion":"Qué aportó esta fuente"},{"nombre":"Fuente 2","url":"https://url2.cl","descripcion":"Qué aportó"},{"nombre":"Fuente 3","url":"https://url3.cl","descripcion":"Qué aportó"}],"imagen_prompt":"Prompt fotorrealista en inglés para Gemini Imagen 3. Específico al tema. 16:9","articulo":{"titular":"titular periodístico directo con dato concreto","bajada":"2-3 oraciones con el hecho más relevante y cifra concreta, con fuente entre paréntesis","cuerpo":"MARKDOWN: ## subtítulos, **datos clave** en negrita, párrafos con fuente entre paréntesis. Sin citas textuales. Mín ${minW} palabras.","analisis_muestra":"Lo que muestra este análisis — qué revela para el sector acuícola, en 2-4 puntos concretos basados solo en los datos entregados"}}`;
 }
 
 function buildPromptDistribuir(titular,bajada,analisisMuestra){
@@ -1936,7 +1936,27 @@ function parseJSON(raw){
 
 function mdToHtml(s){
   if(!s) return s;
-  return s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\*([^*]+)\*/g,'<em>$1</em>');
+  var lines = s.split('\n');
+  var out = [];
+  var inP = false;
+  for(var i=0;i<lines.length;i++){
+    var l = lines[i].trim();
+    if(!l){ if(inP){ out.push('</p>'); inP=false; } continue; }
+    // Headings
+    if(l.startsWith('### ')){ if(inP){out.push('</p>');inP=false;} out.push('<h3>'+inlineMd(l.slice(4))+'</h3>'); continue; }
+    if(l.startsWith('## ')){ if(inP){out.push('</p>');inP=false;} out.push('<h2>'+inlineMd(l.slice(3))+'</h2>'); continue; }
+    if(l.startsWith('# ')){ if(inP){out.push('</p>');inP=false;} out.push('<h2>'+inlineMd(l.slice(2))+'</h2>'); continue; }
+    // Paragraph
+    if(!inP){ out.push('<p>'); inP=true; } else { out.push(' '); }
+    out.push(inlineMd(l));
+  }
+  if(inP) out.push('</p>');
+  return out.join('');
+}
+function inlineMd(s){
+  return s
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g,'<em>$1</em>');
 }
 // Reemplazos automáticos de vocabulario prohibido — red de seguridad independiente del prompt
 function sanitizeVocab(s){
