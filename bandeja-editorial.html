@@ -1489,7 +1489,7 @@ var STEPS=[
   {t:'Empaquetando para <strong>redia.pro</strong>...',p:99},
 ];
 
-function buildPromptInvestigar(esp,foc,kw,temasYaCubiertos){
+function buildPromptInvestigar(esp,foc,kw,temasYaCubiertos,especiesForzar){
   // Fuentes base siempre presentes
   var BASE_CL=[
     // Medios sectoriales
@@ -1524,8 +1524,11 @@ function buildPromptInvestigar(esp,foc,kw,temasYaCubiertos){
   var yaStr = (temasYaCubiertos&&temasYaCubiertos.length)
     ? '\nTEMAS YA CUBIERTOS (no repetir salvo novedad significativa de seguimiento):\n'+temasYaCubiertos.slice(-20).map(t=>'- '+t).join('\n')
     : '';
+  var rotacionStr = especiesForzar
+    ? '\nROTACIÓN OBLIGATORIA: Los últimos artículos cubrieron salmón. DEBES buscar y reportar sobre '+especiesForzar+' en esta ocasión. Si no encuentras noticias recientes de '+especiesForzar+', busca otra especie no salmonídea (ostiones, ostras, algas, erizo). Solo vuelve al salmón si absolutamente no existe ninguna noticia relevante de otras especies en los últimos 7 días.'
+    : '';
   var diversidadStr = (!kw && !esp.length)
-    ? '\nDIVERSIDAD OBLIGATORIA:\n- ESPECIES: No solo salmón. Busca activamente noticias de mitilicultura (mejillones/choritos), ostiones, ostras, algas, erizo de mar u otras especies. Si hay algo relevante, priorízalo.\n- TEMAS: No solo producción y exportaciones. Busca también: tecnología e innovación (IFOP, INCAR, ANID, Nofima), normativa y regulación (SERNAPESCA, SUBPESCA, SMA, Congreso), ciencia aplicada (universidades, centros I+D), sanidad acuícola, comunidades costeras, financiamiento (INDESPA, CORFO).\n- FUENTES: No te limites a Aqua.cl o MundoAcuícola. Incluye Visión Acuícola, SalmonBusiness, IntraFish, FAO, SERNAPESCA, IFOP y prensa regional (El Llanquihue, Diario de Aysén).'
+    ? '\nDIVERSIDAD OBLIGATORIA:\n- ESPECIES: No solo salmón. Busca activamente noticias de mitilicultura (mejillones/choritos), ostiones, ostras, algas, erizo de mar u otras especies. Si hay algo relevante, priorízalo.\n- TEMAS: No solo producción y exportaciones. Busca también: tecnología e innovación (IFOP, INCAR, ANID, Nofima), normativa y regulación (SERNAPESCA, SUBPESCA, SMA, Congreso), ciencia aplicada (universidades, centros I+D), sanidad acuícola, comunidades costeras, financiamiento (INDESPA, CORFO).\n- FUENTES: No te limites a Aqua.cl o MundoAcuícola. Incluye Visión Acuícola, SalmonBusiness, IntraFish, FAO, SERNAPESCA, IFOP y prensa regional (El Llanquihue, Diario de Aysén).'+rotacionStr
     : '\nFUENTES: Busca en al menos 3 fuentes distintas. Incluye fuentes internacionales (IntraFish, SalmonBusiness, FAO) si el tema lo justifica.';
   return `Eres un investigador del sector acuícola chileno. Usa web_search activamente.
 
@@ -1651,7 +1654,30 @@ async function buscarManual(){
   sp(5,'Paso 1/3 — Investigando con Gemini + Google Search...');
   var t1=na(90000); var r1;
   var temasCubiertos=(records||[]).map(function(r){ return r.titular||r.titulo_seo||''; }).filter(Boolean);
-  try { r1=await callGemini(buildPromptInvestigar(esp,foc,kw,temasCubiertos),gemKey,_busquedaAbort.signal,true,null); clearTimeout(t1); }
+
+  // Detectar si los últimos artículos son mayoritariamente salmón y forzar rotación
+  var SALMON_KW = /salm[oó]n|salmonicultura|salmón|trucha|acuicultura.*salm|salm.*acuicultura/i;
+  var OTRAS_ESP  = ['mitilicultura','mejillón','chorito','ostión','ostra','alga','erizo','abalón','almeja','pelillo','pelillo'];
+  var ultimosRecs = (records||[]).slice(-5);
+  var ultimosSalmones = ultimosRecs.filter(function(r){ return SALMON_KW.test(r.titular||r.titulo_seo||''); }).length;
+  var forzarRotacion = (!kw && !esp.length && ultimosSalmones >= 2);
+  // Si hay que rotar, elegir especie con menos cobertura reciente
+  var especiesForzar = '';
+  if(forzarRotacion){
+    var cubiertas = temasCubiertos.join(' ').toLowerCase();
+    var candidatas = [
+      {e:'mitilicultura y mejillones (choritos)',k:'mitilicultura|mejillón|chorito'},
+      {e:'ostiones y pectinicultura',k:'ostión|pectinicultura'},
+      {e:'ostras',k:'ostra'},
+      {e:'algas marinas (pelillo, luga, huiro)',k:'alga|pelillo|luga|huiro'},
+      {e:'erizo de mar',k:'erizo'},
+      {e:'abalón',k:'abalón|abalon'}
+    ];
+    var elegida = candidatas.find(function(c){ return !new RegExp(c.k,'i').test(cubiertas); }) || candidatas[0];
+    especiesForzar = elegida.e;
+  }
+
+  try { r1=await callGemini(buildPromptInvestigar(esp,foc,kw,temasCubiertos,especiesForzar),gemKey,_busquedaAbort.signal,true,null); clearTimeout(t1); }
   catch(e){ clearTimeout(t1); _busquedaAbort=null; err('Error en investigación (Gemini): '+errMsg(e)); rb(); return; }
 
   // Parsear respuesta de texto plano de paso 1
