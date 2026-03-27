@@ -1521,7 +1521,7 @@ function buildPromptRedactar(inv,minW){
   var hechosList=(inv.hechos||[]).map((h,i)=>(i+1)+'. '+h).join('\n');
   return REDIA_IDENTITY+`
 
-TAREA: Redactar análisis editorial REDIA. NO busques en la web — usa solo los datos de la investigación.
+TAREA: Redactar análisis editorial REDIA. Tienes acceso a web_search — úsalo para verificar o ampliar los datos de la investigación consultando la URL fuente. Solo incluye en el artículo datos que puedas verificar en esa fuente.
 
 INVESTIGACIÓN:
 Noticia: ${inv.titulo}
@@ -1626,10 +1626,11 @@ async function buscarManual(){
     }
   }
 
-  // ── PASO 2: Redactar artículo (web_search OFF) ──
+  // ── PASO 2: Redactar artículo (web_search ON con URL fuente para no inventar) ──
   sp(38,'Paso 2/3 — Redactando: <em>'+esc((inv.titulo||'').substring(0,55))+'</em>...');
+  var searchQ2=(inv.url||inv.titulo||'').trim();
   var t2=na(90000); var r2;
-  try { r2=await callAI(buildPromptRedactar(inv,minW),false,(CFG&&CFG.antModel2)||'claude-haiku-4-5-20251001',6000,_busquedaAbort.signal); clearTimeout(t2); }
+  try { r2=await callAI(buildPromptRedactar(inv,minW),true,null,6000,_busquedaAbort.signal,searchQ2); clearTimeout(t2); }
   catch(e){ clearTimeout(t2); _busquedaAbort=null; err(errMsg(e)); rb(); return; }
 
   var rec;
