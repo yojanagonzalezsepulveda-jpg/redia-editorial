@@ -1761,8 +1761,16 @@ async function guardarTodosEnGS(){
     var id=await gsGuardar(r);
     if(id){ r.id=id; ok++; }
   }
-  if(ok) alert(ok+' informe'+(ok!==1?'s guardados':'  guardado')+' en la bandeja editorial.');
-  else alert('No se pudo guardar. Verifica la conexión con Google Sheets.');
+  if(ok){
+    // Recargar bandeja desde Sheets para que aparezca la nota nueva
+    try {
+      var d=await gsCall({action:'listar'});
+      if(d.ok){ records=d.records||[]; renderBandeja(); }
+    } catch(e){}
+    alert(ok+' informe'+(ok!==1?'s guardados':'  guardado')+' en la bandeja editorial.');
+  } else {
+    alert('No se pudo guardar. Verifica la conexión con Google Sheets.');
+  }
 }
 
 function dlManual(){ if(manualRec) dlRec(manualRec); }
