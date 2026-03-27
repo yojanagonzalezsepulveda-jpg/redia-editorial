@@ -1520,11 +1520,12 @@ Responde SOLO con el guión, sin explicaciones adicionales.`;
     var raw=await callGemini(prompt,gemKey,null,false,3000);
     if(!raw||raw.trim().length<20) throw new Error('Respuesta vacía');
     var campo = tipo==='audio' ? 'audio_script' : 'video_script';
-    rec[campo]=raw.trim();
+    var texto=sanitizeVocab(raw.trim());
+    rec[campo]=texto;
     localAddRec(rec);
-    if(rec.id) await gsActualizar(rec.id, campo, raw.trim());
+    if(rec.id) await gsActualizar(rec.id, campo, texto);
     var box=document.getElementById('media-'+tipo+'-'+uid);
-    if(box) box.value=raw.trim();
+    if(box) box.value=texto;
     btn.textContent=orig; btn.disabled=false;
     dirtyMedia(uid, tipo);
   } catch(e){
@@ -1590,7 +1591,7 @@ Responde SOLO con el texto del post completo, sin explicaciones ni etiquetas. Te
 
     var raw=await callGemini(prompt,gemKey,null,false,2000);
     if(!raw||raw.trim().length<10) throw new Error('Respuesta vacía');
-    var texto=raw.trim();
+    var texto=sanitizeVocab(raw.trim());
     rec[red]=texto;
     localAddRec(rec);
     if(rec.id) await gsActualizar(rec.id, red, texto);
@@ -2262,6 +2263,7 @@ function inlineMd(s){
 function sanitizeVocab(s){
   if(!s) return s;
   return s
+    // industria → sector
     .replace(/\bla industria acuícola\b/gi,'el sector acuícola')
     .replace(/\bla industria salmonera\b/gi,'el sector salmonero')
     .replace(/\bla industria del salmón\b/gi,'el sector del salmón')
@@ -2275,7 +2277,33 @@ function sanitizeVocab(s){
     .replace(/\bindustria acuícola\b/gi,'sector acuícola')
     .replace(/\bindustria salmonera\b/gi,'sector salmonero')
     .replace(/\bindustria del salmón\b/gi,'sector del salmón')
-    .replace(/\bindustria\b/gi,'sector');
+    .replace(/\bindustria\b/gi,'sector')
+    // frases de relleno — se eliminan
+    .replace(/[Cc]abe destacar(,?\s*que)?\s*/g,'')
+    .replace(/[Cc]abe mencionar(,?\s*que)?\s*/g,'')
+    .replace(/[Ee]s importante señalar(,?\s*que)?\s*/g,'')
+    .replace(/[Rr]esulta relevante(,?\s*que)?\s*/g,'')
+    .replace(/[Ee]s fundamental(,?\s*que)?\s*/g,'')
+    .replace(/[Vv]ale la pena señalar(,?\s*que)?\s*/g,'')
+    .replace(/[Ee]n este sentido,?\s*/g,'')
+    .replace(/[Aa] modo de conclusión,?\s*/g,'')
+    .replace(/[Ss]in lugar a dudas,?\s*/g,'')
+    // palabras grandilocuentes → alternativas neutras
+    .replace(/\btrascendental(es)?\b/gi,'relevante$1')
+    .replace(/\bsin precedentes\b/gi,'inédito')
+    .replace(/\b[Pp]aradigma\b/g,'modelo')
+    .replace(/\b[Ss]inergia[s]?\b/gi,'colaboración')
+    .replace(/\b[Rr]obusto(s|a|as)?\b/gi,'sólido$1')
+    .replace(/\b[Tt]ransformador(a|es|as)?\b/gi,'relevante')
+    .replace(/\b[Tt]rascendental(es)?\b/gi,'relevante$1')
+    .replace(/\b[Pp]otenciar\b/gi,'mejorar')
+    .replace(/\b[Pp]otencia\b/gi,'impulsa')
+    // frases alarmistas en titulares/posts
+    .replace(/[Nn]oticia (clave|bomba|transformadora)\b/g,'Informe')
+    .replace(/\bun paso clave\b/gi,'un avance')
+    .replace(/\b[Bb]omba\b/g,'dato')
+    .replace(/\b[Ee]n el marco de\b/gi,'en')
+    .replace(/\b[Ee]n el contexto de\b/gi,'en el contexto del');
 }
 function normalizeRec(d){
   var a=d.articulo||{};
