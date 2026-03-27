@@ -1485,7 +1485,20 @@ var STEPS=[
 
 function buildPromptInvestigar(esp,foc,kw,temasYaCubiertos){
   // Fuentes base siempre presentes
-  var BASE_CL=['Aqua.cl','MundoAcuícola','SERNAPESCA','SUBPESCA','SMA'];
+  var BASE_CL=[
+    // Medios sectoriales
+    'Aqua.cl','MundoAcuícola','Visión Acuícola','Portal Acuícola','SalmonExpert','IntraFish','SalmonBusiness','Undercurrent News',
+    // Instituciones reguladoras y estatales
+    'SERNAPESCA','SUBPESCA','SMA','INDESPA','IFOP',
+    // Ciencia y tecnología
+    'Centro INCAR','ANID','UACH','Nofima','CSIRO Australia',
+    // Gremios
+    'SalmonChile','Consejo del Salmón','Asociación de Mitilicultores',
+    // Prensa regional
+    'El Llanquihue','Diario de Aysén','Diario Chiloé',
+    // Internacional
+    'FAO','Globefish'
+  ];
   var fuentesCl=BASE_CL.slice(), fuentesIntl=[];
   foc.forEach(function(f){
     var m=FUENTES_POR_FOCO[f];
@@ -1506,8 +1519,8 @@ function buildPromptInvestigar(esp,foc,kw,temasYaCubiertos){
     ? '\nTEMAS YA CUBIERTOS (no repetir salvo novedad significativa de seguimiento):\n'+temasYaCubiertos.slice(-20).map(t=>'- '+t).join('\n')
     : '';
   var diversidadStr = (!kw && !esp.length)
-    ? '\nDIVERSIDAD DE ESPECIES: El sector acuícola chileno no es solo salmón. Considera también noticias relevantes de mitilicultura (choritos/mejillones), ostiones, ostras, algas, erizo de mar u otras especies. Si hay noticias importantes de estas especies, priorízalas sobre otra noticia de salmón.'
-    : '';
+    ? '\nDIVERSIDAD OBLIGATORIA:\n- ESPECIES: No solo salmón. Busca activamente noticias de mitilicultura (mejillones/choritos), ostiones, ostras, algas, erizo de mar u otras especies. Si hay algo relevante, priorízalo.\n- TEMAS: No solo producción y exportaciones. Busca también: tecnología e innovación (IFOP, INCAR, ANID, Nofima), normativa y regulación (SERNAPESCA, SUBPESCA, SMA, Congreso), ciencia aplicada (universidades, centros I+D), sanidad acuícola, comunidades costeras, financiamiento (INDESPA, CORFO).\n- FUENTES: No te limites a Aqua.cl o MundoAcuícola. Incluye Visión Acuícola, SalmonBusiness, IntraFish, FAO, SERNAPESCA, IFOP y prensa regional (El Llanquihue, Diario de Aysén).'
+    : '\nFUENTES: Busca en al menos 3 fuentes distintas. Incluye fuentes internacionales (IntraFish, SalmonBusiness, FAO) si el tema lo justifica.';
   return `Eres un investigador del sector acuícola chileno. Usa web_search activamente.
 
 ${temaLabel}: ${temaVal}
