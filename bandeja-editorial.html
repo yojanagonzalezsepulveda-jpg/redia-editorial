@@ -2552,12 +2552,10 @@ function buildHTML(r){
       <div class="pub-field">
         <label class="pub-label">Categoría en redia.pro</label>
         <select class="pub-input pub-select" id="pubTipo">
-          <option value="noticia">Noticia</option>
+          <option value="publicación">Publicación / Noticia</option>
           <option value="mercado">Mercado</option>
-          <option value="normativa">Normativa</option>
-          <option value="tecnologia">Tecnología</option>
-          <option value="sostenibilidad">Sostenibilidad</option>
-          <option value="oportunidad">Oportunidad</option>
+          <option value="entrevista">Entrevista</option>
+          <option value="indicadores">Indicadores</option>
         </select>
       </div>
     </div>
@@ -2735,7 +2733,7 @@ function abrirPublicar(uid) {
   if (savedPass)  document.getElementById('pubPbPass').value  = savedPass;
   // set tipo based on categoria
   var cat = (rec.categoria || '').toLowerCase();
-  var tipo = cat.includes('mercado') ? 'mercado' : cat.includes('normativa') ? 'normativa' : cat.includes('tecnol') ? 'tecnologia' : cat.includes('sostenib') ? 'sostenibilidad' : 'noticia';
+  var tipo = cat.includes('mercado') ? 'mercado' : cat.includes('entrevista') ? 'entrevista' : cat.includes('indicador') ? 'indicadores' : 'publicación';
   document.getElementById('pubTipo').value = tipo;
   document.getElementById('pubStatus').style.display = 'none';
   document.getElementById('pubModal').style.display = 'flex';
@@ -2860,7 +2858,7 @@ function abrirPublicar(uid) {
   document.getElementById('pubTitulo').value = rec.titular || rec.titulo_seo || '';
   document.getElementById('pubDesc').value   = rec.bajada  || rec.descripcion_seo || '';
   var cat  = (rec.categoria || '').toLowerCase();
-  var tipo = cat.includes('mercado') ? 'mercado' : cat.includes('normativa') ? 'normativa' : cat.includes('tecnol') ? 'tecnologia' : cat.includes('sostenib') ? 'sostenibilidad' : 'noticia';
+  var tipo = cat.includes('mercado') ? 'mercado' : cat.includes('entrevista') ? 'entrevista' : cat.includes('indicador') ? 'indicadores' : 'publicación';
   document.getElementById('pubTipo').value = tipo;
   document.getElementById('pubStatus').style.display = 'none';
   // Reset toggles
@@ -2918,9 +2916,8 @@ async function confirmarPublicar() {
       if (!token) throw new Error('Credenciales de redia.pro incorrectas — verifica email y contraseña en la pestaña Credenciales');
       var slug  = titulo.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,'-').substring(0,80);
       var descCorta = desc.substring(0, 139); // PocketBase: máx 139 chars
-      // Mapear tipo al valor que acepta PocketBase
-      var tipoMap = { 'noticia':'publicación', 'mercado':'mercado', 'normativa':'publicación', 'tecnologia':'publicación', 'sostenibilidad':'publicación', 'oportunidad':'publicación', 'entrevista':'entrevista', 'patrocinado':'publicación' };
-      var tipoFinal = tipoMap[tipo] || 'publicación';
+      // tipo: valores reales de PocketBase
+      var tipoFinal = (['publicación','mercado','entrevista','indicadores'].indexOf(tipo) >= 0) ? tipo : 'publicación';
       // Usar FormData para poder adjuntar imagen (PocketBase requiere multipart para uploads)
       var fd = new FormData();
       fd.append('titulo', titulo);
@@ -2931,6 +2928,7 @@ async function confirmarPublicar() {
       fd.append('slug', slug);
       fd.append('fecha_publicacion', new Date().toISOString().replace('T',' ').substring(0,19));
       fd.append('verificationLevel', '1');
+      if (tipoFinal === 'mercado') fd.append('Disponiblemercado', 'true');
       // Nota: Etiquetas es campo de relación en PocketBase — no se envían strings
       // Adjuntar imagen si existe (base64 → Blob)
       if(rec.imagen_src && rec.imagen_src.startsWith('data:')){
@@ -3902,12 +3900,10 @@ function clearAll(gridId, cls) {
       <div class="pub-field">
         <label class="pub-label">Categoría en redia.pro</label>
         <select class="pub-input pub-select" id="pubTipo">
-          <option value="noticia">Noticia</option>
+          <option value="publicación">Publicación / Noticia</option>
           <option value="mercado">Mercado</option>
-          <option value="normativa">Normativa</option>
-          <option value="tecnologia">Tecnología</option>
-          <option value="sostenibilidad">Sostenibilidad</option>
-          <option value="oportunidad">Oportunidad</option>
+          <option value="entrevista">Entrevista</option>
+          <option value="indicadores">Indicadores</option>
         </select>
       </div>
     </div>
