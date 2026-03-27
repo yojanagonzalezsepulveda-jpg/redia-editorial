@@ -1934,6 +1934,25 @@ function mdToHtml(s){
   if(!s) return s;
   return s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\*([^*]+)\*/g,'<em>$1</em>');
 }
+// Reemplazos automáticos de vocabulario prohibido — red de seguridad independiente del prompt
+function sanitizeVocab(s){
+  if(!s) return s;
+  return s
+    .replace(/\bla industria acuícola\b/gi,'el sector acuícola')
+    .replace(/\bla industria salmonera\b/gi,'el sector salmonero')
+    .replace(/\bla industria del salmón\b/gi,'el sector del salmón')
+    .replace(/\bla industria mitilicultora\b/gi,'el sector mitilicultor')
+    .replace(/\bla industria\b/gi,'el sector')
+    .replace(/\bsu industria\b/gi,'su sector')
+    .replace(/\besta industria\b/gi,'este sector')
+    .replace(/\bnuestra industria\b/gi,'nuestro sector')
+    .replace(/\bdicha industria\b/gi,'dicho sector')
+    .replace(/\bla misma industria\b/gi,'el mismo sector')
+    .replace(/\bindustria acuícola\b/gi,'sector acuícola')
+    .replace(/\bindustria salmonera\b/gi,'sector salmonero')
+    .replace(/\bindustria del salmón\b/gi,'sector del salmón')
+    .replace(/\bindustria\b/gi,'sector');
+}
 function normalizeRec(d){
   var a=d.articulo||{};
   var uid='M'+Date.now();
@@ -1943,10 +1962,10 @@ function normalizeRec(d){
     tags:d.tags||[], categoria:d.categoria||'Análisis REDIA',
     tiempo_lectura:d.tiempo_lectura||'5 min',
     fuentes_consultadas:d.fuentes_consultadas||[], fuentes_con_links:d.fuentes_con_links||[], imagen_prompt:d.imagen_prompt||'',
-    titular:a.titular||'', bajada:a.bajada||'', cuerpo_html:mdToHtml(a.cuerpo||''),
-    analisis_muestra:mdToHtml(a.analisis_muestra||''),
-    analisis_no_resuelve:a.analisis_no_resuelve||'',
-    analisis_relevante_para:a.analisis_relevante_para||'',
+    titular:sanitizeVocab(a.titular||''), bajada:sanitizeVocab(a.bajada||''), cuerpo_html:sanitizeVocab(mdToHtml(a.cuerpo||'')),
+    analisis_muestra:sanitizeVocab(mdToHtml(a.analisis_muestra||'')),
+    analisis_no_resuelve:sanitizeVocab(a.analisis_no_resuelve||''),
+    analisis_relevante_para:sanitizeVocab(a.analisis_relevante_para||''),
     beneficios:a.beneficios||[], dolores:a.dolores||[],
     alcances:a.alcances||[], coyuntura:a.coyuntura||'',
     linkedin:d.linkedin||'', facebook:d.facebook||'',
@@ -2944,9 +2963,8 @@ Toda la cadena acuícola con igual rigor: salmón atlántico, trucha arcoíris, 
 
 VOCABULARIO OBLIGATORIO:
 - Usa "sector" cuando hables de la acuicultura en su conjunto o de múltiples actores
-- Usa "industria" SOLO cuando te refieras específicamente a grandes compañías o a la dimensión corporativa/industrial
-- Alternativas válidas: "actividad", "rubro", "cadena acuícola", "producción", "el sector mitilicultor", "la actividad salmonera", "el rubro"
-- NUNCA uses "industria" para referirte al sector en general
+- PROHIBIDO: la palabra "industria" en cualquier contexto acuícola. Sin excepciones.
+- Alternativas: "sector", "actividad", "rubro", "cadena acuícola", "producción", "el sector mitilicultor", "la actividad salmonera", "el rubro", "las empresas salmoneras"
 
 TRES REGISTROS DE ESCRITURA:
 1. Tercera persona periodística → noticias, informes estratégicos, análisis técnico-científico
@@ -2957,7 +2975,7 @@ AUDIENCIA:
 Desde pescadores artesanales reconvertidos a la acuicultura hasta gerentes y dueños de grandes compañías. Lenguaje técnico pero claro y accesible para toda la audiencia simultáneamente. Cuando uses términos muy especializados, agrega una breve explicación contextual entre paréntesis o en la siguiente oración.
 
 PALABRAS Y FRASES PROHIBIDAS (NUNCA deben aparecer):
-cabe destacar · es importante señalar · en el contexto de · en el marco de · sin lugar a dudas · robusto · transformador · paradigma · sin precedentes · potenciar · sinergia · cabe mencionar · vale la pena señalar · en este sentido · a modo de conclusión · es fundamental · resulta relevante · hoy en día · en la actualidad · doble clic estratégico · punto de inflexión · ecuación insostenible · industria (cuando hables del sector en general)
+cabe destacar · es importante señalar · en el contexto de · en el marco de · sin lugar a dudas · robusto · transformador · paradigma · sin precedentes · potenciar · sinergia · cabe mencionar · vale la pena señalar · en este sentido · a modo de conclusión · es fundamental · resulta relevante · hoy en día · en la actualidad · doble clic estratégico · punto de inflexión · ecuación insostenible · INDUSTRIA (en cualquier contexto acuícola — usar sector, actividad, rubro o cadena acuícola)
 
 EL TEXTO DEBE SONAR HUMANO:
 Que no parezca generado por IA. Directo, concreto, con voz periodística propia. Las citas reales son el corazón del análisis — NUNCA se inventan ni se parafrasean sin indicarlo. Los datos son concretos y verificados con fuente. Sin lenguaje corporativo ni abstracto.
