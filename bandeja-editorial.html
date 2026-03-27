@@ -2324,9 +2324,10 @@ function setGsStatus(text, cls){
 }
 
 var _gsRetries = 0;
+var _gsTimer = null;
 async function autoConectarGS(){
   if(!GS_URL) return;
-  setGsStatus('Conectando...', 'cs-w');
+  if(_gsTimer){ clearTimeout(_gsTimer); _gsTimer=null; }
   try {
     var d = await gsCall({action:'listar'});
     if(d.ok){
@@ -2335,23 +2336,24 @@ async function autoConectarGS(){
       setGsStatus('Conectado · '+records.length+' registro'+(records.length!==1?'s':''), 'cs-ok');
       renderBandeja();
       _gsRetries = 0;
+      // Resincronizar en segundo plano cada 5 minutos
+      _gsTimer = setTimeout(autoConectarGS, 5*60*1000);
     } else {
       throw new Error(d.error||'Sin ok');
     }
   } catch(e){
     _gsRetries++;
-    setGsStatus('Error al conectar', 'cs-err');
-    // Reintentar hasta 3 veces con delay creciente
-    if(_gsRetries <= 3){
-      setTimeout(autoConectarGS, _gsRetries * 4000);
-    }
+    // Reintentar indefinidamente con delay creciente (máx 30s)
+    var delay = Math.min(_gsRetries * 5000, 30000);
+    setGsStatus('Reconectando...', 'cs-w');
+    _gsTimer = setTimeout(autoConectarGS, delay);
   }
 }
 
 // Mostrar registros locales inmediatamente
 if(records.length) renderBandeja();
 
-// Sincronizar con GS en segundo plano
+// Conectar a GS automáticamente al cargar
 autoConectarGS();
 
 // ── PUBLICAR EN REDIA.PRO ─────────────────────────────
