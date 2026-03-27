@@ -1016,8 +1016,16 @@ var TAVILY_KEY = localStorage.getItem('tavily_key') || '';
 var AI_PROV_SEARCH = localStorage.getItem('ai_prov_search') || 'auto';
 // ── LOCAL STORAGE BACKUP ──────────────────────────────
 var LOCAL_RECS_KEY = 'redia_bandeja_local';
+function deduplicateRecs(recs){
+  var seen = {}; var out = [];
+  for(var r of recs){
+    var key = r.id || r._uid || r.titulo_seo || '';
+    if(!key || !seen[key]){ seen[key]=true; out.push(r); }
+  }
+  return out;
+}
 function localLoad(){ try{ return JSON.parse(localStorage.getItem(LOCAL_RECS_KEY)||'[]'); }catch(e){ return []; } }
-function localSave(recs){ try{ localStorage.setItem(LOCAL_RECS_KEY, JSON.stringify(recs)); }catch(e){} }
+function localSave(recs){ try{ localStorage.setItem(LOCAL_RECS_KEY, JSON.stringify(deduplicateRecs(recs))); }catch(e){} }
 function localAddRec(rec){
   var local = localLoad();
   var idx = local.findIndex(function(r){ return r.id===rec.id || r._uid===rec._uid; });
@@ -1215,7 +1223,7 @@ async function guardarGS(){
     var d = await gsCall({action:'listar'});
     console.log('[GS listar response]', JSON.stringify(d).slice(0,500));
     if(!d.ok) throw new Error(d.error||'Respuesta sin ok:true — revisa el Apps Script');
-    records = d.records || [];
+    records = deduplicateRecs(d.records || []);
     localSave(records);
     renderBandeja();
     st.textContent='Conectado · '+records.length+' registro'+(records.length!==1?'s':''); st.className='cst cs-ok';
@@ -2308,7 +2316,7 @@ if(records.length) renderBandeja();
 // Si hay GS configurado, sincronizar en segundo plano
 if(GS_URL){
   document.getElementById('gsSt').textContent='Conectando...';
-  gsCall({action:'listar'}).then(function(d){ if(d.ok){ records=d.records||[]; localSave(records); document.getElementById('gsSt').textContent='Conectado'; document.getElementById('gsSt').className='cst cs-ok'; renderBandeja(); } else { document.getElementById('gsSt').textContent='Error al conectar'; document.getElementById('gsSt').className='cst cs-err'; } }).catch(function(){ document.getElementById('gsSt').textContent='Error al conectar'; document.getElementById('gsSt').className='cst cs-err'; });
+  gsCall({action:'listar'}).then(function(d){ if(d.ok){ records=deduplicateRecs(d.records||[]); localSave(records); document.getElementById('gsSt').textContent='Conectado · '+records.length+' registro'+(records.length!==1?'s':''); document.getElementById('gsSt').className='cst cs-ok'; renderBandeja(); } else { document.getElementById('gsSt').textContent='Error al conectar'; document.getElementById('gsSt').className='cst cs-err'; } }).catch(function(){ document.getElementById('gsSt').textContent='Error al conectar'; document.getElementById('gsSt').className='cst cs-err'; });
 }
 
 // ── PUBLICAR EN REDIA.PRO ─────────────────────────────
