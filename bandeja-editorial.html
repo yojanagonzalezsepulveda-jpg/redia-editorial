@@ -1487,37 +1487,41 @@ function buildPromptInvestigar(esp,foc,kw){
   // Fuentes base siempre presentes
   var BASE_CL=['Aqua.cl','MundoAcuícola','SERNAPESCA','SUBPESCA','SMA'];
   var fuentesCl=BASE_CL.slice(), fuentesIntl=[];
-  // Agregar fuentes por cada foco seleccionado
   foc.forEach(function(f){
     var m=FUENTES_POR_FOCO[f];
     if(!m) return;
     m.cl.forEach(function(s){ if(!fuentesCl.includes(s)) fuentesCl.push(s); });
     m.intl.forEach(function(s){ if(!fuentesIntl.includes(s)) fuentesIntl.push(s); });
   });
-  // Si no hay focos, usar las primeras 15 de DEFAULT_FUENTES
   if(foc.length===0){
     var _cfgF=(CFG&&CFG.fuentes)?CFG.fuentes.split('\n').filter(Boolean):[];
     var _defF=(typeof DEFAULT_FUENTES!=='undefined'&&Array.isArray(DEFAULT_FUENTES))?DEFAULT_FUENTES:[];
     var _fArr=_cfgF.length>0?_cfgF:_defF;
     _fArr.slice(0,15).forEach(function(s){ if(!fuentesCl.includes(s)) fuentesCl.push(s); });
   }
-  // Construir librería: chilenas + internacionales (max 30 total)
   var fLib=fuentesCl.slice(0,20).concat(fuentesIntl.slice(0,10)).join(', ');
-  return `Eres un investigador del sector acuícola chileno. Usa web_search.
+  return `Eres un investigador del sector acuícola chileno. Usa web_search para buscar en múltiples fuentes.
 
 TEMA: ${kw||'la noticia más relevante del sector acuícola chileno en las últimas 48 horas'}
-${esp.length?'ESPECIES: '+esp.join(', '):''}
-${foc.length?'FOCOS: '+foc.join(', '):''}
+${esp.length?'ESPECIES: '+esp.join(', '):''}${foc.length?'\nFOCOS: '+foc.join(', '):''}
 FUENTES PRIORITARIAS: ${fLib}
 
-TAREA: Investiga el tema usando MÚLTIPLES fuentes — no te quedes solo con la primera que encuentres.
-1. Busca la noticia en al menos 3 medios o fuentes distintas de la lista de fuentes prioritarias
-2. Busca también en SERNAPESCA, SUBPESCA, SalmonChile, Consejo del Salmón o comunicados oficiales si el tema lo justifica
-3. Recopila hechos, cifras y contexto de CADA fuente consultada — no solo de una
-4. Si hay datos de distintas fuentes que se complementan o contradicen, inclúyelos todos en "hechos"
+Busca en al menos 3 fuentes distintas. Responde con este formato exacto:
 
-Responde ÚNICAMENTE con JSON — sin texto antes ni después:
-{"titulo":"título de la noticia","url":"https://url-directa","fuente":"nombre del medio","fecha":"fecha publicación","hechos":["hecho clave con cifra concreta y su fuente entre paréntesis","hecho 2 (fuente)","hecho 3 (fuente)"],"contexto":"antecedentes sectoriales relevantes","angulo":"el ángulo más importante para el sector acuícola chileno","fuentes_adicionales":[{"nombre":"medio o institución diferente al anterior","url":"https://url","aporte":"qué información específica aportó esta fuente"},{"nombre":"segunda fuente adicional","url":"https://url2","aporte":"qué aportó"}]}`;
+TITULO: (título de la noticia principal)
+URL: (url directa a la noticia)
+FUENTE: (nombre del medio)
+FECHA: (fecha de publicación)
+ANGULO: (el ángulo más relevante para el sector acuícola chileno)
+HECHOS:
+- (hecho 1 con cifra concreta — fuente entre paréntesis)
+- (hecho 2 — fuente entre paréntesis)
+- (hecho 3 — fuente entre paréntesis)
+- (hecho 4 si existe)
+CONTEXTO: (antecedentes sectoriales relevantes en 2-3 líneas)
+OTRAS_FUENTES:
+- Nombre: (medio 2) | URL: (url) | Aporte: (qué dato aportó)
+- Nombre: (medio 3) | URL: (url) | Aporte: (qué dato aportó)`;
 }
 
 function buildPromptRedactar(inv,minW){
@@ -1609,25 +1613,36 @@ async function buscarManual(){
   try { r1=await callAI(buildPromptInvestigar(esp,foc,kw),true,null,null,_busquedaAbort.signal,searchQ); clearTimeout(t1); }
   catch(e){ clearTimeout(t1); _busquedaAbort=null; err(errMsg(e)); rb(); return; }
 
-  var inv;
-  try { var p1=parseJSON(r1); inv=Array.isArray(p1)?p1[0]:p1; }
-  catch(e){
-    // Intentar reparación: pedir al modelo que extraiga solo el JSON
-    if(r1 && r1.length > 20){
-      sp(22,'Reparando formato de respuesta...');
-      try {
-        var t1b=na(30000); var r1b;
-        r1b=await callAI('Extrae el objeto JSON de la siguiente respuesta y devuelve SOLO el JSON sin texto adicional:\n\n'+r1, false, null, 2000, _busquedaAbort.signal);
-        clearTimeout(t1b);
-        var p1b=parseJSON(r1b); inv=Array.isArray(p1b)?p1b[0]:p1b;
-      } catch(e2){
-        err('Investigación sin JSON válido. La IA no devolvió el formato esperado.<br><pre style="font-size:10px;white-space:pre-wrap;margin-top:8px;max-height:100px;overflow:auto;background:rgba(0,0,0,.15);padding:6px;border-radius:6px">'+esc((r1||'(respuesta vacía)').substring(0,400))+'</pre>');
-        rb(); return;
-      }
-    } else {
-      err('La IA devolvió una respuesta vacía o inválida. Intenta con otro tema o verifica que la URL sea accesible.<br><pre style="font-size:10px;white-space:pre-wrap;margin-top:8px;max-height:80px;overflow:auto;background:rgba(0,0,0,.15);padding:6px;border-radius:6px">'+esc((r1||'(sin respuesta)').substring(0,400))+'</pre>');
-      rb(); return;
-    }
+  // Parsear respuesta de texto plano de paso 1
+  if(!r1 || r1.trim().length < 30){
+    err('La investigación no devolvió datos. Intenta con otro tema o URL.');
+    rb(); return;
+  }
+  function p1Field(text, key){
+    var m = text.match(new RegExp(key+':\\s*(.+)','i'));
+    return m ? m[1].trim() : '';
+  }
+  function p1List(text, key){
+    var m = text.match(new RegExp(key+':\\s*\\n((?:\\s*-[^\\n]+\\n?)+)','i'));
+    if(!m) return [];
+    return m[1].split('\n').map(function(l){ return l.replace(/^\s*-\s*/,'').trim(); }).filter(Boolean);
+  }
+  var inv = {
+    titulo: p1Field(r1,'TITULO'),
+    url:    p1Field(r1,'URL'),
+    fuente: p1Field(r1,'FUENTE'),
+    fecha:  p1Field(r1,'FECHA'),
+    angulo: p1Field(r1,'ANGULO'),
+    contexto: p1Field(r1,'CONTEXTO'),
+    hechos: p1List(r1,'HECHOS'),
+    fuentes_adicionales: p1List(r1,'OTRAS_FUENTES').map(function(l){
+      var nm=l.match(/Nombre:\s*([^|]+)/i), ul=l.match(/URL:\s*([^|]+)/i), ap=l.match(/Aporte:\s*(.+)/i);
+      return { nombre:(nm?nm[1].trim():''), url:(ul?ul[1].trim():''), aporte:(ap?ap[1].trim():'') };
+    })
+  };
+  if(!inv.titulo){
+    err('La investigación no encontró una noticia. Intenta con un tema más específico o una URL directa.<br><pre style="font-size:10px;white-space:pre-wrap;margin-top:8px;max-height:100px;overflow:auto;background:rgba(0,0,0,.15);padding:6px;border-radius:6px">'+esc(r1.substring(0,400))+'</pre>');
+    rb(); return;
   }
 
   // ── PASO 2: Redactar artículo (web_search ON con URL fuente para no inventar) ──
