@@ -988,8 +988,8 @@ vale la pena señalar</textarea>
         <button onclick="listarModelosGemini()" style="margin-top:6px;padding:5px 10px;font-size:11px;background:var(--s1);border:1px solid var(--s3);border-radius:6px;cursor:pointer;color:var(--s7)">Ver modelos disponibles</button>
         <div id="geminiModelList" style="margin-top:6px;font-size:11px;color:var(--s6);max-height:160px;overflow-y:auto"></div>
         <label class="cfl" style="margin-top:8px">Generación de imágenes</label>
-        <input class="cfi" id="cfImagenModel" placeholder="imagen-3.0-generate-001">
-        <div style="font-size:10px;color:var(--s4);margin-top:3px">imagen-3.0-generate-001: ~$0.04/imagen &nbsp;|&nbsp; gemini-2.0-flash (nativo): ~$0.001/imagen</div>
+        <input class="cfi" id="cfImagenModel" placeholder="dejar vacío = auto (gemini-2.0-flash-preview-image-generation)">
+        <div style="font-size:10px;color:var(--s4);margin-top:3px">Vacío = detección automática &nbsp;|&nbsp; imagen-3.0-generate-001 = Imagen 3 (requiere plan pago)</div>
         <div style="font-weight:700;font-size:12px;color:var(--p6);margin-bottom:8px;margin-top:16px">Anthropic</div>
         <label class="cfl">Paso 1 — Investigar (con búsqueda web)</label>
         <input class="cfi" id="cfAntModel1" placeholder="claude-sonnet-4-20250514">
@@ -3269,17 +3269,21 @@ async function generarImagenGemini(prompt, key) {
   // Modelos soportados: gemini-2.0-flash-preview-image-generation (default, clave estándar)
   // Para Imagen 3 configura imagenModel='imagen-3.0-generate-001' en Configuración editorial (requiere plan pago)
   var model = (CFG&&CFG.imagenModel) || '';
-  // Cascade de modelos a intentar (en orden): primero los más recientes
-  var GEMINI_TRIES = model.startsWith('imagen') ? [] : (model ? [
-    {m: model, mod: ['IMAGE']},
-    {m: model, mod: ['TEXT','IMAGE']}
-  ] : [
+  // Cascade completo de modelos imagen. Si hay modelo configurado lo intenta primero.
+  // gemini-2.0-flash NO soporta image generation — se omite del cascade.
+  var IMG_MODELS = [
     {m: 'gemini-2.0-flash-preview-image-generation', mod: ['IMAGE']},
     {m: 'gemini-2.0-flash-preview-image-generation', mod: ['TEXT','IMAGE']},
     {m: 'gemini-2.0-flash-exp-image-generation',     mod: ['TEXT','IMAGE']},
     {m: 'gemini-2.0-flash-exp-image-generation',     mod: ['IMAGE']},
-    {m: 'gemini-2.0-flash',                          mod: ['TEXT','IMAGE']},
-  ]);
+  ];
+  // Si hay modelo explícito y no es imagen-3, insertarlo al inicio (si no está ya)
+  var customOk = model && !model.startsWith('imagen') &&
+                 model !== 'gemini-2.0-flash' && model !== 'gemini-2.0-flash-001';
+  var GEMINI_TRIES = model.startsWith('imagen') ? [] :
+    (customOk
+      ? [{m:model,mod:['IMAGE']},{m:model,mod:['TEXT','IMAGE']}].concat(IMG_MODELS)
+      : IMG_MODELS);
   try {
     if (!model.startsWith('imagen')) {
       var allErrs = [];
