@@ -1295,8 +1295,9 @@ function buildCard(r){
   var vfmt=(r.video_script||'').replace(/(\d{2}:\d{2})/g,'<span class="vts">$1</span>').replace(/\[([^\]]+)\]/g,'<span style="background:var(--t0);color:#0f766e;padding:1px 5px;border-radius:4px;font-size:10px;font-style:italic;">[$1]</span>').replace(/\n/g,'<br>');
   return `
 <div class="card ${r.estado||'pendiente'}" id="card-${uid}">
-  <div class="card-hd" onclick="toggleCard('${uid}')">
-    <div class="card-info">
+  <div class="card-hd" onclick="toggleCard('${uid}')" style="display:flex;gap:12px;align-items:flex-start">
+    ${r.imagen_src ? `<img id="card-thumb-${uid}" src="${r.imagen_src}" style="width:90px;height:60px;object-fit:cover;border-radius:8px;flex-shrink:0;margin-top:2px">` : `<img id="card-thumb-${uid}" src="" style="display:none;width:90px;height:60px;object-fit:cover;border-radius:8px;flex-shrink:0;margin-top:2px">`}
+    <div class="card-info" style="flex:1;min-width:0">
       <div class="card-cat">${r.categoria||'Análisis REDIA'}</div>
       <div class="card-title">${esc(r.titular||r.titulo_seo||'Sin título')}</div>
       <div class="card-bajada">${esc(r.bajada||'')}</div>
@@ -1305,7 +1306,7 @@ function buildCard(r){
         <span>${r.fuente_original||r.fecha||'REDIA'}</span>
         ${tags.map(t=>'<span>#'+t+'</span>').join('')}
       </div>
-    </div>
+    </div></div>
     <div><div class="sp ${spCls}">${spLbl}</div></div>
   </div>
   <div class="card-body" id="body-${uid}">
@@ -1376,9 +1377,15 @@ function buildCard(r){
           <textarea class="efi big" id="media-video-${uid}" rows="10" oninput="dirtyMedia('${uid}','video')">${esc(r.video_script||'')}</textarea>
         </div>
         <div class="sc">
-          <div class="sl">Prompt imagen (Gemini / Midjourney)</div>
-          <div class="sbox">${esc(r.imagen_prompt||'')}</div>
-          <button class="cpbtn" onclick="cp('${esc(r.imagen_prompt||'')}',this)">Copiar prompt</button>
+          <div class="sl">Imagen
+            <button class="cpbtn" style="margin-left:6px" onclick="generarImgBandeja('${uid}',this)">↺ Generar imagen</button>
+            <button class="cpbtn" onclick="cp('${esc(r.imagen_prompt||'')}',this)">Copiar prompt</button>
+            <a id="dl-img-${uid}" style="display:none"><button class="cpbtn" style="background:#15803d;color:#fff">Descargar</button></a>
+          </div>
+          <div id="img-box-${uid}" style="margin:10px 0;border-radius:10px;overflow:hidden;background:var(--s1);min-height:80px;display:flex;align-items:center;justify-content:center">
+            ${r.imagen_src ? `<img src="${r.imagen_src}" style="width:100%;border-radius:10px">` : `<span style="color:#94a3b8;font-size:12px">Sin imagen — haz clic en Generar imagen</span>`}
+          </div>
+          <div class="sbox" style="font-size:11px;color:#64748b">${esc(r.imagen_prompt||'')}</div>
         </div>
       </div>
     </div>
@@ -1454,6 +1461,35 @@ async function guardarEdicion(uid){
 }
 
 // ── GENERAR DISTRIBUCIÓN ──────────────────────────────
+// ── IMAGEN BANDEJA ────────────────────────────────────
+async function generarImgBandeja(uid, btn){
+  var rec=getRec(uid); if(!rec) return;
+  var gemKey=getAIKey('gem');
+  if(!gemKey){ alert('Configura la API key de Gemini en Credenciales → API Keys IA'); return; }
+  if(!rec.imagen_prompt){ alert('Este artículo no tiene prompt de imagen generado.'); return; }
+  var orig=btn.textContent; btn.textContent='Generando...'; btn.disabled=true;
+  var box=document.getElementById('img-box-'+uid);
+  if(box) box.innerHTML='<span style="color:#94a3b8;font-size:12px">Generando imagen...</span>';
+  try {
+    var src=await generarImagenGemini(rec.imagen_prompt, gemKey);
+    if(!src) throw new Error('No se pudo generar la imagen. Intenta de nuevo.');
+    rec.imagen_src=src;
+    localAddRec(rec);
+    // Mostrar imagen
+    if(box) box.innerHTML='<img src="'+src+'" style="width:100%;border-radius:10px">';
+    // Botón descargar
+    var dl=document.getElementById('dl-img-'+uid);
+    if(dl){ dl.href=src; dl.download='redia-imagen-'+uid+'.png'; dl.style.display='inline'; }
+    // Thumbnail en cabecera de tarjeta
+    var thumb=document.getElementById('card-thumb-'+uid);
+    if(thumb){ thumb.src=src; thumb.style.display='block'; }
+    btn.textContent=orig; btn.disabled=false;
+  } catch(e){
+    if(box) box.innerHTML='<span style="color:#ef4444;font-size:12px">'+e.message+'</span>';
+    btn.textContent=orig; btn.disabled=false;
+  }
+}
+
 // ── AUDIO / VIDEO ─────────────────────────────────────
 function dirtyMedia(uid, tipo){
   var btn=document.getElementById('savebtn-media-'+tipo+'-'+uid);
