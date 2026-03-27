@@ -2,8 +2,8 @@
 import { state } from './state.js';
 import { deduplicateRecs, localAddRec, gsActualizar, gsGuardar } from './storage.js';
 import { esc, sj, cp, cpHTML, dlHTML } from './utils.js';
-import { getAIKey } from './ai.js';
-import { callGemini } from './ai.js';
+import { getAIKey, callGemini } from './ai.js';
+import { generarImagenGemini, resizarImg820x400 } from './media.js';
 import { sanitizeVocab } from './utils.js';
 
 // Inyección de dependencias circulares
@@ -216,6 +216,20 @@ export function toggleCollapse(sId, aId) {
 }
 
 export async function autoPublicarRedia(rec) {
+  // ── Generar imagen automáticamente si no existe ──
+  if (!rec.imagen_src && rec.imagen_prompt) {
+    var gemKey = getAIKey('gem');
+    if (gemKey) {
+      try {
+        var raw = await generarImagenGemini(rec.imagen_prompt, gemKey);
+        if (raw) {
+          rec.imagen_src = await resizarImg820x400(raw);
+          await gsActualizar(rec.id, 'imagen_src', rec.imagen_src);
+        }
+      } catch(imgErr) { /* continuar sin imagen si falla */ }
+    }
+  }
+
   var pbUrl   = localStorage.getItem('cr_pb_url')   || 'https://publicar.redia.pro';
   var pbEmail = localStorage.getItem('cr_pb_email') || '';
   var pbPass  = localStorage.getItem('cr_pb_pass')  || '';
