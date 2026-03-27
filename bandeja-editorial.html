@@ -1476,9 +1476,9 @@ ${esLI
   ? 'Tono profesional e informativo. Emojis sectoriales acuícolas (🐟🌊⚓🦐). Incluye link https://redia.pro al final. Máx 1200 caracteres.'
   : 'Tono conversacional y cercano. Breve. Incluye link https://redia.pro al final. Máx 500 caracteres.'}
 
-Responde SOLO con el texto del post, sin explicaciones ni etiquetas.`;
+Responde SOLO con el texto del post completo, sin explicaciones ni etiquetas. El post debe terminar con una oración completa y el link. NUNCA lo cortes a mitad.`;
 
-    var raw=await callGemini(prompt,gemKey,null,false,800);
+    var raw=await callGemini(prompt,gemKey,null,false,2000);
     if(!raw||raw.trim().length<10) throw new Error('Respuesta vacía');
     var texto=raw.trim();
     rec[red]=texto;
