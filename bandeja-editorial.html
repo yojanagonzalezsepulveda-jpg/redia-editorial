@@ -1340,7 +1340,7 @@ function buildCard(r){
           <div class="ibox-c"><div class="ibox-l">Lo que muestra este análisis</div><div class="ibox-v">${r.analisis_muestra||sj(r.beneficios,[]).map(b=>'· '+b).join('<br>')||''}</div></div>
         </div>
       </div>
-      ${(()=>{var fc=sj(r.fuentes_con_links,[]);if(!fc.length||['entrevista','mercado','patrocinado'].includes(r.categoria)) return '';return '<div style="margin:16px 0 4px;padding:14px 16px;border-top:1px solid var(--s2)"><div style="font-size:11px;font-weight:700;color:var(--s6);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Fuentes consultadas</div><ul style="list-style:none;padding:0;margin:0">'+fc.map(f=>'<li style="margin:6px 0;font-size:12.5px;display:flex;gap:5px;align-items:baseline"><a href="'+f.url+'" target="_blank" rel="noopener" style="color:var(--p6);font-weight:700;text-decoration:none">'+f.nombre+'</a><span style="color:var(--s4);font-size:10px">↗</span>'+(f.descripcion?'<span style="color:var(--s5)"> — '+f.descripcion+'</span>':'')+'</li>').join('')+'</ul></div>';})()}
+      ${(()=>{var fc=sj(r.fuentes_con_links,[]);if(!fc.length||['entrevista','mercado','patrocinado'].includes(r.categoria)) return '';return '<div style="margin:16px 0 4px;padding:14px 16px;border-top:1px solid var(--s2)"><div style="font-size:11px;font-weight:700;color:var(--s6);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Fuentes consultadas</div><ul style="list-style:none;padding:0;margin:0">'+fc.map(f=>'<li style="margin:6px 0;font-size:12.5px;display:flex;gap:5px;align-items:baseline"><a href="'+f.url+'" target="_blank" rel="noopener" style="color:var(--p6);font-weight:700;text-decoration:none">'+f.nombre+'</a><span style="color:var(--s4);font-size:10px">↗</span>'+(f.fecha?'<span style="color:var(--s4);font-size:10.5px">('+f.fecha+')</span>':'')+(f.descripcion?'<span style="color:var(--s5)"> — '+f.descripcion+'</span>':'')+'</li>').join('')+'</ul></div>';})()}
     </div>
     <div class="cpanel" id="cp-${uid}-edit">
       <div class="ef"><label class="efl">Titular</label><input type="text" class="efi" id="ef-${uid}-tit" value="${esc(r.titular||'')}" oninput="dirty('${uid}')"></div>
@@ -1852,7 +1852,7 @@ IMPORTANTE: en fuentes_consultadas y fuentes_con_links lista TODAS las fuentes r
 IMPORTANTE JSON: el campo "cuerpo" debe estar en Markdown puro — NO uses HTML. Así el JSON no tendrá problemas de comillas. Usa ## para subtítulos, **texto** para negritas, párrafos separados por línea en blanco.
 
 Responde SOLO con JSON válido:
-{"titulo_seo":"máx 60 chars","descripcion_seo":"MÁXIMO 140 CARACTERES exactos — frase completa, sin punto final","tags":["t1","t2","t3","t4"],"categoria":"noticia","tiempo_lectura":"X min","fuentes_consultadas":["Medio o fuente 1","Medio o fuente 2","Medio o fuente 3"],"fuentes_con_links":[{"nombre":"Nombre real del medio","url":"https://url-real.cl/nota","descripcion":"Qué aportó esta fuente"},{"nombre":"Fuente 2","url":"https://url2.cl","descripcion":"Qué aportó"},{"nombre":"Fuente 3","url":"https://url3.cl","descripcion":"Qué aportó"}],"imagen_prompt":"Prompt fotorrealista en inglés para Gemini Imagen 3. Específico al tema. 16:9","linkedin":"Post LinkedIn informativo sobre el eje central. Tono profesional, no publicitario. Emojis sectoriales (🐟🌊⚓). Incluye link redia.pro al final. Máx 1200 caracteres.","facebook":"Post Facebook conversacional sobre el mismo eje. Más cercano. Incluye link redia.pro. Máx 500 caracteres.","articulo":{"titular":"titular periodístico directo con dato concreto","bajada":"2-3 oraciones con el hecho más relevante y cifra concreta, con fuente entre paréntesis","cuerpo":"MARKDOWN: ## subtítulos, **datos clave** en negrita, párrafos con fuente entre paréntesis. Sin citas textuales. Mín ${minW} palabras.","analisis_muestra":"Lo que muestra este análisis — qué revela para el sector acuícola, en 2-4 puntos concretos basados solo en los datos entregados"}}`;
+{"titulo_seo":"máx 60 chars","descripcion_seo":"MÁXIMO 140 CARACTERES exactos — frase completa, sin punto final","tags":["t1","t2","t3","t4"],"categoria":"noticia","tiempo_lectura":"X min","fuentes_consultadas":["Medio o fuente 1","Medio o fuente 2","Medio o fuente 3"],"fuentes_con_links":[{"nombre":"Nombre real del medio","url":"https://url-exacta-del-articulo.cl/nota-especifica","fecha":"DD/MM/YYYY","descripcion":"Qué aportó esta fuente"},{"nombre":"Fuente 2","url":"https://url-exacta-articulo2.cl/nota","fecha":"DD/MM/YYYY","descripcion":"Qué aportó"},{"nombre":"Fuente 3","url":"https://url-exacta-articulo3.cl/nota","fecha":"DD/MM/YYYY","descripcion":"Qué aportó"}],"imagen_prompt":"Prompt fotorrealista en inglés para Gemini Imagen 3. Específico al tema. 16:9","linkedin":"Post LinkedIn informativo sobre el eje central. Tono profesional, no publicitario. Emojis sectoriales (🐟🌊⚓). Incluye link redia.pro al final. Máx 1200 caracteres.","facebook":"Post Facebook conversacional sobre el mismo eje. Más cercano. Incluye link redia.pro. Máx 500 caracteres.","articulo":{"titular":"titular periodístico directo con dato concreto","bajada":"2-3 oraciones con el hecho más relevante y cifra concreta, con fuente entre paréntesis","cuerpo":"MARKDOWN: ## subtítulos, **datos clave** en negrita, párrafos con fuente entre paréntesis. Sin citas textuales. Mín ${minW} palabras.","analisis_muestra":"Lo que muestra este análisis — qué revela para el sector acuícola, en 2-4 puntos concretos basados solo en los datos entregados"}}`;
 }
 
 function buildPromptDistribuir(titular,bajada,analisisMuestra){
@@ -2901,12 +2901,21 @@ async function confirmarPublicar() {
       var pbEmail = localStorage.getItem('cr_pb_email') || '';
       var pbPass  = localStorage.getItem('cr_pb_pass')  || '';
       if (!pbEmail || !pbPass) throw new Error('Configura las credenciales de redia.pro en la sección Credenciales');
-      var authRes = await fetch(pbUrl + '/api/admins/auth-with-password', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({identity: pbEmail, password: pbPass})
-      });
-      if (!authRes.ok) throw new Error('Credenciales de redia.pro incorrectas');
-      var token = (await authRes.json()).token;
+      // Intentar auth: primero superusers (PocketBase v0.23+), luego admins (v0.22-), luego users
+      var token = null;
+      var authEndpoints = [
+        pbUrl + '/api/collections/_superusers/auth-with-password',
+        pbUrl + '/api/admins/auth-with-password',
+        pbUrl + '/api/collections/users/auth-with-password'
+      ];
+      for (var _ai = 0; _ai < authEndpoints.length; _ai++) {
+        var _ar = await fetch(authEndpoints[_ai], {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({identity: pbEmail, password: pbPass})
+        });
+        if (_ar.ok) { var _aj = await _ar.json(); token = _aj.token || (_aj.record && _aj.token); break; }
+      }
+      if (!token) throw new Error('Credenciales de redia.pro incorrectas — verifica email y contraseña en la pestaña Credenciales');
       var slug  = titulo.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,'-').substring(0,80);
       var tags  = Array.isArray(rec.tags) ? rec.tags : (rec.tags||'').split(',').map(t=>t.trim()).filter(Boolean);
       // Usar FormData para poder adjuntar imagen (PocketBase requiere multipart para uploads)
@@ -2918,6 +2927,7 @@ async function confirmarPublicar() {
       fd.append('publicado', 'true');
       fd.append('slug', slug);
       fd.append('fecha_publicacion', new Date().toISOString().replace('T',' ').substring(0,19));
+      fd.append('verificationLevel', '1');
       tags.forEach(function(t){ if(t) fd.append('Tags', t); });
       // Adjuntar imagen si existe (base64 → Blob)
       if(rec.imagen_src && rec.imagen_src.startsWith('data:')){
@@ -2931,7 +2941,7 @@ async function confirmarPublicar() {
         method:'POST', headers:{'Authorization':'Bearer '+token},
         body: fd
       });
-      if (!pubRes.ok) { var ed = await pubRes.json().catch(()=>({})); throw new Error(ed.message||'Error '+pubRes.status); }
+      if (!pubRes.ok) { var ed = await pubRes.json().catch(()=>({})); var edMsg = ed.message || ''; if (ed.data) { var edFields = Object.keys(ed.data).map(function(k){ return k+': '+(ed.data[k].message||ed.data[k].code||'?'); }).join(', '); if (edFields) edMsg += ' ['+edFields+']'; } throw new Error(edMsg||'Error HTTP '+pubRes.status); }
       var pubData = await pubRes.json();
       rec._rediaId = pubData.id;
       rec._rediaSlug = slug;
