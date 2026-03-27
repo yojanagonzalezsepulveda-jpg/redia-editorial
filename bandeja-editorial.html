@@ -1034,6 +1034,18 @@ function localAddRec(rec){
   if(idx>=0) local[idx]=rec; else local.push(rec);
   localSave(local);
 }
+// Mezcla registros de GS con los locales: preserva imagen_src (no se guarda en GS por tamaño)
+function mergeConLocal(gsRecs){
+  var local = localLoad();
+  return gsRecs.map(function(gr){
+    var lr = local.find(function(r){
+      return (r.id && r.id===gr.id) ||
+             ((r.titulo_seo||'').trim().toLowerCase() === (gr.titulo_seo||'').trim().toLowerCase());
+    });
+    if(lr && lr.imagen_src && !gr.imagen_src) return Object.assign({}, gr, {imagen_src: lr.imagen_src});
+    return gr;
+  });
+}
 
 var records = localLoad();  // cargar local inmediatamente
 var filtro = 'todos';
@@ -1215,7 +1227,7 @@ async function guardarGS(){
     var d = await gsCall({action:'listar'});
     console.log('[GS listar response]', JSON.stringify(d).slice(0,500));
     if(!d.ok) throw new Error(d.error||'Respuesta sin ok:true — revisa el Apps Script');
-    records = deduplicateRecs(d.records || []);
+    records = deduplicateRecs(mergeConLocal(d.records || []));
     localSave(records);
     renderBandeja();
     _gsRetries = 0;
@@ -2040,7 +2052,7 @@ async function guardarTodosEnGS(){
     if(gsOk){
       try {
         var d=await gsCall({action:'listar'});
-        if(d.ok){ records=d.records||[]; localSave(records); renderBandeja(); }
+        if(d.ok){ records=deduplicateRecs(mergeConLocal(d.records||[])); localSave(records); renderBandeja(); }
       } catch(e){}
     }
   }
@@ -2578,7 +2590,7 @@ async function autoConectarGS(){
   try {
     var d = await gsCall({action:'listar'});
     if(d.ok){
-      records = deduplicateRecs(d.records||[]);
+      records = deduplicateRecs(mergeConLocal(d.records||[]));
       localSave(records);
       setGsStatus('Conectado · '+records.length+' registro'+(records.length!==1?'s':''), 'cs-ok');
       renderBandeja();
