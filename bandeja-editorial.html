@@ -1453,21 +1453,22 @@ Responde SOLO con JSON válido sin markdown:
   "audio_script": "Guión narración audio. Informativo y cercano. Mín 350 palabras.",
   "video_script": "Guión YouTube con timecodes 00:00. Descripción visual entre corchetes. CTA suscripción."
 }`;
-    var raw=await callAI(prompt, false, (CFG&&CFG.antModel2)||'claude-haiku-4-5-20251001', 4000, null);
+    var gemKey=GEM_KEY_SEARCH||localStorage.getItem('gem_key_search')||'';
+    var raw=gemKey ? await callGemini(prompt,gemKey,null,false,2000) : await callAI(prompt,false,null,2000,null);
     var data=parseJSON(raw);
-    if(data&&!Array.isArray(data)){
-      if(data.linkedin)    rec.linkedin=data.linkedin;
-      if(data.facebook)    rec.facebook=data.facebook;
-      if(data.audio_script) rec.audio_script=data.audio_script;
-      if(data.video_script) rec.video_script=data.video_script;
-      if(rec.id){
-        await Promise.all(['linkedin','facebook','audio_script','video_script']
-          .filter(k=>data[k])
-          .map(k=>gsActualizar(rec.id,k,data[k])));
-      }
-      renderBandeja();
-      setTimeout(()=>{ var b=document.getElementById('body-'+uid); if(b) b.classList.add('open'); },50);
+    if(!data||Array.isArray(data)) throw new Error('Respuesta inválida del modelo');
+    if(data.linkedin)     rec.linkedin=data.linkedin;
+    if(data.facebook)     rec.facebook=data.facebook;
+    if(data.audio_script) rec.audio_script=data.audio_script;
+    if(data.video_script) rec.video_script=data.video_script;
+    localAddRec(rec);
+    if(rec.id){
+      await Promise.all(['linkedin','facebook','audio_script','video_script']
+        .filter(k=>data[k])
+        .map(k=>gsActualizar(rec.id,k,data[k])));
     }
+    renderBandeja();
+    setTimeout(()=>{ var b=document.getElementById('body-'+uid); if(b) b.classList.add('open'); },50);
   } catch(e){
     alert('Error generando distribución: '+e.message);
     if(btn){ btn.textContent='Generar distribución'; btn.disabled=false; }
