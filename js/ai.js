@@ -63,7 +63,11 @@ export async function callGemini(prompt, key, signal, useSearch, maxTok, content
   });
   if (!res.ok) { var e = await res.json().catch(() => ({})); throw new Error(e.error?.message || 'Error HTTP ' + res.status); }
   var d = await res.json();
-  return (d.candidates?.[0]?.content?.parts || []).filter(p => p.text && !p.thought).map(p => p.text).join('');
+  var allParts = d.candidates?.[0]?.content?.parts || [];
+  // Preferir partes de texto no-thinking; si no hay, usar cualquier texto (incluyendo thinking)
+  var textParts = allParts.filter(p => p.text && !p.thought);
+  if (textParts.length > 0) return textParts.map(p => p.text).join('');
+  return allParts.filter(p => p.text).map(p => p.text).join('');
 }
 
 export async function callDeepSeek(prompt, key, signal, maxTok) {
