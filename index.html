@@ -2,10 +2,717 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0;url=bandeja-editorial.html">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>REDIA — Centro Editorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
-<script>window.location.replace('bandeja-editorial.html');</script>
+
+<nav class="nav">
+  <div class="logo"><span class="r">RED</span><span class="i">IA</span></div>
+  <div class="ntabs">
+    <button class="ntab on" onclick="showPage('bandeja',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Bandeja editorial
+    </button>
+    <button class="ntab" onclick="showPage('busqueda',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Búsqueda manual
+    </button>
+    <button class="ntab" onclick="showPage('crear',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      Crear contenido
+    </button>
+    <button class="ntab" onclick="showPage('credenciales',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Credenciales
+    </button>
+    <button class="ntab" onclick="showPage('config',this)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Configuración editorial
+    </button>
+  </div>
+  <div class="nav-r">
+    <div class="ndot"></div>
+    <span class="ndate" id="ndate"></span>
+    <span id="gsNavSt" style="font-size:11px;padding:2px 8px;border-radius:10px;margin-left:8px;display:none"></span>
+  </div>
+</nav>
+
+<!-- BANDEJA -->
+<div class="page on" id="page-bandeja">
+  <aside class="sb">
+    <div>
+      <div class="sb-sec">Hoy</div>
+      <div class="stat-row">
+        <div class="stt"><div class="stn p" id="cP">—</div><div class="stl">Pendientes</div></div>
+        <div class="stt"><div class="stn a" id="cA">—</div><div class="stl">Aprobados</div></div>
+        <div class="stt"><div class="stn d" id="cD">—</div><div class="stl">Descartados</div></div>
+        <div class="stt"><div class="stn" id="cT">—</div><div class="stl">Total</div></div>
+      </div>
+    </div>
+    <div>
+      <div class="sb-sec">Filtrar</div>
+      <div class="flt-list">
+        <button class="flt on" data-f="todos" onclick="filtrar('todos',this)">Todos <span class="fbdg" id="fb0">0</span></button>
+        <button class="flt p" data-f="pendiente" onclick="filtrar('pendiente',this)">Pendientes <span class="fbdg" id="fb1">0</span></button>
+        <button class="flt a" data-f="aprobado" onclick="filtrar('aprobado',this)">Aprobados <span class="fbdg" id="fb2">0</span></button>
+        <button class="flt d" data-f="descartado" onclick="filtrar('descartado',this)">Descartados <span class="fbdg" id="fb3">0</span></button>
+      </div>
+    </div>
+    <div>
+      <div class="sb-sec">Conexión Google Sheets</div>
+      <div class="cbox">
+        <input type="text" class="cinp" id="gsUrl" placeholder="URL del Apps Script">
+        <button class="csave" onclick="guardarGS()">Guardar y conectar</button>
+        <div class="cst cs-w" id="gsSt">Sin conectar</div>
+      </div>
+    </div>
+  </aside>
+  <div class="content" id="bandejaContent">
+    <div class="empty">
+      <div class="ering"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <h2 style="font-size:18px;font-weight:900;letter-spacing:-.3px">Bandeja editorial REDIA</h2>
+      <p style="color:var(--s5);max-width:360px;line-height:1.65;font-size:13px">Conecta tu Google Sheets ingresando la URL del Apps Script en el panel izquierdo.</p>
+    </div>
+  </div>
+</div>
+
+<!-- BÚSQUEDA MANUAL -->
+<div class="page" id="page-busqueda">
+  <div class="search-sb">
+    <div style="margin-bottom:10px">
+      <div onclick="toggleCollapse('eSection','eArrow')" style="background:#f3e8ff;color:#7e22ce;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:700;font-size:12px;display:flex;justify-content:space-between;align-items:center;user-select:none">
+        <span id="eLabel">Especies (opcional) — Todas</span>
+        <span id="eArrow" style="font-size:10px;transition:transform .2s;display:inline-block">▼</span>
+      </div>
+      <div id="eSection" style="display:none;padding:8px 2px 2px">
+        <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:6px">
+          <button onclick="selAll('eGrid','chip');updEsp()" style="font-size:10px;color:var(--p6);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Todas</button>
+          <button onclick="clearAll('eGrid','chip');updEsp()" style="font-size:10px;color:var(--s4);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Ninguna</button>
+        </div>
+        <div class="cgrid" id="eGrid">
+          <div class="chip" data-v="Salmón Atlántico"><div class="chip-dot"></div>Salmón</div>
+          <div class="chip" data-v="Trucha arcoíris"><div class="chip-dot"></div>Trucha</div>
+          <div class="chip" data-v="Salmón Coho"><div class="chip-dot"></div>Coho</div>
+          <div class="chip" data-v="Mitílido / Choritos"><div class="chip-dot"></div>Choritos</div>
+          <div class="chip" data-v="Ostra Chilena"><div class="chip-dot"></div>Ostra Chilena</div>
+          <div class="chip" data-v="Ostra Japonesa"><div class="chip-dot"></div>Ostra Japonesa</div>
+          <div class="chip" data-v="Ostión del Norte"><div class="chip-dot"></div>Ostión</div>
+          <div class="chip" data-v="Algas marinas"><div class="chip-dot"></div>Algas</div>
+          <div class="chip" data-v="Erizo de mar"><div class="chip-dot"></div>Erizo</div>
+          <div class="chip" data-v="Abalón"><div class="chip-dot"></div>Abalón</div>
+          <div class="chip" data-v="Acuicultura de pequeña escala"><div class="chip-dot"></div>APE</div>
+          <div class="chip" data-v="Otras especies acuícolas"><div class="chip-dot"></div>Otras</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-bottom:10px">
+      <div onclick="toggleCollapse('fSection','fArrow')" style="background:#f3e8ff;color:#7e22ce;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:700;font-size:12px;display:flex;justify-content:space-between;align-items:center;user-select:none">
+        <span id="fLabel">Focos temáticos (opcional) — Todos</span>
+        <span id="fArrow" style="font-size:10px;transition:transform .2s;display:inline-block">▼</span>
+      </div>
+      <div id="fSection" style="display:none;padding:8px 2px 2px">
+        <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:6px">
+          <button onclick="selAll('fGrid','ftag');updFoc()" style="font-size:10px;color:var(--p6);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Todos</button>
+          <button onclick="clearAll('fGrid','ftag');updFoc()" style="font-size:10px;color:var(--s4);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Ninguno</button>
+        </div>
+        <div class="fwrap" id="fGrid">
+          <div class="ftag" data-v="contingencia nacional">Contingencia</div>
+          <div class="ftag" data-v="tecnología e innovación">Tecnología</div>
+          <div class="ftag" data-v="normativa y regulación">Normativa</div>
+          <div class="ftag" data-v="sanidad acuícola">Sanidad</div>
+          <div class="ftag" data-v="exportaciones y comercio exterior">Exportaciones</div>
+          <div class="ftag" data-v="mercado nacional e internacional">Mercado</div>
+          <div class="ftag" data-v="medio ambiente y sustentabilidad">Medioambiente</div>
+          <div class="ftag" data-v="financiamiento y fondos públicos INDESPA CORFO">Financiamiento</div>
+          <div class="ftag" data-v="investigación científica e innovación">I+D / Ciencia</div>
+          <div class="ftag" data-v="comunidades costeras y territorio">Comunidad</div>
+          <div class="ftag" data-v="relaciones laborales y empleo">Empleo</div>
+          <div class="ftag" data-v="fiscalización y sanciones">Fiscalización</div>
+          <div class="ftag" data-v="negocios e inversiones">Negocios</div>
+          <div class="ftag" data-v="estadísticas y producción">Estadísticas</div>
+          <div class="ftag" data-v="cambio climático y océano">Cambio climático</div>
+          <div class="ftag" data-v="certificaciones y estándares internacionales">Certificaciones</div>
+          <div class="ftag" data-v="infraestructura y logística">Infraestructura</div>
+          <div class="ftag" data-v="emprendimiento y startups acuícolas">Emprendimiento</div>
+        </div>
+      </div>
+    </div>
+    <div class="sb-sec" style="margin-top:12px">Tema o noticia puntual</div>
+    <textarea class="kwa" id="kwIn" placeholder="Ej: nuevas zonas de salmonicultura, precio del salmón en Asia, floraciones algales en Los Lagos..."></textarea>
+    <div class="sb-sec" style="margin-top:12px">Proveedor IA</div>
+    <div style="display:flex;gap:5px;margin-bottom:8px">
+      <button id="provBtnAuto" onclick="selProvSearch('auto')" style="flex:1;padding:6px 0;border-radius:8px;border:1.5px solid var(--p);background:var(--p);color:#fff;font-size:11px;font-weight:700;cursor:pointer">Auto</button>
+      <button id="provBtnGem"  onclick="selProvSearch('gem')"  style="flex:1;padding:6px 0;border-radius:8px;border:1.5px solid var(--s2);background:transparent;color:var(--s5);font-size:11px;font-weight:700;cursor:pointer">Gemini</button>
+      <button id="provBtnDp"   onclick="selProvSearch('deep')" style="flex:1;padding:6px 0;border-radius:8px;border:1.5px solid var(--s2);background:transparent;color:var(--s5);font-size:11px;font-weight:700;cursor:pointer">DeepSeek</button>
+      <button id="provBtnAnt"  onclick="selProvSearch('ant')"  style="flex:1;padding:6px 0;border-radius:8px;border:1.5px solid var(--s2);background:transparent;color:var(--s5);font-size:11px;font-weight:700;cursor:pointer">Anthropic</button>
+    </div>
+    <div id="keyMissing" style="display:none;font-size:11px;color:var(--err);margin-bottom:8px">API key no configurada — ve a <strong>Credenciales → API Keys IA</strong></div>
+    <button class="gbtn" id="genBtn" onclick="buscarManual()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Generar informe ahora
+    </button>
+  </div>
+  <div class="search-main">
+    <div class="empty" id="searchEmpty">
+      <div class="ering"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+      <h2 style="font-size:18px;font-weight:900;letter-spacing:-.3px">Búsqueda manual</h2>
+      <p style="color:var(--s5);max-width:360px;line-height:1.65;font-size:13px">Selecciona especies, focos y agrega un tema puntual. Claude buscará en la web y generará el informe completo.</p>
+    </div>
+    <div id="searchLoading" style="display:none">
+      <div class="loading">
+        <div class="plogo"><span class="r">RED</span><span class="i">IA</span></div>
+        <div class="ptrack"><div class="pfill" id="pFill" style="width:0%"></div></div>
+        <div class="lstep" id="lStep">Iniciando búsqueda...</div>
+        <button onclick="cancelarBusqueda()" style="margin-top:16px;padding:7px 18px;background:none;border:1.5px solid var(--s3);border-radius:8px;color:var(--s5);font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif">Cancelar búsqueda</button>
+      </div>
+    </div>
+    <div id="searchResult" style="display:none"></div>
+  </div>
+</div>
+
+
+<!-- CREAR CONTENIDO -->
+<div class="page" id="page-crear">
+  <div class="crear-layout" style="display:grid">
+    <div class="crear-nav">
+      <div class="sb-sec" style="margin-bottom:12px">Tipo de contenido</div>
+      <div class="tipo-card on" id="tipo-noticia" onclick="selTipo('noticia',this)">
+        <div class="tipo-icon" style="background:var(--p1)">📝</div>
+        <div class="tipo-info"><div class="tipo-name">Análisis / Redacción propia</div><div class="tipo-desc">Noticias, normativa, mercado, ciencia, etc.</div></div>
+      </div>
+      <div class="tipo-card" id="tipo-entrevista" onclick="selTipo('entrevista',this)">
+        <div class="tipo-icon" style="background:var(--t0)">🎙️</div>
+        <div class="tipo-info"><div class="tipo-name">Entrevista</div><div class="tipo-desc">Voces del sector</div></div>
+      </div>
+      <div class="tipo-card" id="tipo-mercado" onclick="selTipo('mercado',this)">
+        <div class="tipo-icon" style="background:#fff7ed">🤝</div>
+        <div class="tipo-info"><div class="tipo-name">Aviso de Mercado</div><div class="tipo-desc">Ofertas, proyectos, alianzas</div></div>
+      </div>
+      <div class="tipo-card" id="tipo-patrocinado" onclick="selTipo('patrocinado',this)">
+        <div class="tipo-icon" style="background:#fef9c3">⭐</div>
+        <div class="tipo-info"><div class="tipo-name">Contenido patrocinado</div><div class="tipo-desc">Clientes y aliados</div></div>
+      </div>
+    </div>
+
+    <div class="crear-main" id="crearMain">
+
+      <!-- NOTICIA/INFORME -->
+      <div id="form-noticia">
+        <div class="crear-form">
+          <div class="cf-t">Noticia o informe propio</div>
+          <div class="cf-s">Trae tus ideas, notas o un borrador. La IA lo desarrolla como publicación estratégica de REDIA con análisis completo, SEO y contenido para redes sociales.</div>
+          <label class="cf-lbl">Título o tema principal</label>
+          <input type="text" class="cf-inp" id="n-titulo" placeholder="Ej: Nueva tecnología de recirculación reduce costos en un 30% en Los Lagos">
+          <label class="cf-lbl">Tus notas, ideas o borrador</label>
+          <textarea class="cf-inp xl" id="n-notas" placeholder="Escribe todo lo que sabes sobre el tema. Puede ser en puntos, párrafos sueltos, datos, nombres, fechas — cualquier formato. La IA lo organiza y desarrolla.&#10;&#10;Ej:&#10;- Empresa X lanzó sistema de recirculación&#10;- Reducción de 30% en costos operativos&#10;- Prueba piloto en salmones, funcionó bien&#10;- Director dice que planean expandir a mitílidos&#10;- Hay interés de 5 empresas más"></textarea>
+          <label class="cf-lbl">Adjuntar documento de referencia (PDF, Word, imagen, texto)</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar archivo<input type="file" id="n-archivo" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg" style="display:none" onchange="document.getElementById('n-archivo-nm').textContent=this.files[0]?this.files[0].name:'Sin archivo'"></label>
+            <span id="n-archivo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
+          </div>
+          <label class="cf-lbl">Categoría en redia.pro</label>
+          <select class="cf-inp" id="n-tipo" style="height:40px">
+            <option value="noticia">Noticia</option>
+            <option value="normativa">Normativa</option>
+            <option value="tecnologia">Tecnología</option>
+            <option value="mercado">Mercado</option>
+            <option value="sostenibilidad">Sostenibilidad</option>
+          </select>
+        </div>
+        <button class="crear-btn" id="n-btn" onclick="generarCrear('noticia')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Generar publicación
+        </button>
+      </div>
+
+      <!-- ENTREVISTA -->
+      <div id="form-entrevista" style="display:none">
+        <div class="crear-form">
+          <div class="cf-t">Entrevista</div>
+          <div class="cf-s">Pega las preguntas y respuestas, una transcripción, notas de la conversación o un resumen. La IA la edita con estilo editorial REDIA — intro del entrevistado, desarrollo y cierre.</div>
+          <label class="cf-lbl">Nombre y cargo del entrevistado</label>
+          <input type="text" class="cf-inp" id="e-persona" placeholder="Ej: María González, Gerente de Operaciones, Empresa Mitilmar">
+          <label class="cf-lbl">Contexto (opcional)</label>
+          <input type="text" class="cf-inp" id="e-contexto" placeholder="Ej: Entrevista realizada en la feria AquaSur 2026, hablamos sobre la expansión de la mitilicultura en Chiloé">
+          <label class="cf-lbl">Contenido de la entrevista</label>
+          <textarea class="cf-inp xl" id="e-contenido" placeholder="Pega aquí las preguntas y respuestas, la transcripción, o tus notas.&#10;&#10;Puede ser en cualquier formato:&#10;P: ¿Cómo ha cambiado la producción este año?&#10;R: Este año tuvimos un aumento del 15%...&#10;&#10;O simplemente notas tuyas:&#10;- Me habló de los desafíos del ISA&#10;- Mencionó que el precio del chorito subió&#10;- Cree que la normativa nueva es positiva"></textarea>
+          <label class="cf-lbl">Adjuntar documento de referencia (PDF, Word, imagen, texto)</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar archivo<input type="file" id="e-archivo" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg" style="display:none" onchange="document.getElementById('e-archivo-nm').textContent=this.files[0]?this.files[0].name:'Sin archivo'"></label>
+            <span id="e-archivo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
+          </div>
+        </div>
+        <button class="crear-btn" id="e-btn" onclick="generarCrear('entrevista')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Generar entrevista
+        </button>
+      </div>
+
+      <!-- MERCADO -->
+      <div id="form-mercado" style="display:none">
+        <div class="crear-form">
+          <div class="cf-t">Aviso de Mercado</div>
+          <div class="cf-s">Describe la oferta, proyecto o alianza que quieres publicar en la sección Mercado de redia.pro.</div>
+          <label class="cf-lbl">Tipo de aviso</label>
+          <select class="cf-inp" id="m-tipo-aviso" style="height:40px">
+            <option value="oferta">Oferta de productos o servicios</option>
+            <option value="proyecto">Proyecto o iniciativa</option>
+            <option value="alianza">Búsqueda de alianza o socio</option>
+            <option value="oportunidad">Oportunidad de negocio</option>
+            <option value="empleo">Oferta de empleo</option>
+          </select>
+          <label class="cf-lbl">Empresa o persona que publica</label>
+          <input type="text" class="cf-inp" id="m-empresa" placeholder="Ej: Mitilmar SpA, Puerto Montt">
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--s7);margin-bottom:12px;cursor:pointer"><input type="checkbox" id="m-anonimo" style="width:15px;height:15px;accent-color:var(--p6)"> Publicar de forma anónima (no mencionar el nombre de la empresa)</label>
+          <label class="cf-lbl">Descripción del aviso</label>
+          <textarea class="cf-inp big" id="m-descripcion" placeholder="Describe qué ofreces, qué buscas, cuáles son las condiciones, precios si aplica, zona geográfica, contacto, etc.&#10;&#10;Mientras más detalles, mejor resultado."></textarea>
+          <label class="cf-lbl">Precio o rango (opcional)</label>
+          <input type="text" class="cf-inp" id="m-precio" placeholder="Ej: $500 por tonelada · Precio a convenir · Inversión desde $10M">
+          <label class="cf-lbl">Adjuntar documento de referencia (PDF, Word, imagen, texto)</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar archivo<input type="file" id="m-archivo" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg" style="display:none" onchange="document.getElementById('m-archivo-nm').textContent=this.files[0]?this.files[0].name:'Sin archivo'"></label>
+            <span id="m-archivo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
+          </div>
+          <label class="cf-lbl">Imagen del producto o servicio (opcional)</label>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar imagen<input type="file" id="m-imagen-prod" accept=".png,.jpg,.jpeg,.webp" style="display:none" onchange="previsualizarImg(this,'m-imagen-prev')"></label>
+            <img id="m-imagen-prev" src="" alt="" style="height:50px;width:80px;object-fit:cover;border-radius:6px;display:none">
+            <span id="m-imagen-prod-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
+          </div>
+        </div>
+        <button class="crear-btn" id="m-btn" onclick="generarCrear('mercado')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Generar aviso
+        </button>
+      </div>
+
+      <!-- PATROCINADO -->
+      <div id="form-patrocinado" style="display:none">
+        <div class="crear-form">
+          <div class="cf-t">Contenido patrocinado</div>
+          <div class="cf-s">Describe el cliente, su mensaje y el objetivo. La IA redacta un contenido con tono editorial REDIA — no publicitario ni rimbombante.</div>
+          <label class="cf-lbl">Cliente o empresa patrocinadora</label>
+          <input type="text" class="cf-inp" id="p-cliente" placeholder="Ej: TipyTown — plataforma de gestión acuícola">
+          <label class="cf-lbl">Mensaje o producto a comunicar</label>
+          <textarea class="cf-inp big" id="p-mensaje" placeholder="¿Qué quiere comunicar el cliente? ¿Qué lanzaron, qué ofrecen, qué logro quieren destacar?&#10;&#10;Ej: Lanzaron una nueva versión de su app con módulo de trazabilidad para pequeños productores de mitílidos."></textarea>
+          <label class="cf-lbl">Tono preferido</label>
+          <select class="cf-inp" id="p-tono" style="height:40px">
+            <option value="editorial">Editorial (parece nota periodística)</option>
+            <option value="caso">Caso de éxito</option>
+            <option value="opinion">Columna de opinión del cliente</option>
+            <option value="producto">Presentación de producto/servicio</option>
+          </select>
+          <label class="cf-lbl">Adjuntar documento de referencia (PDF, Word, imagen, texto)</label>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar archivo<input type="file" id="p-archivo" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg" style="display:none" onchange="document.getElementById('p-archivo-nm').textContent=this.files[0]?this.files[0].name:'Sin archivo'"></label>
+            <span id="p-archivo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
+          </div>
+          <label class="cf-lbl">Logo del cliente (opcional)</label>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar logo<input type="file" id="p-logo" accept=".png,.jpg,.jpeg,.svg,.webp" style="display:none" onchange="previsualizarImg(this,'p-logo-prev')"></label>
+            <img id="p-logo-prev" src="" alt="" style="height:40px;object-fit:contain;border-radius:6px;display:none">
+            <span id="p-logo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
+          </div>
+          <label class="cf-lbl">Imágenes del producto o servicio (opcional, máx 3)</label>
+          <div style="margin-bottom:12px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar imágenes<input type="file" id="p-imagenes" accept=".png,.jpg,.jpeg,.webp" multiple style="display:none" onchange="previsualizarMulti(this,'p-imagenes-prev')"></label>
+              <span id="p-imagenes-nm" style="font-size:12px;color:var(--s5)">Sin archivos</span>
+            </div>
+            <div id="p-imagenes-prev" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+          </div>
+        </div>
+        <button class="crear-btn" id="p-btn" onclick="generarCrear('patrocinado')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Generar contenido patrocinado
+        </button>
+      </div>
+
+      <!-- LOADING CREAR -->
+      <div id="crear-loading" style="display:none">
+        <div class="loading">
+          <div class="plogo"><span class="r">RED</span><span class="i">IA</span></div>
+          <div class="ptrack"><div class="pfill" id="crear-pfill" style="width:0%"></div></div>
+          <div class="lstep" id="crear-step">Procesando tu contenido...</div>
+        </div>
+      </div>
+
+      <!-- RESULTADO CREAR -->
+      <div id="crear-result" style="display:none"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- CREDENCIALES -->
+<div class="page" id="page-credenciales">
+  <div class="cfg-nav">
+    <div class="sb-sec" style="margin-bottom:12px">Plataformas</div>
+    <div class="cni on" onclick="showCredSec('rediapro',this)">redia.pro</div>
+    <div class="cni" onclick="showCredSec('linkedin',this)">LinkedIn</div>
+    <div class="cni" onclick="showCredSec('facebook',this)">Facebook</div>
+    <div class="cni" onclick="showCredSec('historial',this)">Historial</div>
+    <div class="cni" onclick="showCredSec('apikeys',this)">API Keys IA</div>
+  </div>
+  <div class="cfg-main">
+
+    <!-- REDIA.PRO -->
+    <div class="cpg on" id="cred-rediapro">
+      <div class="csec">
+        <div class="cs-t">Conexión redia.pro</div>
+        <div class="cs-s">Credenciales de admin de PocketBase para publicar artículos directamente en redia.pro.</div>
+        <label class="cfl">URL PocketBase</label>
+        <input type="text" class="cfi" id="cr-pb-url" placeholder="https://publicar.redia.pro" value="https://publicar.redia.pro">
+        <label class="cfl">Email admin</label>
+        <input type="email" class="cfi" id="cr-pb-email" placeholder="admin@redia.pro">
+        <label class="cfl">Contraseña admin</label>
+        <input type="password" class="cfi" id="cr-pb-pass" placeholder="contraseña">
+        <div id="cr-pb-status" style="font-size:12px;color:var(--s4);margin-bottom:14px"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="scfg" onclick="probarPB()">Probar conexión</button>
+        <button class="scfg" style="background:var(--s9)" onclick="guardarCredPB()">Guardar</button>
+      </div>
+    </div>
+
+    <!-- LINKEDIN -->
+    <div class="cpg" id="cred-linkedin">
+      <div class="csec">
+        <div class="cs-t">LinkedIn — Página REDIA</div>
+        <div class="cs-s">Para publicar necesitas crear una app en <strong>linkedin.com/developers</strong> y obtener un Access Token con permisos de escritura en la página REDIA.</div>
+        <div style="background:var(--warnb);border:1px solid #fcd34d;border-radius:10px;padding:14px;margin-bottom:16px;font-size:12.5px;color:var(--warn);line-height:1.6">
+          <strong>Antes de llenar esto:</strong><br>
+          1. Ve a linkedin.com/developers → "Create app"<br>
+          2. Nombre: REDIA Editorial · URL: redia.pro<br>
+          3. En "Products" agrega: "Share on LinkedIn" y "Marketing Developer Platform"<br>
+          4. En "Auth" copia el Client ID y Client Secret<br>
+          5. Genera un Access Token con scope <code>w_member_social</code>
+        </div>
+        <label class="cfl">Access Token</label>
+        <input type="password" class="cfi" id="cr-li-token" placeholder="AQV...">
+        <label class="cfl">Organization ID (ID numérico de la página REDIA en LinkedIn)</label>
+        <input type="text" class="cfi" id="cr-li-orgid" placeholder="123456789">
+        <div id="cr-li-status" style="font-size:12px;color:var(--s4);margin-bottom:14px"></div>
+      </div>
+      <button class="scfg" onclick="guardarCredLI()">Guardar credenciales LinkedIn</button>
+    </div>
+
+    <!-- FACEBOOK -->
+    <div class="cpg" id="cred-facebook">
+      <div class="csec">
+        <div class="cs-t">Facebook — Página REDIA</div>
+        <div class="cs-s">Para publicar necesitas un Page Access Token permanente de la página REDIA en Facebook.</div>
+        <div style="background:var(--warnb);border:1px solid #fcd34d;border-radius:10px;padding:14px;margin-bottom:16px;font-size:12.5px;color:var(--warn);line-height:1.6">
+          <strong>Antes de llenar esto:</strong><br>
+          1. Ve a developers.facebook.com → "My Apps" → "Create App"<br>
+          2. Tipo: "Business" · Nombre: REDIA Editorial<br>
+          3. Agrega producto "Pages API"<br>
+          4. En Graph API Explorer genera un Page Access Token para la página REDIA<br>
+          5. Convierte el token a "Long-lived" (dura 60 días)
+        </div>
+        <label class="cfl">Page Access Token</label>
+        <input type="password" class="cfi" id="cr-fb-token" placeholder="EAA...">
+        <label class="cfl">Page ID (ID numérico de la página REDIA en Facebook)</label>
+        <input type="text" class="cfi" id="cr-fb-pageid" placeholder="123456789012345">
+        <div id="cr-fb-status" style="font-size:12px;color:var(--s4);margin-bottom:14px"></div>
+      </div>
+      <button class="scfg" onclick="guardarCredFB()">Guardar credenciales Facebook</button>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="cpg" id="cred-historial">
+      <div class="csec">
+        <div class="cs-t">Historial de publicaciones</div>
+        <div class="cs-s">Registro de todo lo publicado desde REDIA Editorial.</div>
+        <div id="historialList">
+          <div style="color:var(--s4);font-size:13px;padding:20px 0;text-align:center">Sin publicaciones aún</div>
+        </div>
+      </div>
+      <button class="scfg" style="background:var(--err)" onclick="borrarHistorial()">Limpiar historial</button>
+    </div>
+
+    <!-- API KEYS IA -->
+    <div class="cpg" id="cred-apikeys">
+      <div class="csec">
+        <div class="cs-t">API Keys IA</div>
+        <div class="cs-s">Claves de acceso a los proveedores de inteligencia artificial. Se guardan solo en este navegador.</div>
+        <div style="font-weight:700;font-size:12px;color:var(--p6);margin:8px 0">Gemini (Google)</div>
+        <label class="cfl">API Key</label>
+        <input type="password" class="cfi" id="cfGemKey" placeholder="AIza...">
+        <div style="font-weight:700;font-size:12px;color:var(--p6);margin:16px 0 8px">DeepSeek</div>
+        <label class="cfl">API Key</label>
+        <input type="password" class="cfi" id="cfDeepKey" placeholder="sk-...">
+        <label class="cfl" style="margin-top:8px">Tavily API Key (búsqueda web)</label>
+        <input type="password" class="cfi" id="cfTavilyKey" placeholder="tvly-...">
+        <div style="font-weight:700;font-size:12px;color:var(--p6);margin:16px 0 8px">Anthropic</div>
+        <label class="cfl">API Key</label>
+        <input type="password" class="cfi" id="cfAntKey" placeholder="sk-ant-...">
+      </div>
+      <button class="scfg" onclick="guardarCfg('apikeys',this)">Guardar</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- CONFIGURACIÓN -->
+<div class="page" id="page-config">
+  <div class="cfg-nav">
+    <div class="sb-sec" style="margin-bottom:12px">Secciones</div>
+    <div class="cni on" onclick="showCfg('voz',this)">Voz y tono</div>
+    <div class="cni" onclick="showCfg('audiencia',this)">Audiencia</div>
+    <div class="cni" onclick="showCfg('estructura',this)">Estructura</div>
+    <div class="cni" onclick="showCfg('analisis',this)">Análisis estratégico</div>
+    <div class="cni" onclick="showCfg('fuentes',this)">Fuentes</div>
+    <div class="cni" onclick="showCfg('prohibido',this)">Palabras prohibidas</div>
+    <div class="cni" onclick="showCfg('modelos',this)">Modelos IA</div>
+  </div>
+  <div class="cfg-main">
+    <div class="cpg on" id="cfg-voz">
+      <div class="csec">
+        <div class="cs-t">Voz y tono de REDIA</div>
+        <div class="cs-s">REDIA aplica el registro correcto según el tipo de publicación. Esta configuración permite ajustes adicionales.</div>
+        <div style="background:var(--s1);border:1px solid var(--s2);border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:12.5px;color:var(--s7);line-height:1.9">
+          El sistema aplica automáticamente:<br>
+          <span style="color:var(--p6);font-weight:600">· Periodístico</span> → Noticias e informes de análisis<br>
+          <span style="color:var(--p6);font-weight:600">· Técnico</span> → Análisis científico e innovación<br>
+          <span style="color:var(--p6);font-weight:600">· Cercano</span> → Entrevistas y casos de éxito<br>
+          <span style="color:var(--p6);font-weight:600">· Editorial</span> → Contenido patrocinado y avisos
+        </div>
+        <label class="cfl">Instrucción adicional de voz</label>
+        <textarea class="cfi ta" id="cfVoz" placeholder="Ej: Énfasis en la realidad de Chiloé y las comunidades del archipiélago. Evita el lenguaje corporativo."></textarea>
+        <label class="cfl">Temas sensibles o instrucciones especiales</label>
+        <textarea class="cfi ta" id="cfSensible" placeholder="Ej: Cuando cubras temas de comunidades, siempre incluir perspectiva de los trabajadores. Evitar comparaciones directas entre empresas."></textarea>
+      </div>
+      <button class="scfg" onclick="guardarCfg('voz',this)">Guardar</button>
+    </div>
+
+    <div class="cpg" id="cfg-audiencia">
+      <div class="csec">
+        <div class="cs-t">Audiencia — REDIA escribe para toda la cadena</div>
+        <div class="cs-s">Todas activas por defecto. El sistema ajusta el lenguaje para que sea comprensible para todos los actores simultáneamente.</div>
+        <div class="aud-g" id="audGrid">
+          <div class="aud-o on" data-a="artesanal"><div class="aud-dot"></div><div class="aud-n">Pescadores artesanales reconvertidos</div></div>
+          <div class="aud-o on" data-a="tecnico"><div class="aud-dot"></div><div class="aud-n">Técnicos y profesionales</div></div>
+          <div class="aud-o on" data-a="gerentes"><div class="aud-dot"></div><div class="aud-n">Gerentes y directivos</div></div>
+          <div class="aud-o on" data-a="duenos"><div class="aud-dot"></div><div class="aud-n">Dueños de empresas acuícolas</div></div>
+          <div class="aud-o on" data-a="investigadores"><div class="aud-dot"></div><div class="aud-n">Investigadores y académicos</div></div>
+          <div class="aud-o on" data-a="autoridades"><div class="aud-dot"></div><div class="aud-n">Autoridades y reguladores</div></div>
+          <div class="aud-o on" data-a="proveedores"><div class="aud-dot"></div><div class="aud-n">Proveedores de la cadena de valor</div></div>
+          <div class="aud-o on" data-a="inversionistas"><div class="aud-dot"></div><div class="aud-n">Inversionistas y financistas</div></div>
+          <div class="aud-o on" data-a="trabajadores"><div class="aud-dot"></div><div class="aud-n">Trabajadores y operarios del sector</div></div>
+          <div class="aud-o on" data-a="comunidades"><div class="aud-dot"></div><div class="aud-n">Comunidades costeras y territorios</div></div>
+          <div class="aud-o on" data-a="medios"><div class="aud-dot"></div><div class="aud-n">Medios de comunicación y periodistas</div></div>
+          <div class="aud-o on" data-a="academia"><div class="aud-dot"></div><div class="aud-n">Estudiantes y academia</div></div>
+        </div>
+        <label class="cfl">Instrucción adicional de audiencia</label>
+        <textarea class="cfi ta" id="cfAud" placeholder="Ej: Cuando uses términos técnicos, agrega una breve explicación entre paréntesis."></textarea>
+      </div>
+      <button class="scfg" onclick="guardarCfg('audiencia',this)">Guardar</button>
+    </div>
+
+    <div class="cpg" id="cfg-estructura">
+      <div class="csec">
+        <div class="cs-t">Estructura del artículo</div>
+        <div class="cs-s">Define cómo se organiza cada publicación.</div>
+        <label class="cfl">Extensión mínima (palabras)</label>
+        <input type="number" class="cfi" id="cfWords" value="600" min="300" max="2000" style="width:140px">
+        <label class="cfl">Secciones obligatorias (una por línea)</label>
+        <textarea class="cfi ta" id="cfSecc" placeholder=""></textarea>
+        <label class="cfl">Instrucción adicional de estructura</label>
+        <textarea class="cfi ta" id="cfEstr" placeholder="Los subtítulos deben ser afirmaciones directas con el dato más importante — nunca genéricos como Contexto o Análisis"></textarea>
+      </div>
+      <button class="scfg" onclick="guardarCfg('estructura',this)">Guardar</button>
+    </div>
+
+    <div class="cpg" id="cfg-analisis">
+      <div class="csec">
+        <div class="cs-t">Análisis estratégico</div>
+        <div class="cs-s">Dimensiones que aparecen en el cuadro de análisis de cada informe.</div>
+        <label class="cfl">Dimensiones del análisis (una por línea)</label>
+        <textarea class="cfi ta" id="cfDim" placeholder="Beneficios concretos para el sector&#10;Dolores y desafíos&#10;Alcances para la cadena de valor&#10;Coyuntura actual&#10;Impacto en pequeños productores"></textarea>
+        <label class="cfl">Instrucción adicional de análisis</label>
+        <textarea class="cfi ta" id="cfAnal" placeholder="Ej: Siempre menciona el impacto diferenciado entre empresas grandes y pequeños productores."></textarea>
+      </div>
+      <button class="scfg" onclick="guardarCfg('analisis',this)">Guardar</button>
+    </div>
+
+    <div class="cpg" id="cfg-fuentes">
+      <div class="csec">
+        <div class="cs-t">Fuentes prioritarias</div>
+        <div class="cs-s">Medios e instituciones que el sistema siempre consulta.</div>
+        <label class="cfl">Fuentes activas</label>
+        <div id="fuentesPills" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:40px;padding:8px;background:var(--s1);border:1px solid var(--s2);border-radius:8px"></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" class="cfi" id="fuentesInput" placeholder="Agregar fuente..." style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarFuente();}">
+          <button class="scfg" onclick="agregarFuente()" style="margin-top:0;white-space:nowrap">+ Agregar</button>
+        </div>
+      </div>
+      <button class="scfg" onclick="guardarCfg('fuentes',this)">Guardar</button>
+    </div>
+
+    <div class="cpg" id="cfg-prohibido">
+      <div class="csec">
+        <div class="cs-t">Palabras prohibidas</div>
+        <div class="cs-s">Expresiones que no deben aparecer en ninguna publicación.</div>
+        <label class="cfl">Palabras y frases prohibidas (una por línea)</label>
+        <textarea class="cfi" id="cfProh" style="min-height:200px;font-size:12px">cabe destacar
+es importante señalar
+en el contexto de
+en el marco de
+sin lugar a dudas
+robusto
+transformador
+paradigma
+sin precedentes
+en este sentido
+a modo de conclusión
+es fundamental
+resulta relevante
+potenciar
+sinergia
+cabe mencionar
+vale la pena señalar</textarea>
+      </div>
+      <button class="scfg" onclick="guardarCfg('prohibido',this)">Guardar</button>
+    </div>
+
+    <div class="cpg" id="cfg-modelos">
+      <div class="csec">
+        <div class="cs-t">Modelos IA</div>
+        <div class="cs-s">Cuando un modelo queda obsoleto o sale uno mejor, cámbialo aquí sin tocar el código. Deja en blanco para usar el valor por defecto.</div>
+        <div style="font-weight:700;font-size:12px;color:var(--p6);margin-bottom:8px;margin-top:4px">Gemini (Google)</div>
+        <label class="cfl">Texto y búsqueda</label>
+        <input class="cfi" id="cfGeminiModel" placeholder="gemini-2.5-flash">
+        <div style="font-size:10px;color:var(--s4);margin-top:3px">gemini-2.5-flash: ~$0.15/1M entrada · $0.60/1M salida &nbsp;|&nbsp; gemini-2.0-flash: ~$0.10/$0.40 &nbsp;|&nbsp; gemini-2.0-flash-lite: ~$0.075/$0.30</div>
+        <button onclick="listarModelosGemini()" style="margin-top:6px;padding:5px 10px;font-size:11px;background:var(--s1);border:1px solid var(--s3);border-radius:6px;cursor:pointer;color:var(--s7)">Ver modelos disponibles</button>
+        <div id="geminiModelList" style="margin-top:6px;font-size:11px;color:var(--s6);max-height:160px;overflow-y:auto"></div>
+        <label class="cfl" style="margin-top:8px">Generación de imágenes</label>
+        <input class="cfi" id="cfImagenModel" placeholder="dejar vacío = auto (gemini-2.0-flash-preview-image-generation)">
+        <div style="font-size:10px;color:var(--s4);margin-top:3px">Vacío = detección automática &nbsp;|&nbsp; imagen-3.0-generate-001 = Imagen 3 (requiere plan pago)</div>
+        <div style="font-weight:700;font-size:12px;color:var(--p6);margin-bottom:8px;margin-top:16px">Anthropic</div>
+        <label class="cfl">Paso 1 — Investigar (con búsqueda web)</label>
+        <input class="cfi" id="cfAntModel1" placeholder="claude-sonnet-4-20250514">
+        <div style="font-size:10px;color:var(--s4);margin-top:3px">claude-sonnet-4-20250514: ~$3/1M entrada · $15/1M salida</div>
+        <label class="cfl" style="margin-top:8px">Pasos 2 y 3 — Redactar y distribuir</label>
+        <input class="cfi" id="cfAntModel2" placeholder="claude-haiku-4-5-20251001">
+        <div style="font-size:10px;color:var(--s4);margin-top:3px">claude-haiku-4-5-20251001: ~$0.80/1M entrada · $4/1M salida</div>
+        <div style="font-weight:700;font-size:12px;color:var(--p6);margin-bottom:8px;margin-top:16px">DeepSeek</div>
+        <label class="cfl">Modelo de texto</label>
+        <input class="cfi" id="cfDeepModel" placeholder="deepseek-chat">
+        <div style="font-size:10px;color:var(--s4);margin-top:3px">deepseek-chat (V3): ~$0.27/1M entrada · $1.10/1M salida</div>
+      </div>
+      <button class="scfg" onclick="guardarCfg('modelos',this)">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PUBLICAR -->
+<div class="pub-modal" id="pubModal" style="display:none" onclick="if(event.target===this)cerrarPublicar()">
+  <div class="pub-box">
+    <div class="pub-title">Publicar publicación</div>
+    <div class="pub-sub">Selecciona dónde publicar. El link a redia.pro se incluye automáticamente.</div>
+
+    <div class="pub-section">
+      <div class="pub-sec-title">Datos del artículo</div>
+      <div class="pub-field">
+        <label class="pub-label">Titular <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--s4)">(pre-llenado — puedes editarlo)</span></label>
+        <input type="text" class="pub-input" id="pubTitulo" placeholder="Título del artículo">
+      </div>
+      <div class="pub-field">
+        <label class="pub-label">Bajada <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--s4)">(resumen visible en portada)</span></label>
+        <input type="text" class="pub-input" id="pubDesc" placeholder="Bajada del artículo">
+      </div>
+      <div class="pub-field">
+        <label class="pub-label">Categoría en redia.pro</label>
+        <select class="pub-input pub-select" id="pubTipo">
+          <option value="publicación">Publicación / Noticia</option>
+          <option value="mercado">Mercado</option>
+          <option value="entrevista">Entrevista</option>
+          <option value="indicadores">Indicadores</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="pub-section">
+      <div class="pub-sec-title">Publicar en</div>
+      <div class="plat-grid">
+        <div class="plat-row on redia" id="pt-redia" onclick="togglePlat('redia')">
+          <div class="plat-icon pi-redia">R</div>
+          <div class="plat-info">
+            <div class="plat-name">redia.pro</div>
+            <div class="plat-desc">Sección de Noticias</div>
+          </div>
+          <div class="plat-toggle on redia" id="ptg-redia"></div>
+        </div>
+        <div class="plat-row on li" id="pt-li" onclick="togglePlat('li')">
+          <div class="plat-icon pi-li">in</div>
+          <div class="plat-info">
+            <div class="plat-name">LinkedIn</div>
+            <div class="plat-desc">Página REDIA</div>
+          </div>
+          <div id="ptg-li-badge" class="plat-badge">Configurar primero</div>
+          <div class="plat-toggle on li" id="ptg-li"></div>
+        </div>
+        <div class="plat-row on fb" id="pt-fb" onclick="togglePlat('fb')">
+          <div class="plat-icon pi-fb">f</div>
+          <div class="plat-info">
+            <div class="plat-name">Facebook</div>
+            <div class="plat-desc">Página REDIA</div>
+          </div>
+          <div id="ptg-fb-badge" class="plat-badge">Configurar primero</div>
+          <div class="plat-toggle on fb" id="ptg-fb"></div>
+        </div>
+        <div class="plat-row" id="pt-yt" onclick="togglePlat('yt')">
+          <div class="plat-icon pi-yt">▶</div>
+          <div class="plat-info">
+            <div class="plat-name">YouTube</div>
+            <div class="plat-desc">Copia título, descripción y tags listos</div>
+          </div>
+          <div class="plat-toggle" id="ptg-yt"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pub-status" id="pubStatus"></div>
+    <div class="pub-row">
+      <button class="pub-cancel" onclick="cerrarPublicar()">Cancelar</button>
+      <button class="pub-confirm" id="pubConfirm" onclick="confirmarPublicar()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+        Publicar ahora
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- YOUTUBE MODAL -->
+<div class="pub-modal" id="ytModal" style="display:none" onclick="if(event.target===this)document.getElementById('ytModal').style.display='none'">
+  <div class="pub-box">
+    <div class="pub-title">Paquete YouTube listo</div>
+    <div class="pub-sub">Copia cada campo y pégalo al subir tu video a YouTube Studio.</div>
+    <div class="pub-field" style="margin-bottom:14px">
+      <label class="pub-label">Título (máx 100 caracteres)</label>
+      <div style="background:var(--s0);border:1px solid var(--s2);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--s9)" id="ytTitulo"></div>
+      <button class="cpbtn" onclick="cp(document.getElementById('ytTitulo').textContent,this)" style="margin-top:6px">Copiar título</button>
+    </div>
+    <div class="pub-field" style="margin-bottom:14px">
+      <label class="pub-label">Descripción</label>
+      <div style="background:var(--s0);border:1px solid var(--s2);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--s7);white-space:pre-line;max-height:180px;overflow-y:auto" id="ytDesc"></div>
+      <button class="cpbtn" onclick="cp(document.getElementById('ytDesc').textContent,this)" style="margin-top:6px">Copiar descripción</button>
+    </div>
+    <div class="pub-field">
+      <label class="pub-label">Tags</label>
+      <div style="background:var(--s0);border:1px solid var(--s2);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--s9)" id="ytTags"></div>
+      <button class="cpbtn" onclick="cp(document.getElementById('ytTags').textContent,this)" style="margin-top:6px">Copiar tags</button>
+    </div>
+    <div class="pub-row">
+      <button class="pub-cancel" onclick="document.getElementById('ytModal').style.display='none'">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
 </body>
 </html>
