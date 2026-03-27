@@ -1510,10 +1510,14 @@ ${esp.length?'ESPECIES: '+esp.join(', '):''}
 ${foc.length?'FOCOS: '+foc.join(', '):''}
 FUENTES PRIORITARIAS: ${fLib}
 
-TAREA: Busca y encuentra la noticia más relevante. Recopila todos los datos necesarios para escribir un análisis editorial completo.
+TAREA: Investiga el tema usando MÚLTIPLES fuentes — no te quedes solo con la primera que encuentres.
+1. Busca la noticia en al menos 3 medios o fuentes distintas de la lista de fuentes prioritarias
+2. Busca también en SERNAPESCA, SUBPESCA, SalmonChile, Consejo del Salmón o comunicados oficiales si el tema lo justifica
+3. Recopila hechos, cifras y contexto de CADA fuente consultada — no solo de una
+4. Si hay datos de distintas fuentes que se complementan o contradicen, inclúyelos todos en "hechos"
 
 Responde ÚNICAMENTE con JSON — sin texto antes ni después:
-{"titulo":"título de la noticia","url":"https://url-directa","fuente":"nombre del medio","fecha":"fecha publicación","hechos":["hecho clave con cifra concreta","hecho 2","hecho 3"],"citas":[{"texto":"cita literal","autor":"nombre","cargo":"cargo/empresa"}],"contexto":"antecedentes sectoriales relevantes","angulo":"el ángulo más importante para la acuicultura chilena","fuentes_adicionales":[{"nombre":"medio o institución","url":"https://url","aporte":"qué información aportó"}]}`;
+{"titulo":"título de la noticia","url":"https://url-directa","fuente":"nombre del medio","fecha":"fecha publicación","hechos":["hecho clave con cifra concreta y su fuente entre paréntesis","hecho 2 (fuente)","hecho 3 (fuente)"],"contexto":"antecedentes sectoriales relevantes","angulo":"el ángulo más importante para el sector acuícola chileno","fuentes_adicionales":[{"nombre":"medio o institución diferente al anterior","url":"https://url","aporte":"qué información específica aportó esta fuente"},{"nombre":"segunda fuente adicional","url":"https://url2","aporte":"qué aportó"}]}`;
 }
 
 function buildPromptRedactar(inv,minW){
@@ -1628,7 +1632,7 @@ async function buscarManual(){
 
   // ── PASO 2: Redactar artículo (web_search ON con URL fuente para no inventar) ──
   sp(38,'Paso 2/3 — Redactando: <em>'+esc((inv.titulo||'').substring(0,55))+'</em>...');
-  var searchQ2=(inv.url||inv.titulo||'').trim();
+  var searchQ2=(inv.titulo||kw||'').trim()+' acuicultura Chile';
   var t2=na(90000); var r2;
   try { r2=await callAI(buildPromptRedactar(inv,minW),true,null,6000,_busquedaAbort.signal,searchQ2); clearTimeout(t2); }
   catch(e){ clearTimeout(t2); _busquedaAbort=null; err(errMsg(e)); rb(); return; }
