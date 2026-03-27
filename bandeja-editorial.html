@@ -1473,14 +1473,21 @@ RESUMEN: ${cuerpo}
 
 Genera SOLO el post de ${esLI?'LinkedIn':'Facebook'} para este informe.
 
-REGLAS:
-- Abre con el dato o hecho más relevante del artículo, de forma directa y específica
-- PROHIBIDO: frases genéricas ("¡Gran noticia!", "Noticia clave", "¡Increíble!", "revolucionario", "histórico", "boom")
-- PROHIBIDO: exagerar, alarmar o dramatizar — informar con precisión y calma
-- Tono sobrio, informado, sin sensacionalismo ni entusiasmo forzado
-${esLI
-  ? '- Tono profesional e informativo\n- Puedes usar 1-2 emojis relacionados con el tema (no obligatorio)\n- Incluye link https://redia.pro al final\n- Entre 600 y 1000 caracteres'
-  : '- Tono conversacional y directo\n- Máx 400 caracteres\n- Incluye link https://redia.pro al final'}
+${esLI ? `Estilo LinkedIn REDIA — ejemplos de apertura correcta:
+"Chile autorizó 47 nuevas concesiones de mitilicultura en la Región de Los Lagos."
+"El IFOP publicó su informe anual de biomasa de merluza: las cifras muestran recuperación en tres zonas."
+"SUBPESCA abrió consulta pública sobre el nuevo reglamento de acuicultura offshore."
+
+Abre con el hecho concreto del artículo, igual de directo. Sin exclamaciones. Sin adjetivos grandilocuentes. Tono: analista sectorial, no comunicado de prensa.
+- 1-2 emojis máximo si son relevantes al tema
+- Incluye link https://redia.pro al final
+- Entre 500 y 900 caracteres` : `Estilo Facebook REDIA — ejemplos de apertura correcta:
+"Chile aprobó más de 200 proyectos salmoneros que estaban detenidos."
+"El IFOP confirma recuperación de biomasa en tres zonas pesqueras del sur."
+
+Abre igual de directo. Sin exclamaciones. Sin exageración.
+- Máx 350 caracteres
+- Incluye link https://redia.pro al final`}
 
 Responde SOLO con el texto del post completo, sin explicaciones ni etiquetas. Termina con oración completa y el link. NUNCA cortes a mitad.`;
 
