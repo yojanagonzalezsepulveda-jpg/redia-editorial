@@ -434,6 +434,7 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
   <div class="nav-r">
     <div class="ndot"></div>
     <span class="ndate" id="ndate"></span>
+    <span id="gsNavSt" style="font-size:11px;padding:2px 8px;border-radius:10px;margin-left:8px;display:none"></span>
   </div>
 </nav>
 
@@ -1050,15 +1051,6 @@ selProvSearch(AI_PROV_SEARCH, true);
 document.getElementById('ndate').textContent = new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
 applyCFG();
 
-// Auto-conectar Google Sheets si ya hay URL guardada
-if (GS_URL) {
-  var st = document.getElementById('gsSt');
-  st.textContent = 'Conectando...'; st.className = 'cst cs-w';
-  gsCall({action:'listar'}).then(function(d){
-    if (d.ok) { st.textContent = 'Conectado'; st.className = 'cst cs-ok'; records = d.records || []; renderBandeja(); }
-    else { st.textContent = 'Error al conectar'; st.className = 'cst cs-err'; }
-  }).catch(function(){ st.textContent = 'Sin conexión'; st.className = 'cst cs-err'; });
-}
 
 // ── NAV ───────────────────────────────────────────────
 function showPage(id,btn){
@@ -1217,8 +1209,7 @@ async function gsCall(body){
 async function guardarGS(){
   GS_URL = document.getElementById('gsUrl').value.trim();
   localStorage.setItem('gs_url', GS_URL);
-  var st = document.getElementById('gsSt');
-  st.textContent='Conectando...'; st.className='cst cs-w';
+  setGsStatus('Conectando...', 'cs-w');
   try {
     var d = await gsCall({action:'listar'});
     console.log('[GS listar response]', JSON.stringify(d).slice(0,500));
@@ -1226,9 +1217,10 @@ async function guardarGS(){
     records = deduplicateRecs(d.records || []);
     localSave(records);
     renderBandeja();
-    st.textContent='Conectado · '+records.length+' registro'+(records.length!==1?'s':''); st.className='cst cs-ok';
+    _gsRetries = 0;
+    setGsStatus('Conectado · '+records.length+' registro'+(records.length!==1?'s':''), 'cs-ok');
   } catch(e){
-    st.textContent='Error: '+e.message; st.className='cst cs-err';
+    setGsStatus('Error: '+e.message, 'cs-err');
     console.error('[GS error]', e);
   }
 }
@@ -2309,15 +2301,49 @@ function cpHTML(uid,btn){
   cp(rec.html_publicable||buildHTML(rec), btn);
 }
 
-// Auto-connect
+// ── AUTO-CONNECT ──────────────────────────────────────
+function setGsStatus(text, cls){
+  var st = document.getElementById('gsSt');
+  var nav = document.getElementById('gsNavSt');
+  if(st){ st.textContent=text; st.className='cst '+(cls||'cs-w'); }
+  if(nav){
+    nav.textContent = cls==='cs-ok' ? '● GS' : cls==='cs-err' ? '⚠ GS' : '○ GS';
+    nav.style.display = 'inline';
+    nav.style.background = cls==='cs-ok' ? '#dcfce7' : cls==='cs-err' ? '#fee2e2' : '#fef9c3';
+    nav.style.color = cls==='cs-ok' ? '#15803d' : cls==='cs-err' ? '#dc2626' : '#854d0e';
+  }
+}
+
+var _gsRetries = 0;
+async function autoConectarGS(){
+  if(!GS_URL) return;
+  setGsStatus('Conectando...', 'cs-w');
+  try {
+    var d = await gsCall({action:'listar'});
+    if(d.ok){
+      records = deduplicateRecs(d.records||[]);
+      localSave(records);
+      setGsStatus('Conectado · '+records.length+' registro'+(records.length!==1?'s':''), 'cs-ok');
+      renderBandeja();
+      _gsRetries = 0;
+    } else {
+      throw new Error(d.error||'Sin ok');
+    }
+  } catch(e){
+    _gsRetries++;
+    setGsStatus('Error al conectar', 'cs-err');
+    // Reintentar hasta 3 veces con delay creciente
+    if(_gsRetries <= 3){
+      setTimeout(autoConectarGS, _gsRetries * 4000);
+    }
+  }
+}
+
 // Mostrar registros locales inmediatamente
 if(records.length) renderBandeja();
 
-// Si hay GS configurado, sincronizar en segundo plano
-if(GS_URL){
-  document.getElementById('gsSt').textContent='Conectando...';
-  gsCall({action:'listar'}).then(function(d){ if(d.ok){ records=deduplicateRecs(d.records||[]); localSave(records); document.getElementById('gsSt').textContent='Conectado · '+records.length+' registro'+(records.length!==1?'s':''); document.getElementById('gsSt').className='cst cs-ok'; renderBandeja(); } else { document.getElementById('gsSt').textContent='Error al conectar'; document.getElementById('gsSt').className='cst cs-err'; } }).catch(function(){ document.getElementById('gsSt').textContent='Error al conectar'; document.getElementById('gsSt').className='cst cs-err'; });
-}
+// Sincronizar con GS en segundo plano
+autoConectarGS();
 
 // ── PUBLICAR EN REDIA.PRO ─────────────────────────────
 var pubUID = null;
