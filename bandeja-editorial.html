@@ -1471,8 +1471,9 @@ async function generarImgBandeja(uid, btn){
   var box=document.getElementById('img-box-'+uid);
   if(box) box.innerHTML='<span style="color:#94a3b8;font-size:12px">Generando imagen...</span>';
   try {
-    var src=await generarImagenGemini(rec.imagen_prompt, gemKey);
-    if(!src) throw new Error('No se pudo generar la imagen. Intenta de nuevo.');
+    var raw=await generarImagenGemini(rec.imagen_prompt, gemKey);
+    if(!raw) throw new Error('No se pudo generar la imagen. Intenta de nuevo.');
+    var src=await resizarImg820x400(raw);
     rec.imagen_src=src;
     localAddRec(rec);
     // Mostrar imagen
@@ -3113,8 +3114,8 @@ async function generarCrear(tipo) {
     // Generate image with Gemini
     if (gemKey && crearRec.imagen_prompt) {
       document.getElementById('crear-step').textContent = 'Generando imagen con Gemini...';
-      var imgSrc = await generarImagenGemini(crearRec.imagen_prompt, gemKey);
-      if (imgSrc) crearRec._imagenSrc = imgSrc;
+      var imgRaw = await generarImagenGemini(crearRec.imagen_prompt, gemKey);
+      if (imgRaw) crearRec._imagenSrc = await resizarImg820x400(imgRaw);
     }
 
     document.getElementById('crear-pfill').style.width = '100%';
@@ -3243,11 +3244,34 @@ function buildCrearPrompt(tipo) {
   throw new Error('Tipo no reconocido');
 }
 
+// Redimensiona cualquier imagen base64 a 820×400px (formato publicación REDIA) con center-crop
+function resizarImg820x400(dataUrl) {
+  return new Promise(function(resolve){
+    var img = new Image();
+    img.onload = function(){
+      var W=820, H=400;
+      var canvas = document.createElement('canvas');
+      canvas.width=W; canvas.height=H;
+      var ctx = canvas.getContext('2d');
+      // Center-crop (object-fit: cover)
+      var scale = Math.max(W/img.width, H/img.height);
+      var sw = W/scale, sh = H/scale;
+      var sx = (img.width - sw)/2, sy = (img.height - sh)/2;
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
+      resolve(canvas.toDataURL('image/jpeg', 0.92));
+    };
+    img.onerror = function(){ resolve(dataUrl); }; // fallback: retornar original
+    img.src = dataUrl;
+  });
+}
+
 async function generarImagenGemini(prompt, key) {
-  var model = (CFG&&CFG.imagenModel) || 'imagen-3.0-generate-001';
+  // Modelo por defecto: gemini-2.0-flash-preview-image-generation (funciona con claves estándar)
+  // Para Imagen 3 configura imagenModel='imagen-3.0-generate-001' en Configuración editorial (requiere plan pago)
+  var model = (CFG&&CFG.imagenModel) || 'gemini-2.0-flash-preview-image-generation';
   try {
-    if (model.startsWith('gemini')) {
-      // Gemini nativo con responseModalities
+    if (!model.startsWith('imagen')) {
+      // Gemini nativo con responseModalities IMAGE
       var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key, {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
@@ -3256,33 +3280,40 @@ async function generarImagenGemini(prompt, key) {
           generationConfig: {responseModalities: ['IMAGE', 'TEXT']}
         })
       });
-      if (!res.ok) return null;
+      if (!res.ok) {
+        var errTxt = await res.text().catch(function(){ return res.status+''; });
+        throw new Error('API ' + res.status + ': ' + errTxt.slice(0,200));
+      }
       var d = await res.json();
       var parts = d.candidates?.[0]?.content?.parts || [];
       var imgPart = parts.find(function(p){ return p.inlineData; });
-      if (!imgPart) return null;
+      if (!imgPart) throw new Error('La API no devolvió imagen. Respuesta: ' + JSON.stringify(d).slice(0,300));
       return 'data:' + imgPart.inlineData.mimeType + ';base64,' + imgPart.inlineData.data;
     } else {
-      // Imagen 3 (predict)
+      // Imagen 3 (predict) — requiere plan pago Google AI
       var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':predict?key=' + key, {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({instances:[{prompt}], parameters:{sampleCount:1, aspectRatio:'16:9'}})
       });
-      if (!res.ok) return null;
+      if (!res.ok) {
+        var errTxt = await res.text().catch(function(){ return res.status+''; });
+        throw new Error('API ' + res.status + ': ' + errTxt.slice(0,200));
+      }
       var d = await res.json();
       var b64 = d.predictions?.[0]?.bytesBase64Encoded;
-      if (!b64) return null;
+      if (!b64) throw new Error('Sin imagen en respuesta de Imagen 3: ' + JSON.stringify(d).slice(0,200));
       return 'data:' + (d.predictions[0].mimeType||'image/png') + ';base64,' + b64;
     }
-  } catch { return null; }
+  } catch(e) { throw e; } // propagar el error para que lo muestre el llamador
 }
 
 async function generarImgManual() {
   if (!crearRec) return;
   var gemKey = (CFG&&CFG.gemKey) || '';
   if (!gemKey) return alert('Ingresa tu API key de Gemini en Credenciales → API Keys IA.');
-  var src = await generarImagenGemini(crearRec.imagen_prompt, gemKey);
+  var raw = await generarImagenGemini(crearRec.imagen_prompt, gemKey);
+  var src = raw ? await resizarImg820x400(raw) : null;
   if (src) {
     crearRec._imagenSrc = src;
     crearRec.html_publicable = buildHTML(crearRec);
