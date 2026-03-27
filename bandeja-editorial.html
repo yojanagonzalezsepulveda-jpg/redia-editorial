@@ -1500,15 +1500,22 @@ function buildPromptInvestigar(esp,foc,kw){
     _fArr.slice(0,15).forEach(function(s){ if(!fuentesCl.includes(s)) fuentesCl.push(s); });
   }
   var fLib=fuentesCl.slice(0,20).concat(fuentesIntl.slice(0,10)).join(', ');
-  return `Eres un investigador del sector acuícola chileno. Usa web_search para buscar en múltiples fuentes.
+  var temaLabel = kw ? 'TEMA ESPECÍFICO' : 'ESCANEO GENERAL DEL SECTOR';
+  var temaVal = kw || 'sector acuícola chileno — últimas 48-72 horas';
+  return `Eres un investigador del sector acuícola chileno. Usa web_search activamente.
 
-TEMA: ${kw||'la noticia más relevante del sector acuícola chileno en las últimas 48 horas'}
+${temaLabel}: ${temaVal}
 ${esp.length?'ESPECIES: '+esp.join(', '):''}${foc.length?'\nFOCOS: '+foc.join(', '):''}
 FUENTES PRIORITARIAS: ${fLib}
 
-Busca en al menos 3 fuentes distintas. Responde con este formato exacto:
+PROCESO (sigue este orden):
+1. Busca las noticias recientes del sector en las fuentes prioritarias — escanea titulares de los últimos 3 días
+2. ${kw ? 'Profundiza en el tema específico indicado, buscando en al menos 3 fuentes distintas' : 'Identifica la noticia más relevante e impactante para el sector y profundiza en ella con al menos 3 fuentes'}
+3. Recopila hechos verificados con cifras concretas de cada fuente
 
-TITULO: (título de la noticia principal)
+Responde con este formato exacto:
+
+TITULO: (título de la noticia principal seleccionada)
 URL: (url directa a la noticia)
 FUENTE: (nombre del medio)
 FECHA: (fecha de publicación)
@@ -1517,32 +1524,37 @@ HECHOS:
 - (hecho 1 con cifra concreta — fuente entre paréntesis)
 - (hecho 2 — fuente entre paréntesis)
 - (hecho 3 — fuente entre paréntesis)
-- (hecho 4 si existe)
-CONTEXTO: (antecedentes sectoriales relevantes en 2-3 líneas)
+- (más hechos si existen)
+CONTEXTO: (antecedentes sectoriales relevantes — qué pasó antes, qué explica este hecho)
 OTRAS_FUENTES:
-- Nombre: (medio 2) | URL: (url) | Aporte: (qué dato aportó)
-- Nombre: (medio 3) | URL: (url) | Aporte: (qué dato aportó)`;
+- Nombre: (medio o institución) | URL: (url) | Aporte: (qué dato específico aportó)
+- Nombre: (medio o institución) | URL: (url) | Aporte: (qué dato específico aportó)
+NOTICIAS_RECIENTES:
+- (titular breve — fuente — fecha)
+- (titular breve — fuente — fecha)
+- (titular breve — fuente — fecha)`;
 }
 
 function buildPromptRedactar(inv,minW){
   var fuentesStr=(inv.fuentes_adicionales||[]).map(f=>f.nombre+(f.url?' ('+f.url+')':'')).join(', ')||inv.fuente||'';
   var hechosList=(inv.hechos||[]).map((h,i)=>(i+1)+'. '+h).join('\n');
+  var noticiasRecientes=(inv.noticias_recientes||[]).length ? '\nOTRAS NOTICIAS RECIENTES DEL SECTOR (solo como contexto si son relevantes al eje central):\n'+(inv.noticias_recientes.map(n=>'- '+n).join('\n')) : '';
   return REDIA_IDENTITY+`
 
-TAREA: Redactar análisis editorial REDIA. Tienes acceso a web_search — úsalo para verificar o ampliar los datos de la investigación consultando la URL fuente. Solo incluye en el artículo datos que puedas verificar en esa fuente.
+TAREA: Redactar análisis editorial REDIA. Tienes acceso a web_search — úsalo para verificar datos consultando la URL fuente directamente. Solo incluye datos que puedas verificar.
 
 INVESTIGACIÓN:
-Noticia: ${inv.titulo}
+Noticia principal: ${inv.titulo}
 URL: ${inv.url||''}
-Fuente principal: ${inv.fuente||''}
+Fuente: ${inv.fuente||''}
 Fecha: ${inv.fecha||'reciente'}
 Ángulo: ${inv.angulo||''}
 Contexto: ${inv.contexto||''}
 
-Hechos clave:
+Hechos verificados:
 ${hechosList}
-
-Fuentes consultadas en la investigación: ${fuentesStr}
+${noticiasRecientes}
+Fuentes consultadas: ${fuentesStr}
 
 REGLAS DE REDACCIÓN (obligatorias, sin excepción):
 1. NUNCA inventes citas, parafrasees declaraciones de personas, ni uses blockquote ni comillas atribuidas a nadie.
@@ -1635,6 +1647,7 @@ async function buscarManual(){
     angulo: p1Field(r1,'ANGULO'),
     contexto: p1Field(r1,'CONTEXTO'),
     hechos: p1List(r1,'HECHOS'),
+    noticias_recientes: p1List(r1,'NOTICIAS_RECIENTES'),
     fuentes_adicionales: p1List(r1,'OTRAS_FUENTES').map(function(l){
       var nm=l.match(/Nombre:\s*([^|]+)/i), ul=l.match(/URL:\s*([^|]+)/i), ap=l.match(/Aporte:\s*(.+)/i);
       return { nombre:(nm?nm[1].trim():''), url:(ul?ul[1].trim():''), aporte:(ap?ap[1].trim():'') };
