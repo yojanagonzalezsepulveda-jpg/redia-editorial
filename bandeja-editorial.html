@@ -1936,7 +1936,7 @@ function normalizeRec(d){
     tiempo_lectura:d.tiempo_lectura||'5 min',
     fuentes_consultadas:d.fuentes_consultadas||[], fuentes_con_links:d.fuentes_con_links||[], imagen_prompt:d.imagen_prompt||'',
     titular:a.titular||'', bajada:a.bajada||'', cuerpo_html:mdToHtml(a.cuerpo||''),
-    analisis_muestra:a.analisis_muestra||'', 
+    analisis_muestra:mdToHtml(a.analisis_muestra||''),
     analisis_no_resuelve:a.analisis_no_resuelve||'',
     analisis_relevante_para:a.analisis_relevante_para||'',
     beneficios:a.beneficios||[], dolores:a.dolores||[],
