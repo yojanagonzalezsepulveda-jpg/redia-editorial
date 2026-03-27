@@ -1359,9 +1359,27 @@ function buildCard(r){
     </div>
     <div class="cpanel" id="cp-${uid}-media">
       <div class="sgrid">
-        <div class="sc"><div class="sl">Guión Audio</div><div class="sbox">${esc(r.audio_script||'').replace(/\n/g,'<br>')}</div><button class="cpbtn" onclick="cpRec('${uid}','audio_script',this)">Copiar guión</button></div>
-        <div class="sc"><div class="sl">Guión YouTube</div><div class="sbox">${vfmt}</div><button class="cpbtn" onclick="cpRec('${uid}','video_script',this)">Copiar guión</button></div>
-        <div class="sc"><div class="sl">Prompt imagen (Gemini / Midjourney)</div><div class="sbox">${esc(r.imagen_prompt||'')}</div><button class="cpbtn" onclick="cp('${esc(r.imagen_prompt||'')}',this)">Copiar prompt</button></div>
+        <div class="sc">
+          <div class="sl">Guión Audio / Podcast
+            <button class="cpbtn" style="margin-left:6px" onclick="generarMedia('${uid}','audio',this)">↺ Generar</button>
+            <button class="cpbtn" onclick="cp(document.getElementById('media-audio-${uid}').value,this)">Copiar</button>
+            <button id="savebtn-media-audio-${uid}" class="cpbtn" style="background:#94a3b8;color:#fff;opacity:.5" disabled onclick="guardarMedia('${uid}','audio')">Guardar</button>
+          </div>
+          <textarea class="efi big" id="media-audio-${uid}" rows="10" oninput="dirtyMedia('${uid}','audio')">${esc(r.audio_script||'')}</textarea>
+        </div>
+        <div class="sc">
+          <div class="sl">Guión YouTube
+            <button class="cpbtn" style="margin-left:6px" onclick="generarMedia('${uid}','video',this)">↺ Generar</button>
+            <button class="cpbtn" onclick="cp(document.getElementById('media-video-${uid}').value,this)">Copiar</button>
+            <button id="savebtn-media-video-${uid}" class="cpbtn" style="background:#94a3b8;color:#fff;opacity:.5" disabled onclick="guardarMedia('${uid}','video')">Guardar</button>
+          </div>
+          <textarea class="efi big" id="media-video-${uid}" rows="10" oninput="dirtyMedia('${uid}','video')">${esc(r.video_script||'')}</textarea>
+        </div>
+        <div class="sc">
+          <div class="sl">Prompt imagen (Gemini / Midjourney)</div>
+          <div class="sbox">${esc(r.imagen_prompt||'')}</div>
+          <button class="cpbtn" onclick="cp('${esc(r.imagen_prompt||'')}',this)">Copiar prompt</button>
+        </div>
       </div>
     </div>
     <div class="cpanel" id="cp-${uid}-html">
@@ -1436,6 +1454,85 @@ async function guardarEdicion(uid){
 }
 
 // ── GENERAR DISTRIBUCIÓN ──────────────────────────────
+// ── AUDIO / VIDEO ─────────────────────────────────────
+function dirtyMedia(uid, tipo){
+  var btn=document.getElementById('savebtn-media-'+tipo+'-'+uid);
+  if(btn){ btn.textContent='Guardar'; btn.style.background='#d97706'; btn.style.opacity='1'; btn.disabled=false; }
+}
+
+async function guardarMedia(uid, tipo){
+  var rec=getRec(uid); if(!rec) return;
+  var campo = tipo==='audio' ? 'audio_script' : 'video_script';
+  var btn=document.getElementById('savebtn-media-'+tipo+'-'+uid);
+  var texto=(document.getElementById('media-'+tipo+'-'+uid)?.value||'').trim();
+  rec[campo]=texto;
+  localAddRec(rec);
+  if(rec.id) await gsActualizar(rec.id, campo, texto);
+  if(btn){ btn.textContent='Guardado ✓'; btn.style.background='#15803d'; btn.style.opacity='1';
+    setTimeout(function(){ btn.textContent='Guardar'; btn.style.background='#94a3b8'; btn.style.opacity='.5'; btn.disabled=true; },2000);
+  }
+}
+
+async function generarMedia(uid, tipo, btn){
+  var rec=getRec(uid); if(!rec) return;
+  var gemKey=getAIKey('gem');
+  if(!gemKey){ alert('Configura la API key de Gemini en Credenciales → API Keys IA'); return; }
+  var orig=btn.textContent; btn.textContent='...'; btn.disabled=true;
+  try {
+    var titular=rec.titular||'';
+    var bajada=rec.bajada||'';
+    var cuerpo=(rec.cuerpo_html||'').replace(/<[^>]+>/g,' ').substring(0,2000);
+    var prompt = tipo==='audio'
+      ? `Eres el editor de contenidos de REDIA — Red de Inteligencia Acuícola de Chile.
+
+Escribe un guión de narración en audio para este informe. Será leído en voz alta como podcast o nota de voz.
+
+TITULAR: ${titular}
+BAJADA: ${bajada}
+CONTENIDO: ${cuerpo}
+
+REGLAS:
+- Tono informativo, cercano y directo — como si le hablaras a un profesional del sector
+- Sin exclamaciones ni lenguaje alarmista
+- Escribe como se habla, no como se lee
+- Mín 300 palabras
+- Abre con el hecho central sin rodeos
+- Cierra mencionando REDIA como fuente de inteligencia acuícola
+
+Responde SOLO con el guión, sin títulos ni etiquetas.`
+      : `Eres el editor de contenidos de REDIA — Red de Inteligencia Acuícola de Chile.
+
+Escribe un guión para video YouTube sobre este informe.
+
+TITULAR: ${titular}
+BAJADA: ${bajada}
+CONTENIDO: ${cuerpo}
+
+REGLAS:
+- Usa timecodes en formato 00:00 al inicio de cada sección
+- Indica descripción visual entre [corchetes] cuando sea relevante
+- Tono informativo y directo, sin sensacionalismo
+- Mín 300 palabras
+- Cierra con CTA: suscribirse a REDIA en redia.pro
+
+Responde SOLO con el guión, sin explicaciones adicionales.`;
+
+    var raw=await callGemini(prompt,gemKey,null,false,3000);
+    if(!raw||raw.trim().length<20) throw new Error('Respuesta vacía');
+    var campo = tipo==='audio' ? 'audio_script' : 'video_script';
+    rec[campo]=raw.trim();
+    localAddRec(rec);
+    if(rec.id) await gsActualizar(rec.id, campo, raw.trim());
+    var box=document.getElementById('media-'+tipo+'-'+uid);
+    if(box) box.value=raw.trim();
+    btn.textContent=orig; btn.disabled=false;
+    dirtyMedia(uid, tipo);
+  } catch(e){
+    btn.textContent=orig; btn.disabled=false;
+    alert('Error: '+e.message);
+  }
+}
+
 function dirtyRRSS(uid, red){
   var key = red==='linkedin' ? 'li' : 'fb';
   var btn=document.getElementById('savebtn-rrss-'+key+'-'+uid);
