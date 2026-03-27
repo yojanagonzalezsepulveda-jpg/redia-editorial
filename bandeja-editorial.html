@@ -1213,12 +1213,15 @@ async function guardarGS(){
   st.textContent='Conectando...'; st.className='cst cs-w';
   try {
     var d = await gsCall({action:'listar'});
-    if(!d.ok) throw new Error(d.error||'Error');
-    st.textContent='Conectado'; st.className='cst cs-ok';
+    console.log('[GS listar response]', JSON.stringify(d).slice(0,500));
+    if(!d.ok) throw new Error(d.error||'Respuesta sin ok:true — revisa el Apps Script');
     records = d.records || [];
+    localSave(records);
     renderBandeja();
+    st.textContent='Conectado · '+records.length+' registro'+(records.length!==1?'s':''); st.className='cst cs-ok';
   } catch(e){
-    st.textContent=e.message; st.className='cst cs-err';
+    st.textContent='Error: '+e.message; st.className='cst cs-err';
+    console.error('[GS error]', e);
   }
 }
 
