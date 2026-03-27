@@ -1272,10 +1272,8 @@ function renderBandeja(){
     return;
   }
   var fecha=new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
-  var antesDeDedup = lista.length;
   lista = deduplicateRecs(lista);
-  var dupMsg = antesDeDedup > lista.length ? '<button class="rbtn" style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d" onclick="limpiarDuplicados()">Limpiar '+( antesDeDedup-lista.length)+' duplicado'+(antesDeDedup-lista.length!==1?'s':'')+'</button>' : '';
-  c.innerHTML='<div class="cards-hd"><div><div class="cards-title">'+lista.length+' informe'+(lista.length!==1?'s':'')+' · '+filtro+'</div><div class="cards-sub">'+fecha+'</div></div><div style="display:flex;gap:6px">'+dupMsg+'<button class="rbtn" onclick="cargarBandeja()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>Actualizar</button></div></div>'+
+  c.innerHTML='<div class="cards-hd"><div><div class="cards-title">'+lista.length+' informe'+(lista.length!==1?'s':'')+' · '+filtro+'</div><div class="cards-sub">'+fecha+'</div></div><button class="rbtn" onclick="cargarBandeja()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>Actualizar</button></div>'+
   lista.map(r=>buildCard(r)).join('');
 }
 
