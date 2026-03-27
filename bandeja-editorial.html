@@ -1337,6 +1337,12 @@ function buildCard(r){
       </div>
     </div>
     <div class="cpanel" id="cp-${uid}-html">
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:#166534;line-height:1.7">
+        <strong>Para pegar en redia.pro manualmente:</strong><br>
+        <span style="color:#15803d">→ Título del artículo:</span> <strong>${esc(r.titular||r.titulo_seo||'')}</strong><br>
+        <span style="color:#15803d">→ Descripción / extracto:</span> ${esc((r.bajada||r.descripcion_seo||'').substring(0,120))}<br>
+        <span style="color:#15803d">→ Cuerpo:</span> pega el HTML completo abajo
+      </div>
       <div class="hcode">${esc((r.html_publicable||'').substring(0,1800))}${(r.html_publicable||'').length>1800?'\n...':''}</div>
       <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
         <button class="abtn ab-grad" onclick="dlHTML('${uid}')">Descargar HTML</button>
