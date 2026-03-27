@@ -1346,10 +1346,16 @@ function buildCard(r){
       </div>
     </div>
     <div class="cpanel" id="cp-${uid}-rrss">
-      ${!r.linkedin ? `<div style="text-align:center;padding:24px 0"><p style="color:#94a3b8;font-size:13px;margin-bottom:12px">Sin contenido RRSS generado aún</p><button class="rbtn" style="background:linear-gradient(135deg,#0077b5,#00a0dc)" onclick="generarDistribucion('${uid}')">Generar LinkedIn y Facebook</button></div>` : `<div class="sgrid">
-        <div class="sc"><div class="sl">LinkedIn</div><div class="sbox">${esc(r.linkedin||'').replace(/\n/g,'<br>')}</div><button class="cpbtn" onclick="cpRec('${uid}','linkedin',this)">Copiar LinkedIn</button></div>
-        <div class="sc"><div class="sl">Facebook</div><div class="sbox">${esc(r.facebook||'').replace(/\n/g,'<br>')}</div><button class="cpbtn" onclick="cpRec('${uid}','facebook',this)">Copiar Facebook</button></div>
-      </div>`}
+      <div class="sgrid">
+        <div class="sc">
+          <div class="sl">LinkedIn <button class="cpbtn" style="margin-left:6px" onclick="generarRedSocial('${uid}','linkedin',this)">↺ Generar</button>${r.linkedin?`<button class="cpbtn" onclick="cpRec('${uid}','linkedin',this)">Copiar</button>`:''}</div>
+          <div class="sbox" id="rrss-li-${uid}">${r.linkedin ? esc(r.linkedin).replace(/\n/g,'<br>') : '<span style="color:#94a3b8;font-size:12px">Sin contenido — haz clic en Generar</span>'}</div>
+        </div>
+        <div class="sc">
+          <div class="sl">Facebook <button class="cpbtn" style="margin-left:6px" onclick="generarRedSocial('${uid}','facebook',this)">↺ Generar</button>${r.facebook?`<button class="cpbtn" onclick="cpRec('${uid}','facebook',this)">Copiar</button>`:''}</div>
+          <div class="sbox" id="rrss-fb-${uid}">${r.facebook ? esc(r.facebook).replace(/\n/g,'<br>') : '<span style="color:#94a3b8;font-size:12px">Sin contenido — haz clic en Generar</span>'}</div>
+        </div>
+      </div>
     </div>
     <div class="cpanel" id="cp-${uid}-media">
       <div class="sgrid">
@@ -1430,6 +1436,54 @@ async function guardarEdicion(uid){
 }
 
 // ── GENERAR DISTRIBUCIÓN ──────────────────────────────
+async function generarRedSocial(uid, red, btn){
+  var rec=getRec(uid); if(!rec) return;
+  var gemKey=getAIKey('gem');
+  if(!gemKey){ alert('Configura la API key de Gemini en Credenciales → API Keys IA'); return; }
+  var orig=btn.textContent; btn.textContent='...'; btn.disabled=true;
+  try {
+    var titular=rec.titular||'';
+    var bajada=rec.bajada||'';
+    var cuerpo=(rec.cuerpo_html||'').replace(/<[^>]+>/g,' ').substring(0,1500);
+    var esLI = red==='linkedin';
+    var prompt=`Eres el editor de distribución de REDIA — Red de Inteligencia Acuícola de Chile.
+
+TITULAR: ${titular}
+BAJADA: ${bajada}
+RESUMEN: ${cuerpo}
+
+Genera SOLO el post de ${esLI?'LinkedIn':'Facebook'} para este informe.
+${esLI
+  ? 'Tono profesional e informativo. Emojis sectoriales acuícolas (🐟🌊⚓🦐). Incluye link https://redia.pro al final. Máx 1200 caracteres.'
+  : 'Tono conversacional y cercano. Breve. Incluye link https://redia.pro al final. Máx 500 caracteres.'}
+
+Responde SOLO con el texto del post, sin explicaciones ni etiquetas.`;
+
+    var raw=await callGemini(prompt,gemKey,null,false,800);
+    if(!raw||raw.trim().length<10) throw new Error('Respuesta vacía');
+    var texto=raw.trim();
+    rec[red]=texto;
+    localAddRec(rec);
+    if(rec.id) await gsActualizar(rec.id, red, texto);
+    // Actualizar DOM sin re-renderizar toda la tarjeta
+    var box=document.getElementById('rrss-'+(esLI?'li':'fb')+'-'+uid);
+    if(box) box.innerHTML=esc(texto).replace(/\n/g,'<br>');
+    btn.textContent='↺ Generar'; btn.disabled=false;
+    // Agregar botón Copiar si no existe
+    var sl=btn.closest('.sl');
+    if(sl&&!sl.querySelector('.cpbtn[data-copied]')&&!sl.querySelector('.cp-rrss-'+red)){
+      var cb=document.createElement('button');
+      cb.className='cpbtn cp-rrss-'+red;
+      cb.textContent='Copiar';
+      cb.onclick=function(){ cpRec(uid,red,cb); };
+      sl.appendChild(cb);
+    }
+  } catch(e){
+    btn.textContent=orig; btn.disabled=false;
+    alert('Error: '+e.message);
+  }
+}
+
 async function generarDistribucion(uid){
   var rec=getRec(uid); if(!rec) return;
   var btn=document.getElementById('distbtn-'+uid);
