@@ -3271,11 +3271,13 @@ async function generarImagenGemini(prompt, key) {
   var model = (CFG&&CFG.imagenModel) || '';
   // Cascade completo de modelos imagen. Si hay modelo configurado lo intenta primero.
   // gemini-2.0-flash NO soporta image generation — se omite del cascade.
+  // Probamos con v1 Y v1beta ya que los modelos de imagen suelen estar solo en v1
   var IMG_MODELS = [
-    {m: 'gemini-2.0-flash-preview-image-generation', mod: ['IMAGE']},
-    {m: 'gemini-2.0-flash-preview-image-generation', mod: ['TEXT','IMAGE']},
-    {m: 'gemini-2.0-flash-exp-image-generation',     mod: ['TEXT','IMAGE']},
-    {m: 'gemini-2.0-flash-exp-image-generation',     mod: ['IMAGE']},
+    {m: 'gemini-2.0-flash-preview-image-generation', mod: ['IMAGE'],        api: 'v1'},
+    {m: 'gemini-2.0-flash-preview-image-generation', mod: ['IMAGE'],        api: 'v1beta'},
+    {m: 'gemini-2.0-flash-preview-image-generation', mod: ['TEXT','IMAGE'], api: 'v1'},
+    {m: 'gemini-2.0-flash-exp-image-generation',     mod: ['TEXT','IMAGE'], api: 'v1'},
+    {m: 'gemini-2.0-flash-exp-image-generation',     mod: ['IMAGE'],        api: 'v1'},
   ];
   // Si hay modelo explícito y no es imagen-3, insertarlo al inicio (si no está ya)
   var customOk = model && !model.startsWith('imagen') &&
@@ -3291,7 +3293,8 @@ async function generarImagenGemini(prompt, key) {
         var tryModel = GEMINI_TRIES[mi].m;
         var modalities = GEMINI_TRIES[mi].mod;
         try {
-          var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + tryModel + ':generateContent?key=' + key, {
+          var apiVer = GEMINI_TRIES[mi].api || 'v1beta';
+          var res = await fetch('https://generativelanguage.googleapis.com/' + apiVer + '/models/' + tryModel + ':generateContent?key=' + key, {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
             body: JSON.stringify({
@@ -3301,14 +3304,14 @@ async function generarImagenGemini(prompt, key) {
           });
           var respTxt = await res.text();
           if (!res.ok) {
-            allErrs.push(tryModel + '[' + modalities.join('+') + ']: HTTP ' + res.status + ' — ' + respTxt.slice(0,120));
+            allErrs.push(tryModel + '[' + modalities.join('+') + '/' + apiVer + ']: HTTP ' + res.status + ' — ' + respTxt.slice(0,100));
             continue;
           }
           var d = JSON.parse(respTxt);
           var parts = d.candidates?.[0]?.content?.parts || [];
           var imgPart = parts.find(function(p){ return p.inlineData; });
           if (!imgPart) {
-            allErrs.push(tryModel + '[' + modalities.join('+') + ']: sin imagen — ' + JSON.stringify(d).slice(0,120));
+            allErrs.push(tryModel + '[' + modalities.join('+') + ']: sin imagen — ' + JSON.stringify(d).slice(0,100));
             continue;
           }
           return 'data:' + imgPart.inlineData.mimeType + ';base64,' + imgPart.inlineData.data;
@@ -3316,7 +3319,22 @@ async function generarImagenGemini(prompt, key) {
           allErrs.push(tryModel + ': ' + ex.message);
         }
       }
-      throw new Error('Todos los modelos fallaron:\n' + allErrs.join('\n'));
+      // Fallback: Pollinations.ai (gratuito, sin clave, 820×400px nativo)
+      try {
+        var polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) +
+                     '?width=820&height=400&nologo=true&seed=' + Math.floor(Math.random()*99999);
+        var polRes = await fetch(polUrl);
+        if (polRes.ok) {
+          var blob = await polRes.blob();
+          return await new Promise(function(resolve, reject){
+            var reader = new FileReader();
+            reader.onloadend = function(){ resolve(reader.result); };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
+        }
+      } catch(pe) { allErrs.push('pollinations: ' + pe.message); }
+      throw new Error('Sin modelos disponibles. Errores:\n' + allErrs.join('\n'));
     } else {
       // Imagen 3 (predict) — requiere plan pago Google AI
       var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':predict?key=' + key, {
