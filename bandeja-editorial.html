@@ -3282,33 +3282,37 @@ async function generarImagenGemini(prompt, key) {
   ]);
   try {
     if (!model.startsWith('imagen')) {
-      var lastErr = null;
+      var allErrs = [];
       for (var mi = 0; mi < GEMINI_TRIES.length; mi++) {
         var tryModel = GEMINI_TRIES[mi].m;
         var modalities = GEMINI_TRIES[mi].mod;
-        var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + tryModel + ':generateContent?key=' + key, {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({
-            contents: [{parts:[{text: prompt}]}],
-            generationConfig: {responseModalities: modalities}
-          })
-        });
-        if (!res.ok) {
-          var errTxt = await res.text().catch(function(){ return res.status+''; });
-          lastErr = new Error('API ' + res.status + ' (' + tryModel + '): ' + errTxt.slice(0,200));
-          continue; // probar siguiente modelo
+        try {
+          var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + tryModel + ':generateContent?key=' + key, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+              contents: [{parts:[{text: prompt}]}],
+              generationConfig: {responseModalities: modalities}
+            })
+          });
+          var respTxt = await res.text();
+          if (!res.ok) {
+            allErrs.push(tryModel + '[' + modalities.join('+') + ']: HTTP ' + res.status + ' — ' + respTxt.slice(0,120));
+            continue;
+          }
+          var d = JSON.parse(respTxt);
+          var parts = d.candidates?.[0]?.content?.parts || [];
+          var imgPart = parts.find(function(p){ return p.inlineData; });
+          if (!imgPart) {
+            allErrs.push(tryModel + '[' + modalities.join('+') + ']: sin imagen — ' + JSON.stringify(d).slice(0,120));
+            continue;
+          }
+          return 'data:' + imgPart.inlineData.mimeType + ';base64,' + imgPart.inlineData.data;
+        } catch(ex) {
+          allErrs.push(tryModel + ': ' + ex.message);
         }
-        var d = await res.json();
-        var parts = d.candidates?.[0]?.content?.parts || [];
-        var imgPart = parts.find(function(p){ return p.inlineData; });
-        if (!imgPart) {
-          lastErr = new Error('Sin imagen en respuesta (' + tryModel + '): ' + JSON.stringify(d).slice(0,200));
-          continue;
-        }
-        return 'data:' + imgPart.inlineData.mimeType + ';base64,' + imgPart.inlineData.data;
       }
-      throw lastErr || new Error('No se pudo generar imagen con ningún modelo Gemini.');
+      throw new Error('Todos los modelos fallaron:\n' + allErrs.join('\n'));
     } else {
       // Imagen 3 (predict) — requiere plan pago Google AI
       var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':predict?key=' + key, {
