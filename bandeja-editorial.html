@@ -3279,9 +3279,9 @@ async function generarImagenGemini(prompt, key) {
     {m: 'gemini-2.0-flash-exp-image-generation',     mod: ['TEXT','IMAGE'], api: 'v1'},
     {m: 'gemini-2.0-flash-exp-image-generation',     mod: ['IMAGE'],        api: 'v1'},
   ];
-  // Si hay modelo explícito y no es imagen-3, insertarlo al inicio (si no está ya)
-  var customOk = model && !model.startsWith('imagen') &&
-                 model !== 'gemini-2.0-flash' && model !== 'gemini-2.0-flash-001';
+  // Solo honrar modelo configurado si es específicamente de generación de imagen
+  var customOk = model && (model.includes('image') || model.includes('imagen') || model.includes('imgen'))
+                       && !model.startsWith('imagen'); // imagen-3 va por la rama predict
   var GEMINI_TRIES = model.startsWith('imagen') ? [] :
     (customOk
       ? [{m:model,mod:['IMAGE']},{m:model,mod:['TEXT','IMAGE']}].concat(IMG_MODELS)
