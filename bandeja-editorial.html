@@ -1435,38 +1435,44 @@ async function generarDistribucion(uid){
   var btn=document.getElementById('distbtn-'+uid);
   if(btn){ btn.textContent='Generando...'; btn.disabled=true; }
   try {
-    var titular=rec.titular||rec.articulo?.titular||'';
-    var bajada=rec.bajada||rec.articulo?.bajada||'';
-    var cuerpo=rec.cuerpo_html||rec.articulo?.cuerpo||'';
-    var prompt=`Eres el editor de distribución de REDIA, antena de inteligencia acuícola chilena.
+    var gemKey=getAIKey('gem');
+    if(!gemKey) throw new Error('Configura la API key de Gemini en Credenciales → API Keys IA');
+    var titular=rec.titular||'';
+    var bajada=rec.bajada||'';
+    var cuerpo=(rec.cuerpo_html||'').replace(/<[^>]+>/g,' ').substring(0,2000);
+    var prompt=`Eres el editor de distribución de REDIA — Red de Inteligencia Acuícola de Chile.
 
-Con base en el siguiente informe periodístico, genera los textos de distribución:
+Genera los textos de distribución para este informe:
 
 TITULAR: ${titular}
 BAJADA: ${bajada}
-CUERPO: ${cuerpo.replace(/<[^>]+>/g,' ').substring(0,2000)}
+RESUMEN: ${cuerpo}
 
-Responde SOLO con JSON válido sin markdown:
-{
-  "linkedin": "Post LinkedIn informativo, no publicitario. Emojis sectoriales. Máx 1200 chars. Incluye link redia.pro.",
-  "facebook": "Post Facebook conversacional. Máx 500 chars. Incluye link redia.pro.",
-  "audio_script": "Guión narración audio. Informativo y cercano. Mín 350 palabras.",
-  "video_script": "Guión YouTube con timecodes 00:00. Descripción visual entre corchetes. CTA suscripción."
-}`;
-    var gemKey=getAIKey('gem');
-    if(!gemKey) throw new Error('Configura la API key de Gemini en Credenciales → API Keys IA');
-    var raw=await callGemini(prompt,gemKey,null,false,2000);
-    var data=parseJSON(raw);
-    if(!data||Array.isArray(data)) throw new Error('Respuesta inválida del modelo');
-    if(data.linkedin)     rec.linkedin=data.linkedin;
-    if(data.facebook)     rec.facebook=data.facebook;
-    if(data.audio_script) rec.audio_script=data.audio_script;
-    if(data.video_script) rec.video_script=data.video_script;
+Responde en este formato exacto (sin JSON, sin markdown, sin explicaciones):
+
+LINKEDIN:
+[post LinkedIn informativo, profesional, con emojis sectoriales 🐟🌊, incluye el link https://redia.pro al final, máx 1200 caracteres]
+
+FACEBOOK:
+[post Facebook más conversacional y breve, incluye link https://redia.pro, máx 500 caracteres]`;
+
+    var raw=await callGemini(prompt,gemKey,null,false,1500);
+    console.log('[distribucion raw]', raw);
+    if(!raw||raw.trim().length<10) throw new Error('Respuesta vacía de Gemini');
+
+    // Parsear formato de texto plano
+    var liMatch=raw.match(/LINKEDIN:\s*\n([\s\S]*?)(?=\nFACEBOOK:|$)/i);
+    var fbMatch=raw.match(/FACEBOOK:\s*\n([\s\S]*?)$/i);
+    var li=(liMatch?.[1]||'').trim();
+    var fb=(fbMatch?.[1]||'').trim();
+    if(!li) throw new Error('No se encontró el post de LinkedIn en la respuesta');
+
+    rec.linkedin=li;
+    rec.facebook=fb;
     localAddRec(rec);
     if(rec.id){
-      await Promise.all(['linkedin','facebook','audio_script','video_script']
-        .filter(k=>data[k])
-        .map(k=>gsActualizar(rec.id,k,data[k])));
+      if(li) await gsActualizar(rec.id,'linkedin',li);
+      if(fb) await gsActualizar(rec.id,'facebook',fb);
     }
     renderBandeja();
     setTimeout(()=>{ var b=document.getElementById('body-'+uid); if(b) b.classList.add('open'); },50);
