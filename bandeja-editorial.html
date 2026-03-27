@@ -56,7 +56,7 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
 
 /* PAGES */
 .page{display:none;height:calc(100vh - 54px)}
-.page.on{display:flex}
+.page.on{display:flex;height:calc(100vh - 54px)}
 
 /* SIDEBAR */
 .sb{width:260px;flex-shrink:0;background:white;border-right:1px solid var(--s2);overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:14px}
@@ -179,8 +179,6 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
 .ab-pub{background:linear-gradient(135deg,#16a34a,#0d9488);color:white;font-size:12px}
 .ab-pub:hover{opacity:.9;transform:translateY(-1px)}
 .ab-pub:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.pub-modal{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1000;display:flex;align-items:center;justify-content:center}
-.pub-box{background:white;border-radius:20px;padding:28px;width:440px;max-width:90vw;box-shadow:0 20px 60px rgba(15,23,42,.2)}
 .pub-title{font-size:17px;font-weight:800;color:var(--s9);letter-spacing:-.3px;margin-bottom:4px}
 .pub-sub{font-size:13px;color:var(--s5);margin-bottom:20px;line-height:1.5}
 .pub-field{margin-bottom:12px}
@@ -434,7 +432,6 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
   <div class="nav-r">
     <div class="ndot"></div>
     <span class="ndate" id="ndate"></span>
-    <span id="gsNavSt" style="font-size:11px;padding:2px 8px;border-radius:10px;margin-left:8px;display:none"></span>
   </div>
 </nav>
 
@@ -480,74 +477,60 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
 <!-- BÚSQUEDA MANUAL -->
 <div class="page" id="page-busqueda">
   <div class="search-sb">
-    <div style="margin-bottom:10px">
-      <div onclick="toggleCollapse('eSection','eArrow')" style="background:#f3e8ff;color:#7e22ce;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:700;font-size:12px;display:flex;justify-content:space-between;align-items:center;user-select:none">
-        <span id="eLabel">Especies (opcional) — Todas</span>
-        <span id="eArrow" style="font-size:10px;transition:transform .2s;display:inline-block">▼</span>
-      </div>
-      <div id="eSection" style="display:none;padding:8px 2px 2px">
-        <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:6px">
-          <button onclick="selAll('eGrid','chip');updEsp()" style="font-size:10px;color:var(--p6);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Todas</button>
-          <button onclick="clearAll('eGrid','chip');updEsp()" style="font-size:10px;color:var(--s4);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Ninguna</button>
-        </div>
-        <div class="cgrid" id="eGrid">
-          <div class="chip" data-v="Salmón Atlántico"><div class="chip-dot"></div>Salmón</div>
-          <div class="chip" data-v="Trucha arcoíris"><div class="chip-dot"></div>Trucha</div>
-          <div class="chip" data-v="Salmón Coho"><div class="chip-dot"></div>Coho</div>
-          <div class="chip" data-v="Mitílido / Choritos"><div class="chip-dot"></div>Choritos</div>
-          <div class="chip" data-v="Ostra Chilena"><div class="chip-dot"></div>Ostra Chilena</div>
-          <div class="chip" data-v="Ostra Japonesa"><div class="chip-dot"></div>Ostra Japonesa</div>
-          <div class="chip" data-v="Ostión del Norte"><div class="chip-dot"></div>Ostión</div>
-          <div class="chip" data-v="Algas marinas"><div class="chip-dot"></div>Algas</div>
-          <div class="chip" data-v="Erizo de mar"><div class="chip-dot"></div>Erizo</div>
-          <div class="chip" data-v="Abalón"><div class="chip-dot"></div>Abalón</div>
-          <div class="chip" data-v="Acuicultura de pequeña escala"><div class="chip-dot"></div>APE</div>
-          <div class="chip" data-v="Otras especies acuícolas"><div class="chip-dot"></div>Otras</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="sb-sec" style="margin-bottom:0">Especies</div>
+        <div style="display:flex;gap:6px">
+          <button onclick="selAll('eGrid','chip')" style="font-size:10px;color:var(--p6);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Todas</button>
+          <button onclick="clearAll('eGrid','chip')" style="font-size:10px;color:var(--s4);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Ninguna</button>
         </div>
       </div>
+    <div style="font-size:10px;color:var(--s4);margin-bottom:6px;font-style:italic">Opcional — sin selección busca en todas</div>
+    <div class="cgrid" id="eGrid">
+      <div class="chip" data-v="Salmón Atlántico"><div class="chip-dot"></div>Salmón</div>
+      <div class="chip" data-v="Trucha arcoíris"><div class="chip-dot"></div>Trucha</div>
+      <div class="chip" data-v="Salmón Coho"><div class="chip-dot"></div>Coho</div>
+      <div class="chip" data-v="Mitílido / Choritos"><div class="chip-dot"></div>Choritos</div>
+      <div class="chip" data-v="Ostra Chilena"><div class="chip-dot"></div>Ostra Chilena</div>
+      <div class="chip" data-v="Ostra Japonesa"><div class="chip-dot"></div>Ostra Japonesa</div>
+      <div class="chip" data-v="Ostión del Norte"><div class="chip-dot"></div>Ostión</div>
+      <div class="chip" data-v="Algas marinas"><div class="chip-dot"></div>Algas</div>
+      <div class="chip" data-v="Erizo de mar"><div class="chip-dot"></div>Erizo</div>
+      <div class="chip" data-v="Abalón"><div class="chip-dot"></div>Abalón</div>
+      <div class="chip" data-v="Acuicultura de pequeña escala"><div class="chip-dot"></div>APE</div>
+      <div class="chip" data-v="Otras especies acuícolas"><div class="chip-dot"></div>Otras</div>
     </div>
-    <div style="margin-bottom:10px">
-      <div onclick="toggleCollapse('fSection','fArrow')" style="background:#f3e8ff;color:#7e22ce;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:700;font-size:12px;display:flex;justify-content:space-between;align-items:center;user-select:none">
-        <span id="fLabel">Focos temáticos (opcional) — Todos</span>
-        <span id="fArrow" style="font-size:10px;transition:transform .2s;display:inline-block">▼</span>
-      </div>
-      <div id="fSection" style="display:none;padding:8px 2px 2px">
-        <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:6px">
-          <button onclick="selAll('fGrid','ftag');updFoc()" style="font-size:10px;color:var(--p6);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Todos</button>
-          <button onclick="clearAll('fGrid','ftag');updFoc()" style="font-size:10px;color:var(--s4);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Ninguno</button>
-        </div>
-        <div class="fwrap" id="fGrid">
-          <div class="ftag" data-v="contingencia nacional">Contingencia</div>
-          <div class="ftag" data-v="tecnología e innovación">Tecnología</div>
-          <div class="ftag" data-v="normativa y regulación">Normativa</div>
-          <div class="ftag" data-v="sanidad acuícola">Sanidad</div>
-          <div class="ftag" data-v="exportaciones y comercio exterior">Exportaciones</div>
-          <div class="ftag" data-v="mercado nacional e internacional">Mercado</div>
-          <div class="ftag" data-v="medio ambiente y sustentabilidad">Medioambiente</div>
-          <div class="ftag" data-v="financiamiento y fondos públicos INDESPA CORFO">Financiamiento</div>
-          <div class="ftag" data-v="investigación científica e innovación">I+D / Ciencia</div>
-          <div class="ftag" data-v="comunidades costeras y territorio">Comunidad</div>
-          <div class="ftag" data-v="relaciones laborales y empleo">Empleo</div>
-          <div class="ftag" data-v="fiscalización y sanciones">Fiscalización</div>
-          <div class="ftag" data-v="negocios e inversiones">Negocios</div>
-          <div class="ftag" data-v="estadísticas y producción">Estadísticas</div>
-          <div class="ftag" data-v="cambio climático y océano">Cambio climático</div>
-          <div class="ftag" data-v="certificaciones y estándares internacionales">Certificaciones</div>
-          <div class="ftag" data-v="infraestructura y logística">Infraestructura</div>
-          <div class="ftag" data-v="emprendimiento y startups acuícolas">Emprendimiento</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="sb-sec" style="margin-bottom:0">Focos temáticos</div>
+        <div style="display:flex;gap:6px">
+          <button onclick="selAll('fGrid','ftag')" style="font-size:10px;color:var(--p6);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Todos</button>
+          <button onclick="clearAll('fGrid','ftag')" style="font-size:10px;color:var(--s4);background:none;border:none;cursor:pointer;font-weight:600;font-family:Inter,sans-serif">Ninguno</button>
         </div>
       </div>
+    <div style="font-size:10px;color:var(--s4);margin-bottom:6px;font-style:italic">Opcional — sin selección busca en todos los focos</div>
+    <div class="fwrap" id="fGrid">
+      <div class="ftag" data-v="contingencia nacional">Contingencia</div>
+      <div class="ftag" data-v="tecnología e innovación">Tecnología</div>
+      <div class="ftag" data-v="normativa y regulación">Normativa</div>
+      <div class="ftag" data-v="sanidad acuícola">Sanidad</div>
+      <div class="ftag" data-v="exportaciones y comercio exterior">Exportaciones</div>
+      <div class="ftag" data-v="mercado nacional e internacional">Mercado</div>
+      <div class="ftag" data-v="medio ambiente y sustentabilidad">Medioambiente</div>
+      <div class="ftag" data-v="financiamiento y fondos públicos INDESPA CORFO">Financiamiento</div>
+      <div class="ftag" data-v="investigación científica e innovación">I+D / Ciencia</div>
+      <div class="ftag" data-v="comunidades costeras y territorio">Comunidad</div>
+      <div class="ftag" data-v="relaciones laborales y empleo">Empleo</div>
+      <div class="ftag" data-v="fiscalización y sanciones">Fiscalización</div>
+      <div class="ftag" data-v="negocios e inversiones">Negocios</div>
+      <div class="ftag" data-v="estadísticas y producción">Estadísticas</div>
+      <div class="ftag" data-v="cambio climático y océano">Cambio climático</div>
+      <div class="ftag" data-v="certificaciones y estándares internacionales">Certificaciones</div>
+      <div class="ftag" data-v="infraestructura y logística">Infraestructura</div>
+      <div class="ftag" data-v="emprendimiento y startups acuícolas">Emprendimiento</div>
     </div>
     <div class="sb-sec" style="margin-top:12px">Tema o noticia puntual</div>
     <textarea class="kwa" id="kwIn" placeholder="Ej: nuevas zonas de salmonicultura, precio del salmón en Asia, floraciones algales en Los Lagos..."></textarea>
-    <div class="sb-sec" style="margin-top:12px">Proveedor IA</div>
-    <div style="display:flex;gap:5px;margin-bottom:8px">
-      <button id="provBtnAuto" onclick="selProvSearch('auto')" style="flex:1;padding:6px 0;border-radius:8px;border:1.5px solid var(--p);background:var(--p);color:#fff;font-size:11px;font-weight:700;cursor:pointer">Auto</button>
-      <button id="provBtnGem"  onclick="selProvSearch('gem')"  style="flex:1;padding:6px 0;border-radius:8px;border:1.5px solid var(--s2);background:transparent;color:var(--s5);font-size:11px;font-weight:700;cursor:pointer">Gemini</button>
-      <button id="provBtnDp"   onclick="selProvSearch('deep')" style="flex:1;padding:6px 0;border-radius:8px;border:1.5px solid var(--s2);background:transparent;color:var(--s5);font-size:11px;font-weight:700;cursor:pointer">DeepSeek</button>
-      <button id="provBtnAnt"  onclick="selProvSearch('ant')"  style="flex:1;padding:6px 0;border-radius:8px;border:1.5px solid var(--s2);background:transparent;color:var(--s5);font-size:11px;font-weight:700;cursor:pointer">Anthropic</button>
-    </div>
-    <div id="keyMissing" style="display:none;font-size:11px;color:var(--err);margin-bottom:8px">API key no configurada — ve a <strong>Credenciales → API Keys IA</strong></div>
+    <div class="sb-sec" style="margin-top:12px">API key Anthropic</div>
+    <input type="password" class="cinp" id="antKey" placeholder="sk-ant-...">
     <button class="gbtn" id="genBtn" onclick="buscarManual()">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       Generar informe ahora
@@ -564,7 +547,6 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
         <div class="plogo"><span class="r">RED</span><span class="i">IA</span></div>
         <div class="ptrack"><div class="pfill" id="pFill" style="width:0%"></div></div>
         <div class="lstep" id="lStep">Iniciando búsqueda...</div>
-        <button onclick="cancelarBusqueda()" style="margin-top:16px;padding:7px 18px;background:none;border:1.5px solid var(--s3);border-radius:8px;color:var(--s5);font-size:12px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif">Cancelar búsqueda</button>
       </div>
     </div>
     <div id="searchResult" style="display:none"></div>
@@ -580,7 +562,7 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
       <div class="sb-sec" style="margin-bottom:12px">Tipo de contenido</div>
       <div class="tipo-card on" id="tipo-noticia" onclick="selTipo('noticia',this)">
         <div class="tipo-icon" style="background:var(--p1)">📝</div>
-        <div class="tipo-info"><div class="tipo-name">Análisis / Redacción propia</div><div class="tipo-desc">Noticias, normativa, mercado, ciencia, etc.</div></div>
+        <div class="tipo-info"><div class="tipo-name">Noticia / Informe</div><div class="tipo-desc">Análisis propio del sector</div></div>
       </div>
       <div class="tipo-card" id="tipo-entrevista" onclick="selTipo('entrevista',this)">
         <div class="tipo-icon" style="background:var(--t0)">🎙️</div>
@@ -593,6 +575,11 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
       <div class="tipo-card" id="tipo-patrocinado" onclick="selTipo('patrocinado',this)">
         <div class="tipo-icon" style="background:#fef9c3">⭐</div>
         <div class="tipo-info"><div class="tipo-name">Contenido patrocinado</div><div class="tipo-desc">Clientes y aliados</div></div>
+      </div>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--s2)">
+        <div class="sb-sec" style="margin-bottom:8px">API key Gemini</div>
+        <input type="password" class="gemini-inp" id="crear-gemini-key" placeholder="AIza... (para imágenes)">
+        <div style="font-size:10px;color:var(--s4);line-height:1.5">Gratis en aistudio.google.com</div>
       </div>
     </div>
 
@@ -607,11 +594,6 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
           <input type="text" class="cf-inp" id="n-titulo" placeholder="Ej: Nueva tecnología de recirculación reduce costos en un 30% en Los Lagos">
           <label class="cf-lbl">Tus notas, ideas o borrador</label>
           <textarea class="cf-inp xl" id="n-notas" placeholder="Escribe todo lo que sabes sobre el tema. Puede ser en puntos, párrafos sueltos, datos, nombres, fechas — cualquier formato. La IA lo organiza y desarrolla.&#10;&#10;Ej:&#10;- Empresa X lanzó sistema de recirculación&#10;- Reducción de 30% en costos operativos&#10;- Prueba piloto en salmones, funcionó bien&#10;- Director dice que planean expandir a mitílidos&#10;- Hay interés de 5 empresas más"></textarea>
-          <label class="cf-lbl">Adjuntar documento de referencia (PDF, Word, imagen, texto)</label>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar archivo<input type="file" id="n-archivo" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg" style="display:none" onchange="document.getElementById('n-archivo-nm').textContent=this.files[0]?this.files[0].name:'Sin archivo'"></label>
-            <span id="n-archivo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
-          </div>
           <label class="cf-lbl">Categoría en redia.pro</label>
           <select class="cf-inp" id="n-tipo" style="height:40px">
             <option value="noticia">Noticia</option>
@@ -620,6 +602,8 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
             <option value="mercado">Mercado</option>
             <option value="sostenibilidad">Sostenibilidad</option>
           </select>
+          <label class="cf-lbl">API key Anthropic</label>
+          <input type="password" class="cf-inp" id="n-antkey" placeholder="sk-ant-...">
         </div>
         <button class="crear-btn" id="n-btn" onclick="generarCrear('noticia')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
@@ -638,11 +622,8 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
           <input type="text" class="cf-inp" id="e-contexto" placeholder="Ej: Entrevista realizada en la feria AquaSur 2026, hablamos sobre la expansión de la mitilicultura en Chiloé">
           <label class="cf-lbl">Contenido de la entrevista</label>
           <textarea class="cf-inp xl" id="e-contenido" placeholder="Pega aquí las preguntas y respuestas, la transcripción, o tus notas.&#10;&#10;Puede ser en cualquier formato:&#10;P: ¿Cómo ha cambiado la producción este año?&#10;R: Este año tuvimos un aumento del 15%...&#10;&#10;O simplemente notas tuyas:&#10;- Me habló de los desafíos del ISA&#10;- Mencionó que el precio del chorito subió&#10;- Cree que la normativa nueva es positiva"></textarea>
-          <label class="cf-lbl">Adjuntar documento de referencia (PDF, Word, imagen, texto)</label>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar archivo<input type="file" id="e-archivo" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg" style="display:none" onchange="document.getElementById('e-archivo-nm').textContent=this.files[0]?this.files[0].name:'Sin archivo'"></label>
-            <span id="e-archivo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
-          </div>
+          <label class="cf-lbl">API key Anthropic</label>
+          <input type="password" class="cf-inp" id="e-antkey" placeholder="sk-ant-...">
         </div>
         <button class="crear-btn" id="e-btn" onclick="generarCrear('entrevista')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
@@ -665,22 +646,12 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
           </select>
           <label class="cf-lbl">Empresa o persona que publica</label>
           <input type="text" class="cf-inp" id="m-empresa" placeholder="Ej: Mitilmar SpA, Puerto Montt">
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--s7);margin-bottom:12px;cursor:pointer"><input type="checkbox" id="m-anonimo" style="width:15px;height:15px;accent-color:var(--p6)"> Publicar de forma anónima (no mencionar el nombre de la empresa)</label>
           <label class="cf-lbl">Descripción del aviso</label>
           <textarea class="cf-inp big" id="m-descripcion" placeholder="Describe qué ofreces, qué buscas, cuáles son las condiciones, precios si aplica, zona geográfica, contacto, etc.&#10;&#10;Mientras más detalles, mejor resultado."></textarea>
           <label class="cf-lbl">Precio o rango (opcional)</label>
           <input type="text" class="cf-inp" id="m-precio" placeholder="Ej: $500 por tonelada · Precio a convenir · Inversión desde $10M">
-          <label class="cf-lbl">Adjuntar documento de referencia (PDF, Word, imagen, texto)</label>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar archivo<input type="file" id="m-archivo" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg" style="display:none" onchange="document.getElementById('m-archivo-nm').textContent=this.files[0]?this.files[0].name:'Sin archivo'"></label>
-            <span id="m-archivo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
-          </div>
-          <label class="cf-lbl">Imagen del producto o servicio (opcional)</label>
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar imagen<input type="file" id="m-imagen-prod" accept=".png,.jpg,.jpeg,.webp" style="display:none" onchange="previsualizarImg(this,'m-imagen-prev')"></label>
-            <img id="m-imagen-prev" src="" alt="" style="height:50px;width:80px;object-fit:cover;border-radius:6px;display:none">
-            <span id="m-imagen-prod-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
-          </div>
+          <label class="cf-lbl">API key Anthropic</label>
+          <input type="password" class="cf-inp" id="m-antkey" placeholder="sk-ant-...">
         </div>
         <button class="crear-btn" id="m-btn" onclick="generarCrear('mercado')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
@@ -704,25 +675,8 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
             <option value="opinion">Columna de opinión del cliente</option>
             <option value="producto">Presentación de producto/servicio</option>
           </select>
-          <label class="cf-lbl">Adjuntar documento de referencia (PDF, Word, imagen, texto)</label>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar archivo<input type="file" id="p-archivo" accept=".pdf,.docx,.doc,.txt,.png,.jpg,.jpeg" style="display:none" onchange="document.getElementById('p-archivo-nm').textContent=this.files[0]?this.files[0].name:'Sin archivo'"></label>
-            <span id="p-archivo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
-          </div>
-          <label class="cf-lbl">Logo del cliente (opcional)</label>
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-            <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar logo<input type="file" id="p-logo" accept=".png,.jpg,.jpeg,.svg,.webp" style="display:none" onchange="previsualizarImg(this,'p-logo-prev')"></label>
-            <img id="p-logo-prev" src="" alt="" style="height:40px;object-fit:contain;border-radius:6px;display:none">
-            <span id="p-logo-nm" style="font-size:12px;color:var(--s5)">Sin archivo</span>
-          </div>
-          <label class="cf-lbl">Imágenes del producto o servicio (opcional, máx 3)</label>
-          <div style="margin-bottom:12px">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-              <label style="padding:7px 14px;background:var(--s1);border:1px solid var(--s2);border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--s7);white-space:nowrap">Seleccionar imágenes<input type="file" id="p-imagenes" accept=".png,.jpg,.jpeg,.webp" multiple style="display:none" onchange="previsualizarMulti(this,'p-imagenes-prev')"></label>
-              <span id="p-imagenes-nm" style="font-size:12px;color:var(--s5)">Sin archivos</span>
-            </div>
-            <div id="p-imagenes-prev" style="display:flex;gap:8px;flex-wrap:wrap"></div>
-          </div>
+          <label class="cf-lbl">API key Anthropic</label>
+          <input type="password" class="cf-inp" id="p-antkey" placeholder="sk-ant-...">
         </div>
         <button class="crear-btn" id="p-btn" onclick="generarCrear('patrocinado')">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
@@ -753,7 +707,6 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
     <div class="cni" onclick="showCredSec('linkedin',this)">LinkedIn</div>
     <div class="cni" onclick="showCredSec('facebook',this)">Facebook</div>
     <div class="cni" onclick="showCredSec('historial',this)">Historial</div>
-    <div class="cni" onclick="showCredSec('apikeys',this)">API Keys IA</div>
   </div>
   <div class="cfg-main">
 
@@ -832,26 +785,6 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
       <button class="scfg" style="background:var(--err)" onclick="borrarHistorial()">Limpiar historial</button>
     </div>
 
-    <!-- API KEYS IA -->
-    <div class="cpg" id="cred-apikeys">
-      <div class="csec">
-        <div class="cs-t">API Keys IA</div>
-        <div class="cs-s">Claves de acceso a los proveedores de inteligencia artificial. Se guardan solo en este navegador.</div>
-        <div style="font-weight:700;font-size:12px;color:var(--p6);margin:8px 0">Gemini (Google)</div>
-        <label class="cfl">API Key</label>
-        <input type="password" class="cfi" id="cfGemKey" placeholder="AIza...">
-        <div style="font-weight:700;font-size:12px;color:var(--p6);margin:16px 0 8px">DeepSeek</div>
-        <label class="cfl">API Key</label>
-        <input type="password" class="cfi" id="cfDeepKey" placeholder="sk-...">
-        <label class="cfl" style="margin-top:8px">Tavily API Key (búsqueda web)</label>
-        <input type="password" class="cfi" id="cfTavilyKey" placeholder="tvly-...">
-        <div style="font-weight:700;font-size:12px;color:var(--p6);margin:16px 0 8px">Anthropic</div>
-        <label class="cfl">API Key</label>
-        <input type="password" class="cfi" id="cfAntKey" placeholder="sk-ant-...">
-      </div>
-      <button class="scfg" onclick="guardarCfg('apikeys',this)">Guardar</button>
-    </div>
-
   </div>
 </div>
 
@@ -865,45 +798,39 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
     <div class="cni" onclick="showCfg('analisis',this)">Análisis estratégico</div>
     <div class="cni" onclick="showCfg('fuentes',this)">Fuentes</div>
     <div class="cni" onclick="showCfg('prohibido',this)">Palabras prohibidas</div>
-    <div class="cni" onclick="showCfg('modelos',this)">Modelos IA</div>
   </div>
   <div class="cfg-main">
     <div class="cpg on" id="cfg-voz">
       <div class="csec">
         <div class="cs-t">Voz y tono de REDIA</div>
-        <div class="cs-s">REDIA aplica el registro correcto según el tipo de publicación. Esta configuración permite ajustes adicionales.</div>
-        <div style="background:var(--s1);border:1px solid var(--s2);border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:12.5px;color:var(--s7);line-height:1.9">
-          El sistema aplica automáticamente:<br>
-          <span style="color:var(--p6);font-weight:600">· Periodístico</span> → Noticias e informes de análisis<br>
-          <span style="color:var(--p6);font-weight:600">· Técnico</span> → Análisis científico e innovación<br>
-          <span style="color:var(--p6);font-weight:600">· Cercano</span> → Entrevistas y casos de éxito<br>
-          <span style="color:var(--p6);font-weight:600">· Editorial</span> → Contenido patrocinado y avisos
+        <div class="cs-s">Define cómo habla REDIA. Se aplica a todos los informes generados.</div>
+        <div class="tone-g" id="toneGrid">
+          <div class="tone-o on" data-t="directo"><div class="tone-n">Directo</div><div class="tone-d">Sin rodeos, al punto</div></div>
+          <div class="tone-o" data-t="tecnico"><div class="tone-n">Técnico</div><div class="tone-d">Preciso y especializado</div></div>
+          <div class="tone-o" data-t="periodistico"><div class="tone-n">Periodístico</div><div class="tone-d">Narrativo y humano</div></div>
+          <div class="tone-o" data-t="analitico"><div class="tone-n">Analítico</div><div class="tone-d">Datos y contexto</div></div>
+          <div class="tone-o" data-t="divulgativo"><div class="tone-n">Divulgativo</div><div class="tone-d">Accesible para todos</div></div>
+          <div class="tone-o" data-t="mixto"><div class="tone-n">Mixto</div><div class="tone-d">Técnico + accesible</div></div>
         </div>
         <label class="cfl">Instrucción adicional de voz</label>
-        <textarea class="cfi ta" id="cfVoz" placeholder="Ej: Énfasis en la realidad de Chiloé y las comunidades del archipiélago. Evita el lenguaje corporativo."></textarea>
-        <label class="cfl">Temas sensibles o instrucciones especiales</label>
-        <textarea class="cfi ta" id="cfSensible" placeholder="Ej: Cuando cubras temas de comunidades, siempre incluir perspectiva de los trabajadores. Evitar comparaciones directas entre empresas."></textarea>
+        <textarea class="cfi ta" id="cfVoz" placeholder="Ej: Escribe como un periodista especializado que conoce el sector desde adentro. Evita el lenguaje corporativo."></textarea>
       </div>
       <button class="scfg" onclick="guardarCfg('voz',this)">Guardar</button>
     </div>
 
     <div class="cpg" id="cfg-audiencia">
       <div class="csec">
-        <div class="cs-t">Audiencia — REDIA escribe para toda la cadena</div>
-        <div class="cs-s">Todas activas por defecto. El sistema ajusta el lenguaje para que sea comprensible para todos los actores simultáneamente.</div>
+        <div class="cs-t">Audiencia objetivo</div>
+        <div class="cs-s">El sistema ajusta el lenguaje para que sea comprensible para todos a la vez.</div>
         <div class="aud-g" id="audGrid">
           <div class="aud-o on" data-a="artesanal"><div class="aud-dot"></div><div class="aud-n">Pescadores artesanales reconvertidos</div></div>
           <div class="aud-o on" data-a="tecnico"><div class="aud-dot"></div><div class="aud-n">Técnicos y profesionales</div></div>
           <div class="aud-o on" data-a="gerentes"><div class="aud-dot"></div><div class="aud-n">Gerentes y directivos</div></div>
           <div class="aud-o on" data-a="duenos"><div class="aud-dot"></div><div class="aud-n">Dueños de empresas acuícolas</div></div>
-          <div class="aud-o on" data-a="investigadores"><div class="aud-dot"></div><div class="aud-n">Investigadores y académicos</div></div>
-          <div class="aud-o on" data-a="autoridades"><div class="aud-dot"></div><div class="aud-n">Autoridades y reguladores</div></div>
-          <div class="aud-o on" data-a="proveedores"><div class="aud-dot"></div><div class="aud-n">Proveedores de la cadena de valor</div></div>
-          <div class="aud-o on" data-a="inversionistas"><div class="aud-dot"></div><div class="aud-n">Inversionistas y financistas</div></div>
-          <div class="aud-o on" data-a="trabajadores"><div class="aud-dot"></div><div class="aud-n">Trabajadores y operarios del sector</div></div>
-          <div class="aud-o on" data-a="comunidades"><div class="aud-dot"></div><div class="aud-n">Comunidades costeras y territorios</div></div>
-          <div class="aud-o on" data-a="medios"><div class="aud-dot"></div><div class="aud-n">Medios de comunicación y periodistas</div></div>
-          <div class="aud-o on" data-a="academia"><div class="aud-dot"></div><div class="aud-n">Estudiantes y academia</div></div>
+          <div class="aud-o" data-a="investigadores"><div class="aud-dot"></div><div class="aud-n">Investigadores y académicos</div></div>
+          <div class="aud-o" data-a="autoridades"><div class="aud-dot"></div><div class="aud-n">Autoridades y reguladores</div></div>
+          <div class="aud-o" data-a="proveedores"><div class="aud-dot"></div><div class="aud-n">Proveedores de la cadena de valor</div></div>
+          <div class="aud-o" data-a="inversionistas"><div class="aud-dot"></div><div class="aud-n">Inversionistas y financistas</div></div>
         </div>
         <label class="cfl">Instrucción adicional de audiencia</label>
         <textarea class="cfi ta" id="cfAud" placeholder="Ej: Cuando uses términos técnicos, agrega una breve explicación entre paréntesis."></textarea>
@@ -916,11 +843,11 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
         <div class="cs-t">Estructura del artículo</div>
         <div class="cs-s">Define cómo se organiza cada publicación.</div>
         <label class="cfl">Extensión mínima (palabras)</label>
-        <input type="number" class="cfi" id="cfWords" value="600" min="300" max="2000" style="width:140px">
+        <input type="number" class="cfi" id="cfWords" value="700" min="300" max="2000" style="width:140px">
         <label class="cfl">Secciones obligatorias (una por línea)</label>
-        <textarea class="cfi ta" id="cfSecc" placeholder=""></textarea>
+        <textarea class="cfi ta" id="cfSecc" placeholder="Contexto y antecedentes&#10;Qué significa para el sector&#10;Impacto en la cadena de valor&#10;Perspectiva regional"></textarea>
         <label class="cfl">Instrucción adicional de estructura</label>
-        <textarea class="cfi ta" id="cfEstr" placeholder="Los subtítulos deben ser afirmaciones directas con el dato más importante — nunca genéricos como Contexto o Análisis"></textarea>
+        <textarea class="cfi ta" id="cfEstr" placeholder="Ej: Los subtítulos deben ser afirmaciones directas, nunca genéricos."></textarea>
       </div>
       <button class="scfg" onclick="guardarCfg('estructura',this)">Guardar</button>
     </div>
@@ -941,12 +868,8 @@ body{font-family:'Inter',sans-serif;background:var(--s0);color:var(--s9);font-si
       <div class="csec">
         <div class="cs-t">Fuentes prioritarias</div>
         <div class="cs-s">Medios e instituciones que el sistema siempre consulta.</div>
-        <label class="cfl">Fuentes activas</label>
-        <div id="fuentesPills" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:40px;padding:8px;background:var(--s1);border:1px solid var(--s2);border-radius:8px"></div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input type="text" class="cfi" id="fuentesInput" placeholder="Agregar fuente..." style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarFuente();}">
-          <button class="scfg" onclick="agregarFuente()" style="margin-top:0;white-space:nowrap">+ Agregar</button>
-        </div>
+        <label class="cfl">Fuentes a consultar (una por línea)</label>
+        <textarea class="cfi" id="cfFuentes" style="min-height:180px;font-size:12px" placeholder="Aqua.cl&#10;MundoAcuícola&#10;SERNAPESCA&#10;SUBPESCA&#10;Intesal&#10;FAO&#10;Globefish&#10;El Llanquihue&#10;Diario de Aysén&#10;UACH&#10;IFOP"></textarea>
       </div>
       <button class="scfg" onclick="guardarCfg('fuentes',this)">Guardar</button>
     </div>
@@ -976,34 +899,6 @@ vale la pena señalar</textarea>
       </div>
       <button class="scfg" onclick="guardarCfg('prohibido',this)">Guardar</button>
     </div>
-
-    <div class="cpg" id="cfg-modelos">
-      <div class="csec">
-        <div class="cs-t">Modelos IA</div>
-        <div class="cs-s">Cuando un modelo queda obsoleto o sale uno mejor, cámbialo aquí sin tocar el código. Deja en blanco para usar el valor por defecto.</div>
-        <div style="font-weight:700;font-size:12px;color:var(--p6);margin-bottom:8px;margin-top:4px">Gemini (Google)</div>
-        <label class="cfl">Texto y búsqueda</label>
-        <input class="cfi" id="cfGeminiModel" placeholder="gemini-2.5-flash">
-        <div style="font-size:10px;color:var(--s4);margin-top:3px">gemini-2.5-flash: ~$0.15/1M entrada · $0.60/1M salida &nbsp;|&nbsp; gemini-2.0-flash: ~$0.10/$0.40 &nbsp;|&nbsp; gemini-2.0-flash-lite: ~$0.075/$0.30</div>
-        <button onclick="listarModelosGemini()" style="margin-top:6px;padding:5px 10px;font-size:11px;background:var(--s1);border:1px solid var(--s3);border-radius:6px;cursor:pointer;color:var(--s7)">Ver modelos disponibles</button>
-        <div id="geminiModelList" style="margin-top:6px;font-size:11px;color:var(--s6);max-height:160px;overflow-y:auto"></div>
-        <label class="cfl" style="margin-top:8px">Generación de imágenes</label>
-        <input class="cfi" id="cfImagenModel" placeholder="dejar vacío = auto (gemini-2.0-flash-preview-image-generation)">
-        <div style="font-size:10px;color:var(--s4);margin-top:3px">Vacío = detección automática &nbsp;|&nbsp; imagen-3.0-generate-001 = Imagen 3 (requiere plan pago)</div>
-        <div style="font-weight:700;font-size:12px;color:var(--p6);margin-bottom:8px;margin-top:16px">Anthropic</div>
-        <label class="cfl">Paso 1 — Investigar (con búsqueda web)</label>
-        <input class="cfi" id="cfAntModel1" placeholder="claude-sonnet-4-20250514">
-        <div style="font-size:10px;color:var(--s4);margin-top:3px">claude-sonnet-4-20250514: ~$3/1M entrada · $15/1M salida</div>
-        <label class="cfl" style="margin-top:8px">Pasos 2 y 3 — Redactar y distribuir</label>
-        <input class="cfi" id="cfAntModel2" placeholder="claude-haiku-4-5-20251001">
-        <div style="font-size:10px;color:var(--s4);margin-top:3px">claude-haiku-4-5-20251001: ~$0.80/1M entrada · $4/1M salida</div>
-        <div style="font-weight:700;font-size:12px;color:var(--p6);margin-bottom:8px;margin-top:16px">DeepSeek</div>
-        <label class="cfl">Modelo de texto</label>
-        <input class="cfi" id="cfDeepModel" placeholder="deepseek-chat">
-        <div style="font-size:10px;color:var(--s4);margin-top:3px">deepseek-chat (V3): ~$0.27/1M entrada · $1.10/1M salida</div>
-      </div>
-      <button class="scfg" onclick="guardarCfg('modelos',this)">Guardar</button>
-    </div>
   </div>
 </div>
 
@@ -1011,59 +906,16 @@ vale la pena señalar</textarea>
 // ── STATE ─────────────────────────────────────────────
 var GS_URL = localStorage.getItem('gs_url') || '';
 var ANT_KEY = localStorage.getItem('ant_key') || '';
-var GEM_KEY_SEARCH = localStorage.getItem('gem_key_search') || '';
-var DEEP_KEY_SEARCH = localStorage.getItem('deep_key_search') || '';
-var TAVILY_KEY = localStorage.getItem('tavily_key') || '';
-var AI_PROV_SEARCH = localStorage.getItem('ai_prov_search') || 'auto';
-// ── LOCAL STORAGE BACKUP ──────────────────────────────
-var LOCAL_RECS_KEY = 'redia_bandeja_local';
-function deduplicateRecs(recs){
-  var seen = {}; var out = [];
-  for(var r of recs){
-    // titulo_seo primero: mismo título = mismo artículo aunque el ID difiera
-    var key = (r.titulo_seo||'').trim().toLowerCase() || r.id || r._uid || '';
-    if(!key || !seen[key]){ seen[key]=true; out.push(r); }
-  }
-  return out;
-}
-function localLoad(){ try{ return JSON.parse(localStorage.getItem(LOCAL_RECS_KEY)||'[]'); }catch(e){ return []; } }
-function localSave(recs){ try{ localStorage.setItem(LOCAL_RECS_KEY, JSON.stringify(deduplicateRecs(recs))); }catch(e){} }
-function localAddRec(rec){
-  var local = localLoad();
-  var idx = local.findIndex(function(r){ return r.id===rec.id || r._uid===rec._uid; });
-  if(idx>=0) local[idx]=rec; else local.push(rec);
-  localSave(local);
-}
-// Mezcla registros de GS con los locales: preserva imagen_src (no se guarda en GS por tamaño)
-function mergeConLocal(gsRecs){
-  var local = localLoad();
-  return gsRecs.map(function(gr){
-    var lr = local.find(function(r){
-      return (r.id && r.id===gr.id) ||
-             ((r.titulo_seo||'').trim().toLowerCase() === (gr.titulo_seo||'').trim().toLowerCase());
-    });
-    if(lr && lr.imagen_src && !gr.imagen_src) return Object.assign({}, gr, {imagen_src: lr.imagen_src});
-    return gr;
-  });
-}
-
-var records = localLoad();  // cargar local inmediatamente
+var records = [];
 var filtro = 'todos';
 var CFG = loadCFG();
 var manualRec = null;
 
-// Migrar modelos obsoletos
-(function migrarModelos(){
-  var obsoletos = ['gemini-2.0-flash-001','gemini-2.0-flash','gemini-2.0-flash-lite','gemini-2.0-flash-lite-latest','gemini-1.5-flash','gemini-1.5-pro'];
-  if (obsoletos.includes(CFG.geminiModel)) { CFG.geminiModel = 'gemini-2.5-flash'; saveCFG({geminiModel:'gemini-2.5-flash'}); }
-})();
-
 // prefill
 if (GS_URL) document.getElementById('gsUrl').value = GS_URL;
-selProvSearch(AI_PROV_SEARCH, true);
+if (ANT_KEY) document.getElementById('antKey').value = ANT_KEY;
 document.getElementById('ndate').textContent = new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
 applyCFG();
-
 
 // ── NAV ───────────────────────────────────────────────
 function showPage(id,btn){
@@ -1075,6 +927,7 @@ function showPage(id,btn){
   var pg=document.getElementById('page-'+id);
   if(pg){
     pg.classList.add('on');
+    // Crear uses grid layout internally
     if(id==='crear') pg.style.display='block';
     else pg.style.display='flex';
   }
@@ -1087,124 +940,23 @@ function showCfg(id,el){
   el.classList.add('on');
 }
 
-// ── FUENTES PILLS ─────────────────────────────────────
-var DEFAULT_FUENTES=['Aqua.cl','MundoAcuícola','Intesal','SalmonExpert','Diario Acuícola','Mundo Marítimo','Portal Acuícola','Revista Aqua','SERNAPESCA','SUBPESCA','INDESPA','CORFO','SERCOTEC','ANID','FIC','FONDECYT','ProChile','SNA','SENCE','Ministerio de Economía','Ministerio del Medio Ambiente','Ministerio de Salud','Ministerio de Trabajo','Subsecretaría de Pesca','Dirección del Trabajo','SEREMI de Salud Los Lagos','SEREMI de Salud Aysén','SMA (Superintendencia del Medio Ambiente)','Contraloría General de la República','FIMA (Fiscalía del Medio Ambiente)','CONAF','DIRECTEMAR (Armada de Chile)','Gobierno Regional Los Lagos','Gobierno Regional Aysén','Gobierno Regional Magallanes','Gobierno Regional Los Ríos','Gobierno Regional Biobío','Gobierno Regional Araucanía','SalmonChile','Consejo del Salmón','Asociación de Mitilicultores','Asociación de Piscicultores','AquaPacífico','Federación de Pescadores','UACH','UCT','UCSC','PUCV','UdeC','UFRO','IFOP','Centro INCAR','Centro FONDAP','Fundación Chinquihue','ULAM','Centros de Innovación Regional Los Lagos','Centros de Innovación Regional Aysén','El Llanquihue','Diario de Aysén','La Discusión','MiradaSur','Diario Chiloé','El Sureño','IntraFish','SalmonBusiness','Fish Farmer','Undercurrent News','Eurofish','Globefish','FAO','OCDE','Banco Mundial','IUCN','OIE/OMSA','WorldFish','Nofima','Institute of Marine Research Noruega','CSIRO Australia','Cámara de Diputadas y Diputados','Senado de la República','Comisión de Pesca y Acuicultura Cámara','Comisión de Pesca y Acuicultura Senado','Comisión de Medio Ambiente Cámara','Comisión de Medio Ambiente Senado','Comisión de Trabajo Cámara','Comisión de Trabajo Senado','Comisión de Salud Cámara','Comisión de Salud Senado','Comisión de Transporte Cámara','Comisión de Hacienda Cámara','Comisión de Hacienda Senado','Comisión de Economía Cámara','Comisión de Economía Senado','Biblioteca del Congreso Nacional BCN'];
-
-// Mapeo foco → fuentes prioritarias por categoría
-var FUENTES_POR_FOCO = {
-  'normativa y regulación': {
-    cl:  ['SERNAPESCA','SUBPESCA','SMA','Contraloría General de la República','BCN','Comisión de Pesca y Acuicultura Cámara','Comisión de Pesca y Acuicultura Senado','Comisión de Medio Ambiente Cámara','Comisión de Asuntos Indígenas','Comisión de Transporte Cámara','Cámara de Diputadas y Diputados','Senado de la República'],
-    intl:['EFSA','Comisión Europea DG SANTE','FDA','GACC China (Aduana China)','MAFF Japón','Rosselkhoznadzor Rusia','Codex Alimentarius']
-  },
-  'exportaciones y comercio exterior': {
-    cl:  ['ProChile','SERNAPESCA','SalmonChile','Consejo del Salmón','Aduanas Chile'],
-    intl:['IntraFish','SalmonBusiness','Undercurrent News','Globefish','FAO','USDA','Eurofish']
-  },
-  'mercado nacional e internacional': {
-    cl:  ['Aqua.cl','MundoAcuícola','SalmonChile','SalmonExpert','Intesal'],
-    intl:['IntraFish','SalmonBusiness','Undercurrent News','Globefish','FAO']
-  },
-  'tecnología e innovación': {
-    cl:  ['IFOP','Centro INCAR','ANID','CORFO','UACH','UCT','UCSC','PUCV','UdeC','Fundación Chinquihue'],
-    intl:['Nofima','Institute of Marine Research Noruega','CSIRO Australia','University of Stirling','Global Seafood Alliance','WorldFish','FAO']
-  },
-  'investigación científica e innovación': {
-    cl:  ['IFOP','Centro INCAR','ANID','FONDECYT','UACH','UCT','UCSC','PUCV','UdeC','UFRO'],
-    intl:['Nofima','Institute of Marine Research Noruega','CSIRO Australia','University of Stirling','WorldFish','FAO']
-  },
-  'certificaciones y estándares internacionales': {
-    cl:  ['SERNAPESCA','APL-CORFO','SalmonChile','ProChile'],
-    intl:['ASC (Aquaculture Stewardship Council)','BAP Global Seafood Alliance','Friend of the Sea','MSC','GlobalG.A.P.','Naturland']
-  },
-  'sanidad acuícola': {
-    cl:  ['SERNAPESCA','INDESPA','ISP','UACH'],
-    intl:['OIE/OMSA','WOAH','Nofima','Institute of Marine Research Noruega']
-  },
-  'medio ambiente y sustentabilidad': {
-    cl:  ['SMA','CONAF','DIRECTEMAR','Ministerio del Medio Ambiente','FIMA'],
-    intl:['IUCN','OCDE','IPCC','UNEP','FAO','WWF']
-  },
-  'cambio climático y océano': {
-    cl:  ['SMA','DIRECTEMAR','Ministerio del Medio Ambiente','INACH','IFOP'],
-    intl:['IPCC','IUCN','OCDE','FAO','NOAA']
-  },
-  'financiamiento y fondos públicos INDESPA CORFO': {
-    cl:  ['CORFO','INDESPA','ANID','FIC','FONDECYT','SERCOTEC'],
-    intl:['BID','Banco Mundial','FAO','GEF']
-  },
-  'estadísticas y producción': {
-    cl:  ['SERNAPESCA','SUBPESCA','INDESPA','SalmonChile','Intesal'],
-    intl:['FAO','Globefish','OCDE']
-  },
-  'comunidades costeras y territorio': {
-    cl:  ['Gobierno Regional Los Lagos','Gobierno Regional Aysén','Gobierno Regional Magallanes','El Llanquihue','Diario de Aysén','La Discusión','Diario Chiloé','CONAF','DIRECTEMAR'],
-    intl:[]
-  },
-  'relaciones laborales y empleo': {
-    cl:  ['Dirección del Trabajo','Ministerio de Trabajo','SENCE','SalmonChile','Federación de Pescadores'],
-    intl:['OIT']
-  },
-  'fiscalización y sanciones': {
-    cl:  ['SMA','SERNAPESCA','Contraloría General de la República','FIMA','DIRECTEMAR'],
-    intl:[]
-  },
-  'negocios e inversiones': {
-    cl:  ['Aqua.cl','MundoAcuícola','SalmonChile','Mundo Marítimo'],
-    intl:['IntraFish','SalmonBusiness','Bloomberg','Reuters']
-  },
-  'contingencia nacional': {
-    cl:  ['Aqua.cl','MundoAcuícola','SERNAPESCA','El Llanquihue','Diario de Aysén','La Discusión'],
-    intl:[]
-  },
-  'infraestructura y logística': {
-    cl:  ['Mundo Marítimo','DIRECTEMAR','Ministerio de Obras Públicas','Ministerio de Transporte'],
-    intl:[]
-  },
-  'emprendimiento y startups acuícolas': {
-    cl:  ['CORFO','INDESPA','ANID','StartUp Chile','Fundación Chinquihue'],
-    intl:['Hatch','Aqua-Spark','Global Seafood Alliance']
-  }
-};
-
-function renderFuentesPills(fuentes){
-  var c=document.getElementById('fuentesPills'); if(!c) return;
-  c.innerHTML=fuentes.map(f=>`<span data-fuente="${esc(f)}" style="display:inline-flex;align-items:center;gap:4px;background:var(--p1);color:var(--p6);border:1px solid var(--p3);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:500">${esc(f)}<button onclick="this.parentElement.remove()" title="Eliminar" style="background:none;border:none;cursor:pointer;color:var(--s5);font-size:15px;line-height:1;padding:0 0 1px 3px">&times;</button></span>`).join('');
-}
-
-function getFuentesActivas(){
-  var c=document.getElementById('fuentesPills'); if(!c) return [];
-  return [...c.querySelectorAll('span')].map(s=>s.dataset.fuente);
-}
-
-function agregarFuente(){
-  var input=document.getElementById('fuentesInput');
-  var val=input.value.trim(); if(!val) return;
-  var activas=getFuentesActivas();
-  if(!activas.includes(val)){ activas.push(val); renderFuentesPills(activas); }
-  input.value='';
-}
-
 // ── CONFIG ────────────────────────────────────────────
 function loadCFG(){ try{ return JSON.parse(localStorage.getItem('redia_cfg')||'{}'); }catch{ return {}; } }
 function saveCFG(obj){ Object.assign(CFG,obj); localStorage.setItem('redia_cfg',JSON.stringify(CFG)); }
 function applyCFG(){
   if(CFG.tono) document.querySelectorAll('#toneGrid .tone-o').forEach(el=>el.classList.toggle('on',el.dataset.t===CFG.tono));
   if(CFG.audiencias) document.querySelectorAll('#audGrid .aud-o').forEach(el=>el.classList.toggle('on',(CFG.audiencias||[]).includes(el.dataset.a)));
-  var m={cfVoz:'voz',cfSensible:'sensible',cfAud:'aud',cfWords:'words',cfSecc:'secc',cfEstr:'estr',cfDim:'dim',cfAnal:'anal',cfProh:'proh',cfGeminiModel:'geminiModel',cfImagenModel:'imagenModel',cfAntModel1:'antModel1',cfAntModel2:'antModel2',cfDeepModel:'deepModel',cfGemKey:'gemKey',cfDeepKey:'deepKey',cfTavilyKey:'tavilyKey',cfAntKey:'antKey'};
+  var m={cfVoz:'voz',cfAud:'aud',cfWords:'words',cfSecc:'secc',cfEstr:'estr',cfDim:'dim',cfAnal:'anal',cfFuentes:'fuentes',cfProh:'proh'};
   Object.entries(m).forEach(([elId,key])=>{ var el=document.getElementById(elId); if(el&&CFG[key]) el.value=CFG[key]; });
-  var fuentesGuardadas = CFG.fuentes ? CFG.fuentes.split('\n').filter(Boolean) : DEFAULT_FUENTES;
-  renderFuentesPills(fuentesGuardadas);
 }
 function guardarCfg(sec,btn){
   var d={};
-  if(sec==='voz'){ d.voz=document.getElementById('cfVoz').value; d.sensible=document.getElementById('cfSensible').value; }
+  if(sec==='voz'){ var t=document.querySelector('#toneGrid .tone-o.on'); d.tono=t?t.dataset.t:'directo'; d.voz=document.getElementById('cfVoz').value; }
   else if(sec==='audiencia'){ d.audiencias=[...document.querySelectorAll('#audGrid .aud-o.on')].map(e=>e.dataset.a); d.aud=document.getElementById('cfAud').value; }
   else if(sec==='estructura'){ d.words=document.getElementById('cfWords').value; d.secc=document.getElementById('cfSecc').value; d.estr=document.getElementById('cfEstr').value; }
   else if(sec==='analisis'){ d.dim=document.getElementById('cfDim').value; d.anal=document.getElementById('cfAnal').value; }
-  else if(sec==='fuentes'){ d.fuentes=getFuentesActivas().join('\n'); }
+  else if(sec==='fuentes'){ d.fuentes=document.getElementById('cfFuentes').value; }
   else if(sec==='prohibido'){ d.proh=document.getElementById('cfProh').value; }
-  else if(sec==='modelos'){ d.geminiModel=document.getElementById('cfGeminiModel').value.trim(); d.imagenModel=document.getElementById('cfImagenModel').value.trim(); d.antModel1=document.getElementById('cfAntModel1').value.trim(); d.antModel2=document.getElementById('cfAntModel2').value.trim(); d.deepModel=document.getElementById('cfDeepModel').value.trim(); }
-  else if(sec==='apikeys'){ d.gemKey=document.getElementById('cfGemKey').value.trim(); d.deepKey=document.getElementById('cfDeepKey').value.trim(); d.tavilyKey=document.getElementById('cfTavilyKey').value.trim(); d.antKey=document.getElementById('cfAntKey').value.trim(); }
   saveCFG(d);
   var orig=btn.textContent; btn.textContent='Guardado'; btn.classList.add('ok');
   setTimeout(()=>{ btn.textContent=orig; btn.classList.remove('ok'); },2000);
@@ -1222,26 +974,17 @@ async function gsCall(body){
 async function guardarGS(){
   GS_URL = document.getElementById('gsUrl').value.trim();
   localStorage.setItem('gs_url', GS_URL);
-  setGsStatus('Conectando...', 'cs-w');
+  var st = document.getElementById('gsSt');
+  st.textContent='Conectando...'; st.className='cst cs-w';
   try {
     var d = await gsCall({action:'listar'});
-    console.log('[GS listar response]', JSON.stringify(d).slice(0,500));
-    if(!d.ok) throw new Error(d.error||'Respuesta sin ok:true — revisa el Apps Script');
-    records = deduplicateRecs(mergeConLocal(d.records || []));
-    localSave(records);
+    if(!d.ok) throw new Error(d.error||'Error');
+    st.textContent='Conectado'; st.className='cst cs-ok';
+    records = d.records || [];
     renderBandeja();
-    _gsRetries = 0;
-    setGsStatus('Conectado · '+records.length+' registro'+(records.length!==1?'s':''), 'cs-ok');
   } catch(e){
-    setGsStatus('Error: '+e.message, 'cs-err');
-    console.error('[GS error]', e);
+    st.textContent=e.message; st.className='cst cs-err';
   }
-}
-
-function limpiarDuplicados(){
-  records = deduplicateRecs(records);
-  localSave(records);
-  renderBandeja();
 }
 
 async function cargarBandeja(){
@@ -1284,8 +1027,7 @@ function renderBandeja(){
     return;
   }
   var fecha=new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
-  lista = deduplicateRecs(lista);
-  c.innerHTML='<div class="cards-hd"><div><div class="cards-title">'+lista.length+' informe'+(lista.length!==1?'s':'')+' · '+filtro+'</div><div class="cards-sub">'+fecha+'</div></div><div style="display:flex;gap:8px"><button id="autoGenBtn" class="rbtn" onclick="generarAutomatico(this)" style="background:var(--grad)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Generar ahora</button><button class="rbtn" onclick="cargarBandeja()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>Actualizar</button></div></div>'+
+  c.innerHTML='<div class="cards-hd"><div><div class="cards-title">'+lista.length+' informe'+(lista.length!==1?'s':'')+' · '+filtro+'</div><div class="cards-sub">'+fecha+'</div></div><button class="rbtn" onclick="cargarBandeja()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>Actualizar</button></div>'+
   lista.map(r=>buildCard(r)).join('');
 }
 
@@ -1307,9 +1049,8 @@ function buildCard(r){
   var vfmt=(r.video_script||'').replace(/(\d{2}:\d{2})/g,'<span class="vts">$1</span>').replace(/\[([^\]]+)\]/g,'<span style="background:var(--t0);color:#0f766e;padding:1px 5px;border-radius:4px;font-size:10px;font-style:italic;">[$1]</span>').replace(/\n/g,'<br>');
   return `
 <div class="card ${r.estado||'pendiente'}" id="card-${uid}">
-  <div class="card-hd" onclick="toggleCard('${uid}')" style="display:flex;gap:12px;align-items:flex-start">
-    ${r.imagen_src ? `<img id="card-thumb-${uid}" src="${r.imagen_src}" style="width:90px;height:60px;object-fit:cover;border-radius:8px;flex-shrink:0;margin-top:2px">` : `<img id="card-thumb-${uid}" src="" style="display:none;width:90px;height:60px;object-fit:cover;border-radius:8px;flex-shrink:0;margin-top:2px">`}
-    <div class="card-info" style="flex:1;min-width:0">
+  <div class="card-hd" onclick="toggleCard('${uid}')">
+    <div class="card-info">
       <div class="card-cat">${r.categoria||'Análisis REDIA'}</div>
       <div class="card-title">${esc(r.titular||r.titulo_seo||'Sin título')}</div>
       <div class="card-bajada">${esc(r.bajada||'')}</div>
@@ -1318,7 +1059,7 @@ function buildCard(r){
         <span>${r.fuente_original||r.fecha||'REDIA'}</span>
         ${tags.map(t=>'<span>#'+t+'</span>').join('')}
       </div>
-    </div></div>
+    </div>
     <div><div class="sp ${spCls}">${spLbl}</div></div>
   </div>
   <div class="card-body" id="body-${uid}">
@@ -1338,9 +1079,10 @@ function buildCard(r){
         <div class="ibox-t">Análisis estratégico REDIA</div>
         <div class="ibox-g" style="grid-template-columns:1fr">
           <div class="ibox-c"><div class="ibox-l">Lo que muestra este análisis</div><div class="ibox-v">${r.analisis_muestra||sj(r.beneficios,[]).map(b=>'· '+b).join('<br>')||''}</div></div>
+          <div class="ibox-c"><div class="ibox-l">Lo que no resuelve por sí solo</div><div class="ibox-v">${r.analisis_no_resuelve||sj(r.dolores,[]).map(b=>'· '+b).join('<br>')||''}</div></div>
+          <div class="ibox-c"><div class="ibox-l">Para quiénes es especialmente relevante</div><div class="ibox-v">${r.analisis_relevante_para||r.coyuntura||''}</div></div>
         </div>
       </div>
-      ${(()=>{var fc=sj(r.fuentes_con_links,[]);if(!fc.length||['entrevista','mercado','patrocinado'].includes(r.categoria)) return '';return '<div style="margin:16px 0 4px;padding:14px 16px;border-top:1px solid var(--s2)"><div style="font-size:11px;font-weight:700;color:var(--s6);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Fuentes consultadas</div><ul style="list-style:none;padding:0;margin:0">'+fc.map(f=>'<li style="margin:6px 0;font-size:12.5px;display:flex;gap:5px;align-items:baseline"><a href="'+f.url+'" target="_blank" rel="noopener" style="color:var(--p6);font-weight:700;text-decoration:none">'+f.nombre+'</a><span style="color:var(--s4);font-size:10px">↗</span>'+(f.descripcion?'<span style="color:var(--s5)"> — '+f.descripcion+'</span>':'')+'</li>').join('')+'</ul></div>';})()}
     </div>
     <div class="cpanel" id="cp-${uid}-edit">
       <div class="ef"><label class="efl">Titular</label><input type="text" class="efi" id="ef-${uid}-tit" value="${esc(r.titular||'')}" oninput="dirty('${uid}')"></div>
@@ -1360,54 +1102,18 @@ function buildCard(r){
     </div>
     <div class="cpanel" id="cp-${uid}-rrss">
       <div class="sgrid">
-        <div class="sc">
-          <div class="sl">LinkedIn <button class="cpbtn" style="margin-left:6px" onclick="generarRedSocial('${uid}','linkedin',this)">↺ Generar</button><button class="cpbtn" onclick="cp(document.getElementById('rrss-li-${uid}').value,this)">Copiar</button><button id="savebtn-rrss-li-${uid}" class="cpbtn" style="background:#94a3b8;color:#fff;opacity:.5" disabled onclick="guardarRRSS('${uid}','linkedin')">Guardar</button></div>
-          <textarea class="efi" id="rrss-li-${uid}" rows="6" oninput="dirtyRRSS('${uid}','linkedin')">${esc(r.linkedin||'')}</textarea>
-        </div>
-        <div class="sc">
-          <div class="sl">Facebook <button class="cpbtn" style="margin-left:6px" onclick="generarRedSocial('${uid}','facebook',this)">↺ Generar</button><button class="cpbtn" onclick="cp(document.getElementById('rrss-fb-${uid}').value,this)">Copiar</button><button id="savebtn-rrss-fb-${uid}" class="cpbtn" style="background:#94a3b8;color:#fff;opacity:.5" disabled onclick="guardarRRSS('${uid}','facebook')">Guardar</button></div>
-          <textarea class="efi" id="rrss-fb-${uid}" rows="4" oninput="dirtyRRSS('${uid}','facebook')">${esc(r.facebook||'')}</textarea>
-        </div>
+        <div class="sc"><div class="sl">LinkedIn</div><div class="sbox">${esc(r.linkedin||'').replace(/\n/g,'<br>')}</div><button class="cpbtn" onclick="cpRec('${uid}','linkedin',this)">Copiar LinkedIn</button></div>
+        <div class="sc"><div class="sl">Facebook</div><div class="sbox">${esc(r.facebook||'').replace(/\n/g,'<br>')}</div><button class="cpbtn" onclick="cpRec('${uid}','facebook',this)">Copiar Facebook</button></div>
       </div>
     </div>
     <div class="cpanel" id="cp-${uid}-media">
       <div class="sgrid">
-        <div class="sc">
-          <div class="sl">Guión Audio / Podcast
-            <button class="cpbtn" style="margin-left:6px" onclick="generarMedia('${uid}','audio',this)">↺ Generar</button>
-            <button class="cpbtn" onclick="cp(document.getElementById('media-audio-${uid}').value,this)">Copiar</button>
-            <button id="savebtn-media-audio-${uid}" class="cpbtn" style="background:#94a3b8;color:#fff;opacity:.5" disabled onclick="guardarMedia('${uid}','audio')">Guardar</button>
-          </div>
-          <textarea class="efi big" id="media-audio-${uid}" rows="10" oninput="dirtyMedia('${uid}','audio')">${esc(r.audio_script||'')}</textarea>
-        </div>
-        <div class="sc">
-          <div class="sl">Guión YouTube
-            <button class="cpbtn" style="margin-left:6px" onclick="generarMedia('${uid}','video',this)">↺ Generar</button>
-            <button class="cpbtn" onclick="cp(document.getElementById('media-video-${uid}').value,this)">Copiar</button>
-            <button id="savebtn-media-video-${uid}" class="cpbtn" style="background:#94a3b8;color:#fff;opacity:.5" disabled onclick="guardarMedia('${uid}','video')">Guardar</button>
-          </div>
-          <textarea class="efi big" id="media-video-${uid}" rows="10" oninput="dirtyMedia('${uid}','video')">${esc(r.video_script||'')}</textarea>
-        </div>
-        <div class="sc">
-          <div class="sl">Imagen
-            <button class="cpbtn" style="margin-left:6px" onclick="generarImgBandeja('${uid}',this)">↺ Generar imagen</button>
-            <button class="cpbtn" onclick="cp('${esc(r.imagen_prompt||'')}',this)">Copiar prompt</button>
-            <a id="dl-img-${uid}" style="display:none"><button class="cpbtn" style="background:#15803d;color:#fff">Descargar</button></a>
-          </div>
-          <div id="img-box-${uid}" style="margin:10px 0;border-radius:10px;overflow:hidden;background:var(--s1);min-height:80px;display:flex;align-items:center;justify-content:center">
-            ${r.imagen_src ? `<img src="${r.imagen_src}" style="width:100%;border-radius:10px">` : `<span style="color:#94a3b8;font-size:12px">Sin imagen — haz clic en Generar imagen</span>`}
-          </div>
-          <div class="sbox" style="font-size:11px;color:#64748b">${esc(r.imagen_prompt||'')}</div>
-        </div>
+        <div class="sc"><div class="sl">Guión Audio</div><div class="sbox">${esc(r.audio_script||'').replace(/\n/g,'<br>')}</div><button class="cpbtn" onclick="cpRec('${uid}','audio_script',this)">Copiar guión</button></div>
+        <div class="sc"><div class="sl">Guión YouTube</div><div class="sbox">${vfmt}</div><button class="cpbtn" onclick="cpRec('${uid}','video_script',this)">Copiar guión</button></div>
+        <div class="sc"><div class="sl">Prompt imagen (Gemini / Midjourney)</div><div class="sbox">${esc(r.imagen_prompt||'')}</div><button class="cpbtn" onclick="cp('${esc(r.imagen_prompt||'')}',this)">Copiar prompt</button></div>
       </div>
     </div>
     <div class="cpanel" id="cp-${uid}-html">
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:#166534;line-height:1.7">
-        <strong>Para pegar en redia.pro manualmente:</strong><br>
-        <span style="color:#15803d">→ Título del artículo:</span> <strong>${esc(r.titular||r.titulo_seo||'')}</strong><br>
-        <span style="color:#15803d">→ Descripción / extracto:</span> ${esc((r.bajada||r.descripcion_seo||'').substring(0,120))}<br>
-        <span style="color:#15803d">→ Cuerpo:</span> pega el HTML completo abajo
-      </div>
       <div class="hcode">${esc((r.html_publicable||'').substring(0,1800))}${(r.html_publicable||'').length>1800?'\n...':''}</div>
       <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
         <button class="abtn ab-grad" onclick="dlHTML('${uid}')">Descargar HTML</button>
@@ -1418,17 +1124,15 @@ function buildCard(r){
       ${(r.estado||'pendiente')!=='aprobado'  ?`<button class="abtn ab-ok"   onclick="estado('${uid}','aprobado')">Aprobar</button>`:''}
       ${(r.estado||'pendiente')!=='descartado'?`<button class="abtn ab-disc" onclick="estado('${uid}','descartado')">Descartar</button>`:''}
       ${(r.estado||'pendiente')==='descartado'?`<button class="abtn ab-ok"   onclick="estado('${uid}','pendiente')">Restaurar</button>`:''}
-      ${(r.titular||r.articulo?.titular)&&!(r.linkedin)?`<button class="abtn ab-grad" id="distbtn-${uid}" onclick="generarDistribucion('${uid}')">Generar distribución</button>`:''}
       <button class="abtn ab-save" id="savebtn-${uid}" onclick="guardarEdicion('${uid}')">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13"/><polyline points="7 3 7 8 15 8"/></svg>
         Guardar edición
       </button>
-      ${(r.estado)==='aprobado'?`<button class="abtn ab-pub" id="pubbtn-${uid}" onclick="abrirPublicar('${uid}')">
+      <button class="abtn ab-pub" id="pubbtn-${uid}" onclick="abrirPublicar('${uid}')">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
         Publicar en redia.pro
-      </button>`:''}
+      </button>
       <button class="abtn ab-grad" onclick="dlHTML('${uid}')">Descargar HTML</button>
-      <button class="abtn ab-out" onclick="cpHTML('${uid}',this)">Copiar HTML</button>
     </div>
   </div>
 </div>`;
@@ -1472,265 +1176,10 @@ async function guardarEdicion(uid){
   if(btn){ btn.textContent='Guardado'; btn.style.background='var(--ok)'; setTimeout(()=>{ btn.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13"/><polyline points="7 3 7 8 15 8"/></svg> Guardar edición'; btn.style.background='var(--p6)'; },2000); }
 }
 
-// ── GENERAR DISTRIBUCIÓN ──────────────────────────────
-// ── IMAGEN BANDEJA ────────────────────────────────────
-async function generarImgBandeja(uid, btn){
-  var rec=getRec(uid); if(!rec) return;
-  var gemKey=getAIKey('gem');
-  if(!gemKey){ alert('Configura la API key de Gemini en Credenciales → API Keys IA'); return; }
-  if(!rec.imagen_prompt){ alert('Este artículo no tiene prompt de imagen generado.'); return; }
-  var orig=btn.textContent; btn.textContent='Generando...'; btn.disabled=true;
-  var box=document.getElementById('img-box-'+uid);
-  if(box) box.innerHTML='<span style="color:#94a3b8;font-size:12px">Generando imagen...</span>';
-  try {
-    var raw=await generarImagenGemini(rec.imagen_prompt, gemKey);
-    if(!raw) throw new Error('No se pudo generar la imagen. Intenta de nuevo.');
-    var src=await resizarImg820x400(raw);
-    rec.imagen_src=src;
-    localAddRec(rec);
-    // Mostrar imagen
-    if(box) box.innerHTML='<img src="'+src+'" style="width:100%;border-radius:10px">';
-    // Botón descargar
-    var dl=document.getElementById('dl-img-'+uid);
-    if(dl){ dl.href=src; dl.download='redia-imagen-'+uid+'.png'; dl.style.display='inline'; }
-    // Thumbnail en cabecera de tarjeta
-    var thumb=document.getElementById('card-thumb-'+uid);
-    if(thumb){ thumb.src=src; thumb.style.display='block'; }
-    btn.textContent=orig; btn.disabled=false;
-  } catch(e){
-    if(box) box.innerHTML='<span style="color:#ef4444;font-size:12px">'+e.message+'</span>';
-    btn.textContent=orig; btn.disabled=false;
-  }
-}
-
-// ── AUDIO / VIDEO ─────────────────────────────────────
-function dirtyMedia(uid, tipo){
-  var btn=document.getElementById('savebtn-media-'+tipo+'-'+uid);
-  if(btn){ btn.textContent='Guardar'; btn.style.background='#d97706'; btn.style.opacity='1'; btn.disabled=false; }
-}
-
-async function guardarMedia(uid, tipo){
-  var rec=getRec(uid); if(!rec) return;
-  var campo = tipo==='audio' ? 'audio_script' : 'video_script';
-  var btn=document.getElementById('savebtn-media-'+tipo+'-'+uid);
-  var texto=(document.getElementById('media-'+tipo+'-'+uid)?.value||'').trim();
-  rec[campo]=texto;
-  localAddRec(rec);
-  if(rec.id) await gsActualizar(rec.id, campo, texto);
-  if(btn){ btn.textContent='Guardado ✓'; btn.style.background='#15803d'; btn.style.opacity='1';
-    setTimeout(function(){ btn.textContent='Guardar'; btn.style.background='#94a3b8'; btn.style.opacity='.5'; btn.disabled=true; },2000);
-  }
-}
-
-async function generarMedia(uid, tipo, btn){
-  var rec=getRec(uid); if(!rec) return;
-  var gemKey=getAIKey('gem');
-  if(!gemKey){ alert('Configura la API key de Gemini en Credenciales → API Keys IA'); return; }
-  var orig=btn.textContent; btn.textContent='...'; btn.disabled=true;
-  try {
-    var titular=rec.titular||'';
-    var bajada=rec.bajada||'';
-    var cuerpo=(rec.cuerpo_html||'').replace(/<[^>]+>/g,' ').substring(0,2000);
-    var prompt = tipo==='audio'
-      ? `Eres el editor de contenidos de REDIA — Red de Inteligencia Acuícola de Chile.
-
-Escribe un guión de narración en audio para este informe. Será leído en voz alta como podcast o nota de voz.
-
-TITULAR: ${titular}
-BAJADA: ${bajada}
-CONTENIDO: ${cuerpo}
-
-REGLAS:
-- Tono informativo, cercano y directo — como si le hablaras a un profesional del sector
-- Sin exclamaciones ni lenguaje alarmista
-- Escribe como se habla, no como se lee
-- Mín 300 palabras
-- Abre con el hecho central sin rodeos
-- Cierra mencionando REDIA como fuente de inteligencia acuícola
-
-Responde SOLO con el guión, sin títulos ni etiquetas.`
-      : `Eres el editor de contenidos de REDIA — Red de Inteligencia Acuícola de Chile.
-
-Escribe un guión para video YouTube sobre este informe.
-
-TITULAR: ${titular}
-BAJADA: ${bajada}
-CONTENIDO: ${cuerpo}
-
-REGLAS:
-- Usa timecodes en formato 00:00 al inicio de cada sección
-- Indica descripción visual entre [corchetes] cuando sea relevante
-- Tono informativo y directo, sin sensacionalismo
-- Mín 300 palabras
-- Cierra con CTA: suscribirse a REDIA en redia.pro
-
-Responde SOLO con el guión, sin explicaciones adicionales.`;
-
-    var raw=await callGemini(prompt,gemKey,null,false,3000);
-    if(!raw||raw.trim().length<20) throw new Error('Respuesta vacía');
-    var campo = tipo==='audio' ? 'audio_script' : 'video_script';
-    var texto=sanitizeVocab(raw.trim());
-    rec[campo]=texto;
-    localAddRec(rec);
-    if(rec.id) await gsActualizar(rec.id, campo, texto);
-    var box=document.getElementById('media-'+tipo+'-'+uid);
-    if(box) box.value=texto;
-    btn.textContent=orig; btn.disabled=false;
-    dirtyMedia(uid, tipo);
-  } catch(e){
-    btn.textContent=orig; btn.disabled=false;
-    alert('Error: '+e.message);
-  }
-}
-
-function dirtyRRSS(uid, red){
-  var key = red==='linkedin' ? 'li' : 'fb';
-  var btn=document.getElementById('savebtn-rrss-'+key+'-'+uid);
-  if(btn){ btn.textContent='Guardar'; btn.style.background='#d97706'; btn.style.opacity='1'; btn.disabled=false; }
-}
-
-async function guardarRRSS(uid, red){
-  var rec=getRec(uid); if(!rec) return;
-  var key = red==='linkedin' ? 'li' : 'fb';
-  var btn=document.getElementById('savebtn-rrss-'+key+'-'+uid);
-  var texto=(document.getElementById('rrss-'+key+'-'+uid)?.value||'').trim();
-  rec[red]=texto;
-  localAddRec(rec);
-  if(rec.id) await gsActualizar(rec.id, red, texto);
-  if(btn){ btn.textContent='Guardado ✓'; btn.style.background='#15803d'; btn.style.opacity='1';
-    setTimeout(function(){ btn.textContent='Guardar'; btn.style.background='#94a3b8'; btn.style.opacity='.5'; btn.disabled=true; },2000);
-  }
-}
-
-async function generarRedSocial(uid, red, btn){
-  var rec=getRec(uid); if(!rec) return;
-  var gemKey=getAIKey('gem');
-  if(!gemKey){ alert('Configura la API key de Gemini en Credenciales → API Keys IA'); return; }
-  var orig=btn.textContent; btn.textContent='...'; btn.disabled=true;
-  try {
-    var titular=rec.titular||'';
-    var bajada=rec.bajada||'';
-    var cuerpo=(rec.cuerpo_html||'').replace(/<[^>]+>/g,' ').substring(0,1500);
-    var esLI = red==='linkedin';
-    var prompt=`Eres el editor de distribución de REDIA — Red de Inteligencia Acuícola de Chile.
-
-TITULAR: ${titular}
-BAJADA: ${bajada}
-RESUMEN: ${cuerpo}
-
-Genera SOLO el post de ${esLI?'LinkedIn':'Facebook'} para este informe.
-
-${esLI ? `Estilo LinkedIn REDIA — ejemplos de apertura correcta:
-"Chile autorizó 47 nuevas concesiones de mitilicultura en la Región de Los Lagos."
-"El IFOP publicó su informe anual de biomasa de merluza: las cifras muestran recuperación en tres zonas."
-"SUBPESCA abrió consulta pública sobre el nuevo reglamento de acuicultura offshore."
-
-Abre con el hecho concreto del artículo, igual de directo. Sin exclamaciones. Sin adjetivos grandilocuentes. Tono: analista sectorial, no comunicado de prensa.
-- 1-2 emojis máximo si son relevantes al tema
-- Incluye link https://redia.pro al final
-- Entre 500 y 900 caracteres` : `Estilo Facebook REDIA — ejemplos de apertura correcta:
-"Chile aprobó más de 200 proyectos salmoneros que estaban detenidos."
-"El IFOP confirma recuperación de biomasa en tres zonas pesqueras del sur."
-
-Abre igual de directo. Sin exclamaciones. Sin exageración.
-- Máx 350 caracteres
-- Incluye link https://redia.pro al final`}
-
-Responde SOLO con el texto del post completo, sin explicaciones ni etiquetas. Termina con oración completa y el link. NUNCA cortes a mitad.`;
-
-    var raw=await callGemini(prompt,gemKey,null,false,2000);
-    if(!raw||raw.trim().length<10) throw new Error('Respuesta vacía');
-    var texto=sanitizeVocab(raw.trim());
-    rec[red]=texto;
-    localAddRec(rec);
-    if(rec.id) await gsActualizar(rec.id, red, texto);
-    // Actualizar textarea y activar botón guardar
-    var box=document.getElementById('rrss-'+(esLI?'li':'fb')+'-'+uid);
-    if(box) box.value=texto;
-    btn.textContent='↺ Generar'; btn.disabled=false;
-    dirtyRRSS(uid, red);
-  } catch(e){
-    btn.textContent=orig; btn.disabled=false;
-    alert('Error: '+e.message);
-  }
-}
-
-async function generarDistribucion(uid){
-  var rec=getRec(uid); if(!rec) return;
-  var btn=document.getElementById('distbtn-'+uid);
-  if(btn){ btn.textContent='Generando...'; btn.disabled=true; }
-  try {
-    var gemKey=getAIKey('gem');
-    if(!gemKey) throw new Error('Configura la API key de Gemini en Credenciales → API Keys IA');
-    var titular=rec.titular||'';
-    var bajada=rec.bajada||'';
-    var cuerpo=(rec.cuerpo_html||'').replace(/<[^>]+>/g,' ').substring(0,2000);
-    var prompt=`Eres el editor de distribución de REDIA — Red de Inteligencia Acuícola de Chile.
-
-Genera los textos de distribución para este informe:
-
-TITULAR: ${titular}
-BAJADA: ${bajada}
-RESUMEN: ${cuerpo}
-
-Responde en este formato exacto (sin JSON, sin markdown, sin explicaciones):
-
-LINKEDIN:
-[post LinkedIn informativo, profesional, con emojis sectoriales 🐟🌊, incluye el link https://redia.pro al final, máx 1200 caracteres]
-
-FACEBOOK:
-[post Facebook más conversacional y breve, incluye link https://redia.pro, máx 500 caracteres]`;
-
-    var raw=await callGemini(prompt,gemKey,null,false,1500);
-    console.log('[distribucion raw]', raw);
-    if(!raw||raw.trim().length<10) throw new Error('Respuesta vacía de Gemini');
-
-    // Parsear formato de texto plano — acepta variantes de formato
-    var liMatch=raw.match(/LINKEDIN[:\s]+\n?([\s\S]*?)(?=\n\s*FACEBOOK[:\s]|$)/i);
-    var fbMatch=raw.match(/FACEBOOK[:\s]+\n?([\s\S]*?)$/i);
-    var li=(liMatch?.[1]||'').trim().replace(/^\[|\]$/g,'');
-    var fb=(fbMatch?.[1]||'').trim().replace(/^\[|\]$/g,'');
-    if(!li) throw new Error('No se encontró el post de LinkedIn en la respuesta');
-
-    rec.linkedin=li;
-    rec.facebook=fb;
-    localAddRec(rec);
-    if(rec.id){
-      if(li) await gsActualizar(rec.id,'linkedin',li);
-      if(fb) await gsActualizar(rec.id,'facebook',fb);
-    }
-    renderBandeja();
-    setTimeout(()=>{ var b=document.getElementById('body-'+uid); if(b) b.classList.add('open'); },50);
-  } catch(e){
-    alert('Error generando distribución: '+e.message);
-    if(btn){ btn.textContent='Generar distribución'; btn.disabled=false; }
-  }
-}
-
 // ── BÚSQUEDA MANUAL ───────────────────────────────────
-document.querySelectorAll('#eGrid .chip').forEach(el=>el.onclick=()=>{el.classList.toggle('on');updEsp();});
+document.querySelectorAll('#eGrid .chip').forEach(el=>el.onclick=()=>el.classList.toggle('on'));
 // Chips y tags son opcionales — sin selección = busca todo
-document.querySelectorAll('#fGrid .ftag').forEach(el=>el.onclick=()=>{el.classList.toggle('on');updFoc();});
-
-function toggleCollapse(sId, aId) {
-  var s=document.getElementById(sId), a=document.getElementById(aId);
-  if(!s) return;
-  var open=s.style.display!=='none';
-  s.style.display=open?'none':'block';
-  if(a) a.style.transform=open?'':'rotate(180deg)';
-}
-function updEsp() {
-  var sel=[...document.querySelectorAll('#eGrid .chip.on')].map(e=>e.textContent.trim());
-  var lbl=document.getElementById('eLabel');
-  if(!lbl) return;
-  lbl.textContent=sel.length?'Especies — '+sel.join(', '):'Especies (opcional) — Todas';
-}
-function updFoc() {
-  var n=document.querySelectorAll('#fGrid .ftag.on').length;
-  var lbl=document.getElementById('fLabel');
-  if(!lbl) return;
-  lbl.textContent=n?'Focos — '+n+' seleccionado'+(n>1?'s':''):'Focos temáticos (opcional) — Todos';
-}
+document.querySelectorAll('#fGrid .ftag').forEach(el=>el.onclick=()=>el.classList.toggle('on'));
 
 var STEPS=[
   {t:'Consultando <strong>Aqua.cl, MundoAcuícola, Intesal</strong>...',p:10},
@@ -1744,288 +1193,54 @@ var STEPS=[
   {t:'Empaquetando para <strong>redia.pro</strong>...',p:99},
 ];
 
-function buildPromptInvestigar(esp,foc,kw,temasYaCubiertos,especiesForzar){
-  // Fuentes base siempre presentes
-  var BASE_CL=[
-    // Medios sectoriales
-    'Aqua.cl','MundoAcuícola','Visión Acuícola','Portal Acuícola','SalmonExpert','IntraFish','SalmonBusiness','Undercurrent News',
-    // Instituciones reguladoras y estatales
-    'SERNAPESCA','SUBPESCA','SMA','INDESPA','IFOP',
-    // Ciencia y tecnología
-    'Centro INCAR','ANID','UACH','Nofima','CSIRO Australia',
-    // Gremios
-    'SalmonChile','Consejo del Salmón','Asociación de Mitilicultores',
-    // Prensa regional
-    'El Llanquihue','Diario de Aysén','Diario Chiloé',
-    // Internacional
-    'FAO','Globefish'
-  ];
-  var fuentesCl=BASE_CL.slice(), fuentesIntl=[];
-  foc.forEach(function(f){
-    var m=FUENTES_POR_FOCO[f];
-    if(!m) return;
-    m.cl.forEach(function(s){ if(!fuentesCl.includes(s)) fuentesCl.push(s); });
-    m.intl.forEach(function(s){ if(!fuentesIntl.includes(s)) fuentesIntl.push(s); });
-  });
-  if(foc.length===0){
-    var _cfgF=(CFG&&CFG.fuentes)?CFG.fuentes.split('\n').filter(Boolean):[];
-    var _defF=(typeof DEFAULT_FUENTES!=='undefined'&&Array.isArray(DEFAULT_FUENTES))?DEFAULT_FUENTES:[];
-    var _fArr=_cfgF.length>0?_cfgF:_defF;
-    _fArr.slice(0,15).forEach(function(s){ if(!fuentesCl.includes(s)) fuentesCl.push(s); });
-  }
-  var fLib=fuentesCl.slice(0,20).concat(fuentesIntl.slice(0,10)).join(', ');
-  var temaLabel = kw ? 'TEMA ESPECÍFICO' : 'ESCANEO GENERAL DEL SECTOR';
-  var temaVal = kw || 'sector acuícola chileno — últimas 48-72 horas';
-  var yaStr = (temasYaCubiertos&&temasYaCubiertos.length)
-    ? '\nTEMAS YA CUBIERTOS (no repetir salvo novedad significativa de seguimiento):\n'+temasYaCubiertos.slice(-20).map(t=>'- '+t).join('\n')
-    : '';
-  var rotacionStr = especiesForzar
-    ? '\nROTACIÓN OBLIGATORIA: Los últimos artículos cubrieron salmón. DEBES buscar y reportar sobre '+especiesForzar+' en esta ocasión. Si no encuentras noticias recientes de '+especiesForzar+', busca otra especie no salmonídea (ostiones, ostras, algas, erizo). Solo vuelve al salmón si absolutamente no existe ninguna noticia relevante de otras especies en los últimos 7 días.'
-    : '';
-  var diversidadStr = (!kw && !esp.length)
-    ? '\nDIVERSIDAD OBLIGATORIA:\n- ESPECIES: No solo salmón. Busca activamente noticias de mitilicultura (mejillones/choritos), ostiones, ostras, algas, erizo de mar u otras especies. Si hay algo relevante, priorízalo.\n- TEMAS: No solo producción y exportaciones. Busca también: tecnología e innovación (IFOP, INCAR, ANID, Nofima), normativa y regulación (SERNAPESCA, SUBPESCA, SMA, Congreso), ciencia aplicada (universidades, centros I+D), sanidad acuícola, comunidades costeras, financiamiento (INDESPA, CORFO).\n- FUENTES: No te limites a Aqua.cl o MundoAcuícola. Incluye Visión Acuícola, SalmonBusiness, IntraFish, FAO, SERNAPESCA, IFOP y prensa regional (El Llanquihue, Diario de Aysén).'+rotacionStr
-    : '\nFUENTES: Busca en al menos 3 fuentes distintas. Incluye fuentes internacionales (IntraFish, SalmonBusiness, FAO) si el tema lo justifica.';
-  return `Eres un investigador del sector acuícola chileno. Usa web_search activamente.
-
-${temaLabel}: ${temaVal}
-${esp.length?'ESPECIES: '+esp.join(', '):''}${foc.length?'\nFOCOS: '+foc.join(', '):''}
-FUENTES PRIORITARIAS: ${fLib}${yaStr}${diversidadStr}
-
-PROCESO (sigue este orden):
-1. Busca las noticias recientes del sector en las fuentes prioritarias — escanea titulares de los últimos 3 días
-2. ${kw ? 'Profundiza en el tema específico indicado, buscando en al menos 3 fuentes distintas' : 'Identifica la noticia más relevante e impactante del sector — evitando los temas ya cubiertos — y profundiza en ella con al menos 3 fuentes'}
-3. Recopila hechos verificados con cifras concretas de cada fuente
-
-Responde con este formato exacto:
-
-TITULO: (título de la noticia principal seleccionada)
-URL: (url directa a la noticia)
-FUENTE: (nombre del medio)
-FECHA: (fecha de publicación)
-ANGULO: (el ángulo más relevante para el sector acuícola chileno)
-HECHOS:
-- (hecho 1 con cifra concreta — fuente entre paréntesis)
-- (hecho 2 — fuente entre paréntesis)
-- (hecho 3 — fuente entre paréntesis)
-- (más hechos si existen)
-CONTEXTO: (antecedentes sectoriales relevantes — qué pasó antes, qué explica este hecho)
-OTRAS_FUENTES:
-- Nombre: (medio o institución) | URL: (url) | Aporte: (qué dato específico aportó)
-- Nombre: (medio o institución) | URL: (url) | Aporte: (qué dato específico aportó)
-NOTICIAS_RECIENTES:
-- (titular breve — fuente — fecha)
-- (titular breve — fuente — fecha)
-- (titular breve — fuente — fecha)`;
-}
-
-function buildPromptRedactar(inv,minW){
-  var fuentesStr=(inv.fuentes_adicionales||[]).map(f=>f.nombre+(f.url?' ('+f.url+')':'')).join(', ')||inv.fuente||'';
-  var hechosList=(inv.hechos||[]).map((h,i)=>(i+1)+'. '+h).join('\n');
-  var noticiasRecientes=(inv.noticias_recientes||[]).length ? '\nOTRAS NOTICIAS RECIENTES DEL SECTOR (solo como contexto si son relevantes al eje central):\n'+(inv.noticias_recientes.map(n=>'- '+n).join('\n')) : '';
-  return REDIA_IDENTITY+`
-
-TAREA: Redactar análisis editorial REDIA. Tienes acceso a web_search — úsalo para verificar datos consultando la URL fuente directamente. Solo incluye datos que puedas verificar.
-
-INVESTIGACIÓN:
-Noticia principal: ${inv.titulo}
-URL: ${inv.url||''}
-Fuente: ${inv.fuente||''}
-Fecha: ${inv.fecha||'reciente'}
-Ángulo: ${inv.angulo||''}
-Contexto: ${inv.contexto||''}
-
-Hechos verificados:
-${hechosList}
-${noticiasRecientes}
-Fuentes consultadas: ${fuentesStr}
-
-REGLAS DE REDACCIÓN (obligatorias, sin excepción):
-1. NUNCA inventes citas ni reproduzcas declaraciones textuales de personas. Sin blockquote, sin comillas atribuidas a nadie.
-2. NUNCA inventes cifras, porcentajes ni estadísticas. Cada dato debe provenir de una fuente real que puedas nombrar.
-3. web_search está disponible SOLO para verificar datos ya mencionados en la investigación — NO para agregar datos nuevos no relacionados al tema central.
-4. Cuando uses un dato, indica su fuente en el mismo párrafo: "(según [Fuente])" o "(de acuerdo a [Fuente])". Si no conoces la fuente, no uses el dato.
-5. El tema central ("${inv.titulo}") es el EJE. Todo lo demás solo entra si sirve directamente para explicarlo — nunca como sección paralela.
-6. Si un dato o subtema no ilumina directamente el eje central, no va.
-
-Redacta el informe completo con voz REDIA. Mín ${minW} palabras en el cuerpo.
-IMPORTANTE: en fuentes_consultadas y fuentes_con_links lista TODAS las fuentes reales usadas en la investigación, no solo la principal.
-IMPORTANTE JSON: el campo "cuerpo" debe estar en Markdown puro — NO uses HTML. Así el JSON no tendrá problemas de comillas. Usa ## para subtítulos, **texto** para negritas, párrafos separados por línea en blanco.
-
-Responde SOLO con JSON válido:
-{"titulo_seo":"máx 60 chars","descripcion_seo":"MÁXIMO 140 CARACTERES exactos — frase completa, sin punto final","tags":["t1","t2","t3","t4"],"categoria":"noticia","tiempo_lectura":"X min","fuentes_consultadas":["Medio o fuente 1","Medio o fuente 2","Medio o fuente 3"],"fuentes_con_links":[{"nombre":"Nombre real del medio","url":"https://url-real.cl/nota","descripcion":"Qué aportó esta fuente"},{"nombre":"Fuente 2","url":"https://url2.cl","descripcion":"Qué aportó"},{"nombre":"Fuente 3","url":"https://url3.cl","descripcion":"Qué aportó"}],"imagen_prompt":"Prompt fotorrealista en inglés para Gemini Imagen 3. Específico al tema. 16:9","linkedin":"Post LinkedIn informativo sobre el eje central. Tono profesional, no publicitario. Emojis sectoriales (🐟🌊⚓). Incluye link redia.pro al final. Máx 1200 caracteres.","facebook":"Post Facebook conversacional sobre el mismo eje. Más cercano. Incluye link redia.pro. Máx 500 caracteres.","articulo":{"titular":"titular periodístico directo con dato concreto","bajada":"2-3 oraciones con el hecho más relevante y cifra concreta, con fuente entre paréntesis","cuerpo":"MARKDOWN: ## subtítulos, **datos clave** en negrita, párrafos con fuente entre paréntesis. Sin citas textuales. Mín ${minW} palabras.","analisis_muestra":"Lo que muestra este análisis — qué revela para el sector acuícola, en 2-4 puntos concretos basados solo en los datos entregados"}}`;
-}
-
-function buildPromptDistribuir(titular,bajada,analisisMuestra){
-  return `Redacta el contenido de distribución para este artículo de REDIA — Red de Inteligencia Acuícola de Chile.
-
-TITULAR: ${titular}
-BAJADA: ${bajada}
-ANÁLISIS: ${analisisMuestra}
-
-Responde SOLO con JSON válido:
-{"linkedin":"Post LinkedIn. Informativo, no publicitario. Emojis sectoriales. Máx 1200 chars. Link redia.pro.","facebook":"Post Facebook conversacional. Máx 500 chars. Link redia.pro.","audio_script":"Guión narración audio. Informativo y cercano. Mín 350 palabras.","video_script":"Guión YouTube. Timecodes 00:00. [Descripción visual]. CTA suscripción. Mín 300 palabras."}`;
-}
-
 async function buscarManual(){
   var esp=[...document.querySelectorAll('#eGrid .chip.on')].map(e=>e.dataset.v);
   var foc=[...document.querySelectorAll('#fGrid .ftag.on')].map(e=>e.dataset.v);
   var kw=document.getElementById('kwIn').value.trim();
-  var km = document.getElementById('keyMissing');
-  var avail = buildProvOrder(AI_PROV_SEARCH).filter(function(p){ return !!getAIKey(p); });
-  if(!avail.length){ if(km) km.style.display='block'; return; }
-  if(km) km.style.display='none';
+  var key=document.getElementById('antKey').value.trim();
+  // Especies y focos son opcionales — sin selección busca en toda la acuicultura
+  if(!key) return alert('Ingresa tu API key de Anthropic.');
+  localStorage.setItem('ant_key',key);
+  ANT_KEY=key;
   var btn=document.getElementById('genBtn');
   btn.disabled=true; btn.innerHTML='<div class="spnw"></div> Generando...';
   document.getElementById('searchEmpty').style.display='none';
   document.getElementById('searchResult').style.display='none';
   document.getElementById('searchLoading').style.display='block';
-  var minW=parseInt(CFG.words||'600');
-
-  function sp(pct,txt){ document.getElementById('pFill').style.width=pct+'%'; document.getElementById('lStep').innerHTML=txt; }
-  function err(msg){ document.getElementById('searchLoading').style.display='none'; document.getElementById('searchEmpty').style.display='flex'; document.getElementById('searchEmpty').innerHTML='<div style="background:var(--errb);border:1px solid var(--errbr);border-radius:14px;padding:20px;max-width:400px;color:var(--err);font-size:13px;line-height:1.6"><strong>Error:</strong><br>'+msg+'</div>'; }
-  function na(ms){ _busquedaAbort=new AbortController(); return setTimeout(()=>_busquedaAbort.abort(),ms); }
-  function rb(){ btn.disabled=false; btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora'; }
-  function isRL(e){ return e.message&&e.message.startsWith('RATE_LIMIT'); }
-  function errMsg(e){ return e.message&&e.message.startsWith('RATE_LIMIT')?'Límite de tokens/minuto. Espera 60s e intenta de nuevo.':(e.name==='AbortError'?'Tiempo agotado.':e.message); }
-  // Limpiar URLs de tracking (Mailchimp, UTM, etc.) para extraer solo la URL base o el dominio
-  function cleanTrackingUrl(s){
-    if(!s) return s;
-    // Si tiene parámetros UTM o parece un fragmento de URL de campaña
-    if(/utm_|mailchimp|mc_eid|mc_cid|EMAIL_CAMPAIGN/i.test(s)){
-      // Intentar extraer la URL real (antes del ?) o el texto más útil sin los params
-      var urlMatch=s.match(/https?:\/\/[^\s?&]+/);
-      if(urlMatch) return urlMatch[0];
-      // Si no hay URL completa, limpiar los parámetros de tracking
-      return s.replace(/[?&]?(utm_\w+|mc_eid|mc_cid|EMAIL_CAMPAIGN)[^&]*/g,'').replace(/^[?&]/,'').trim();
-    }
-    return s;
+  document.getElementById('pFill').style.width='0%';
+  var si=0;
+  var st=setInterval(()=>{ if(si<STEPS.length){ document.getElementById('lStep').innerHTML=STEPS[si].t; document.getElementById('pFill').style.width=STEPS[si].p+'%'; si++; } },38000/STEPS.length);
+  try {
+    var raw=await callClaude(buildPrompt(esp,foc,kw),key);
+    clearInterval(st);
+    document.getElementById('pFill').style.width='100%';
+    await sleep(300);
+    var data=parseJSON(raw);
+    // Soporte para múltiples informes (array) o informe único (objeto)
+    var dataArr=Array.isArray(data)?data:[data];
+    var recs=dataArr.map(d=>{ var r=normalizeRec(d); r.html_publicable=buildHTML(r); r._uid=r.id; return r; });
+    manualRec=recs[0];
+    manualRecs=recs;
+    document.getElementById('searchLoading').style.display='none';
+    var res=document.getElementById('searchResult');
+    res.style.display='block';
+    var n=recs.length;
+    res.innerHTML=
+      '<div class="cards-hd"><div><div class="cards-title">'+n+' informe'+(n!==1?'s generados':' generado')+'</div><div class="cards-sub">Revisa cada uno — aprueba los que quieres publicar, descarta los demás</div></div>'+
+      '<div style="display:flex;gap:7px">'+
+      (GS_URL?'<button class="rbtn" style="background:linear-gradient(135deg,var(--ok),var(--t5))" onclick="guardarTodosEnGS()">Guardar todos en bandeja</button>':'')+
+      '</div></div>'+
+      recs.map(r=>buildCard(r)).join('');
+    setTimeout(()=>{ var b=document.getElementById('body-'+recs[0].id); if(b) b.classList.add('open'); },100);
+  } catch(e){
+    clearInterval(st);
+    document.getElementById('searchLoading').style.display='none';
+    document.getElementById('searchEmpty').style.display='flex';
+    document.getElementById('searchEmpty').innerHTML='<div style="background:var(--errb);border:1px solid var(--errbr);border-radius:14px;padding:20px;max-width:400px;color:var(--err);font-size:13px;line-height:1.6"><strong>Error:</strong><br>'+e.message+'</div>';
+  } finally {
+    btn.disabled=false;
+    btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Generar informe ahora';
   }
-  kw = cleanTrackingUrl(kw);
-  var searchQ=((kw||'')+' '+(esp.join(' '))+' '+(foc.join(' '))).trim();
-
-  // ── PASO 1: Investigar — siempre Gemini (Google Search grounding) ──
-  var gemKey = getAIKey('gem');
-  if(!gemKey){ err('Paso 1 requiere la API key de Gemini para buscar en la web. Configúrala en Credenciales → API Keys IA.'); rb(); return; }
-  sp(5,'Paso 1/3 — Investigando con Gemini + Google Search...');
-  var t1=na(90000); var r1;
-  var temasCubiertos=(records||[]).map(function(r){ return r.titular||r.titulo_seo||''; }).filter(Boolean);
-
-  // Detectar si los últimos artículos son mayoritariamente salmón y forzar rotación
-  var SALMON_KW = /salm[oó]n|salmonicultura|salmón|trucha|acuicultura.*salm|salm.*acuicultura/i;
-  var OTRAS_ESP  = ['mitilicultura','mejillón','chorito','ostión','ostra','alga','erizo','abalón','almeja','pelillo','pelillo'];
-  var ultimosRecs = (records||[]).slice(-5);
-  var ultimosSalmones = ultimosRecs.filter(function(r){ return SALMON_KW.test(r.titular||r.titulo_seo||''); }).length;
-  var forzarRotacion = (!kw && !esp.length && ultimosSalmones >= 2);
-  // Si hay que rotar, elegir especie con menos cobertura reciente
-  var especiesForzar = '';
-  if(forzarRotacion){
-    var cubiertas = temasCubiertos.join(' ').toLowerCase();
-    var candidatas = [
-      {e:'mitilicultura y mejillones (choritos)',k:'mitilicultura|mejillón|chorito'},
-      {e:'ostiones y pectinicultura',k:'ostión|pectinicultura'},
-      {e:'ostras',k:'ostra'},
-      {e:'algas marinas (pelillo, luga, huiro)',k:'alga|pelillo|luga|huiro'},
-      {e:'erizo de mar',k:'erizo'},
-      {e:'abalón',k:'abalón|abalon'}
-    ];
-    var elegida = candidatas.find(function(c){ return !new RegExp(c.k,'i').test(cubiertas); }) || candidatas[0];
-    especiesForzar = elegida.e;
-  }
-
-  try { r1=await callGemini(buildPromptInvestigar(esp,foc,kw,temasCubiertos,especiesForzar),gemKey,_busquedaAbort.signal,true,null); clearTimeout(t1); }
-  catch(e){ clearTimeout(t1); _busquedaAbort=null; err('Error en investigación (Gemini): '+errMsg(e)); rb(); return; }
-
-  // Parsear respuesta de texto plano de paso 1
-  if(!r1 || r1.trim().length < 30){
-    err('La investigación no devolvió datos. Intenta con otro tema o URL.');
-    rb(); return;
-  }
-  function p1Field(text, key){
-    var m = text.match(new RegExp(key+':\\s*(.+)','i'));
-    return m ? m[1].trim() : '';
-  }
-  function p1List(text, key){
-    var m = text.match(new RegExp(key+':\\s*\\n((?:\\s*-[^\\n]+\\n?)+)','i'));
-    if(!m) return [];
-    return m[1].split('\n').map(function(l){ return l.replace(/^\s*-\s*/,'').trim(); }).filter(Boolean);
-  }
-  var inv = {
-    titulo: p1Field(r1,'TITULO'),
-    url:    p1Field(r1,'URL'),
-    fuente: p1Field(r1,'FUENTE'),
-    fecha:  p1Field(r1,'FECHA'),
-    angulo: p1Field(r1,'ANGULO'),
-    contexto: p1Field(r1,'CONTEXTO'),
-    hechos: p1List(r1,'HECHOS'),
-    noticias_recientes: p1List(r1,'NOTICIAS_RECIENTES'),
-    fuentes_adicionales: p1List(r1,'OTRAS_FUENTES').map(function(l){
-      var nm=l.match(/Nombre:\s*([^|]+)/i), ul=l.match(/URL:\s*([^|]+)/i), ap=l.match(/Aporte:\s*(.+)/i);
-      return { nombre:(nm?nm[1].trim():''), url:(ul?ul[1].trim():''), aporte:(ap?ap[1].trim():'') };
-    })
-  };
-  if(!inv.titulo){
-    err('La investigación no encontró una noticia. Intenta con un tema más específico o una URL directa.<br><pre style="font-size:10px;white-space:pre-wrap;margin-top:8px;max-height:100px;overflow:auto;background:rgba(0,0,0,.15);padding:6px;border-radius:6px">'+esc(r1.substring(0,400))+'</pre>');
-    rb(); return;
-  }
-
-  // ── PASO 2: Redactar — Gemini. Sin búsqueda (datos ya vienen de paso 1) ──
-  sp(38,'Paso 2/3 — Redactando con Gemini: <em>'+esc((inv.titulo||'').substring(0,55))+'</em>...');
-  var t2=na(90000); var r2;
-  try { r2=await callGemini(buildPromptRedactar(inv,minW),gemKey,_busquedaAbort.signal,false,6000); clearTimeout(t2); }
-  catch(e){ clearTimeout(t2); _busquedaAbort=null; err('Error en redacción (Gemini): '+errMsg(e)); rb(); return; }
-
-  var rec;
-  try { rec=normalizeRec(parseJSON(r2)); }
-  catch(e){
-    // Intentar reparación: pedir al modelo que corrija el JSON
-    if(r2 && r2.length > 20){
-      sp(60,'Reparando formato del artículo...');
-      try {
-        var t2b=na(40000); var r2b;
-        r2b=await callAI('El siguiente JSON tiene errores (posiblemente comillas sin escapar en el HTML del campo "cuerpo"). Corrígelo y devuelve SOLO el JSON válido sin texto adicional. Usa comillas simples en atributos HTML dentro de strings JSON:\n\n'+r2.substring(0,4000), false, null, 3000, _busquedaAbort.signal);
-        clearTimeout(t2b);
-        rec=normalizeRec(parseJSON(r2b));
-      } catch(e2){
-        err('No se pudo procesar el artículo.<br><pre style="font-size:10px;white-space:pre-wrap;margin-top:8px;max-height:100px;overflow:auto;background:rgba(0,0,0,.15);padding:6px;border-radius:6px">'+esc((r2||'(vacío)').substring(0,400))+'</pre>');
-        rb(); return;
-      }
-    } else {
-      err('El artículo no pudo generarse. Intenta de nuevo.<br><pre style="font-size:10px;white-space:pre-wrap;margin-top:8px;max-height:80px;overflow:auto;background:rgba(0,0,0,.15);padding:6px;border-radius:6px">'+esc((r2||'(sin respuesta)').substring(0,400))+'</pre>');
-      rb(); return;
-    }
-  }
-
-  // ── PASO 3: Distribución (web_search OFF) ──
-  sp(72,'Paso 3/3 — Generando LinkedIn, Facebook y guiones...');
-  var t3=na(60000); var r3;
-  try { r3=await callAI(buildPromptDistribuir(rec.titular,rec.bajada,rec.analisis_muestra),false,(CFG&&CFG.antModel2)||'claude-haiku-4-5-20251001',2000,_busquedaAbort.signal); clearTimeout(t3); }
-  catch(e){ clearTimeout(t3); /* distribución es opcional — si falla igual mostramos el artículo */ r3=null; }
-
-  if(r3){ try{ var dist=parseJSON(r3); rec.linkedin=dist.linkedin||''; rec.facebook=dist.facebook||''; rec.audio_script=dist.audio_script||''; rec.video_script=dist.video_script||''; }catch(e){} }
-
-  rec.fecha_fuente=inv.fecha||'';
-  rec.html_publicable=buildHTML(rec); rec._uid=rec.id;
-  manualRec=rec; manualRecs=[rec];
-
-  sp(100,'Listo');
-  await sleep(200);
-  document.getElementById('searchLoading').style.display='none';
-
-  var res=document.getElementById('searchResult');
-  res.style.display='block';
-  var srcUrl=inv.url||'';
-  var srcName=inv.fuente||'la fuente original';
-  res.innerHTML=
-    '<div class="cards-hd"><div><div class="cards-title">Informe generado</div><div class="cards-sub">Revisa, edita y publica cuando esté listo</div></div>'+
-    '<div style="display:flex;gap:7px"><button class="rbtn" style="background:linear-gradient(135deg,var(--ok),var(--t5))" onclick="guardarTodosEnGS()">Guardar en bandeja</button>'+
-    '</div></div>'+
-    '<div style="background:#fefce8;border:1px solid #fde047;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:#713f12;line-height:1.6">'+
-    '<strong>Verificar antes de publicar:</strong> Este borrador es un análisis editorial generado por IA a partir de hechos y datos. '+
-    'Verifica cifras y datos clave contra '+(srcUrl?'<a href="'+esc(srcUrl)+'" target="_blank" style="color:#92400e;font-weight:700">'+esc(srcName)+'</a>':esc(srcName))+
-    ' antes de publicar.</div>'+
-    buildCard(rec);
-  setTimeout(()=>{ var b=document.getElementById('body-'+rec.id); if(b) b.classList.add('open'); },100);
-  rb();
 }
 
 async function guardarManualEnGS(){
@@ -2035,152 +1250,28 @@ async function guardarManualEnGS(){
   else alert('No se pudo guardar. Verifica la conexión con Google Sheets.');
 }
 
-// ── GENERAR AUTOMÁTICO ────────────────────────────────
-// Ejecuta el flujo completo (paso1+paso2+paso3) y guarda directo en bandeja
-async function generarAutomatico(btn){
-  var gemKey = getAIKey('gem');
-  if(!gemKey){ alert('Configura la API key de Gemini en Credenciales → API Keys IA'); return; }
-
-  var origTxt = btn ? btn.innerHTML : '';
-  if(btn){ btn.disabled=true; btn.innerHTML='<div class="spnw"></div> Generando...'; }
-
-  // Notificación de progreso en bandeja
-  function setNotif(txt){
-    var n = document.getElementById('autoGenNotif');
-    if(!n){ n=document.createElement('div'); n.id='autoGenNotif';
-      n.style.cssText='background:#fef9c3;border:1px solid #fde047;border-radius:10px;padding:10px 14px;font-size:12px;color:#713f12;margin-bottom:10px;display:flex;gap:8px;align-items:center';
-      var c=document.getElementById('bandejaContent');
-      if(c) c.insertAdjacentElement('afterbegin',n);
-    }
-    n.innerHTML='<div class="spnw" style="border-top-color:#713f12"></div> '+txt;
-  }
-  function clearNotif(){ var n=document.getElementById('autoGenNotif'); if(n) n.remove(); }
-
-  try {
-    // Rotación automática de especies
-    var temasCubiertos = (records||[]).map(function(r){ return r.titular||r.titulo_seo||''; }).filter(Boolean);
-    var SALMON_KW = /salm[oó]n|salmonicultura|salmón|trucha|acuicultura.*salm|salm.*acuicultura/i;
-    var ultimosSalmones = (records||[]).slice(-5).filter(function(r){ return SALMON_KW.test(r.titular||r.titulo_seo||''); }).length;
-    var especiesForzar = '';
-    if(ultimosSalmones >= 2){
-      var cubiertas = temasCubiertos.join(' ').toLowerCase();
-      var candidatas = [
-        {e:'mitilicultura y mejillones (choritos)',k:'mitilicultura|mejillón|chorito'},
-        {e:'ostiones y pectinicultura',k:'ostión|pectinicultura'},
-        {e:'ostras',k:'ostra'},
-        {e:'algas marinas (pelillo, luga, huiro)',k:'alga|pelillo|luga|huiro'},
-        {e:'erizo de mar',k:'erizo'},
-        {e:'abalón',k:'abalón|abalon'}
-      ];
-      var elegida = candidatas.find(function(c){ return !new RegExp(c.k,'i').test(cubiertas); }) || candidatas[0];
-      especiesForzar = elegida.e;
-    }
-
-    // PASO 1 — Investigar
-    setNotif('Paso 1/3 — Investigando con Gemini + Google Search...');
-    var r1 = await callGemini(buildPromptInvestigar([],[],null,temasCubiertos,especiesForzar), gemKey, null, true, null);
-    if(!r1 || r1.trim().length < 30) throw new Error('La investigación no devolvió datos. Intenta de nuevo.');
-
-    function p1Field(text,key){ var m=text.match(new RegExp(key+':\\s*(.+)','i')); return m?m[1].trim():''; }
-    function p1List(text,key){ var m=text.match(new RegExp(key+':\\s*\\n((?:\\s*-[^\\n]+\\n?)+)','i')); if(!m) return []; return m[1].split('\n').map(function(l){ return l.replace(/^\s*-\s*/,'').trim(); }).filter(Boolean); }
-    var inv = {
-      titulo: p1Field(r1,'TITULO'), url: p1Field(r1,'URL'), fuente: p1Field(r1,'FUENTE'),
-      fecha: p1Field(r1,'FECHA'), angulo: p1Field(r1,'ANGULO'), contexto: p1Field(r1,'CONTEXTO'),
-      hechos: p1List(r1,'HECHOS'), noticias_recientes: p1List(r1,'NOTICIAS_RECIENTES'),
-      fuentes_adicionales: p1List(r1,'OTRAS_FUENTES').map(function(l){
-        var nm=l.match(/Nombre:\s*([^|]+)/i),ul=l.match(/URL:\s*([^|]+)/i),ap=l.match(/Aporte:\s*(.+)/i);
-        return {nombre:(nm?nm[1].trim():''),url:(ul?ul[1].trim():''),aporte:(ap?ap[1].trim():'')};
-      })
-    };
-    if(!inv.titulo) throw new Error('No se encontró una noticia. Intenta de nuevo.');
-
-    // PASO 2 — Redactar
-    setNotif('Paso 2/3 — Redactando: <em>'+inv.titulo.substring(0,55)+'</em>...');
-    var minW = parseInt(CFG.words||'600');
-    var r2 = await callGemini(buildPromptRedactar(inv,minW), gemKey, null, false, 6000);
-    var rec;
-    try { rec = normalizeRec(parseJSON(r2)); }
-    catch(e){
-      var r2b = await callGemini('El siguiente JSON tiene errores. Corrígelo devolviendo SOLO el JSON válido:\n\n'+r2.substring(0,4000), gemKey, null, false, 3000);
-      rec = normalizeRec(parseJSON(r2b));
-    }
-
-    // PASO 3 — Distribución
-    setNotif('Paso 3/3 — Generando LinkedIn, Facebook y guiones...');
-    try {
-      var r3 = await callAI(buildPromptDistribuir(rec.titular,rec.bajada,rec.analisis_muestra), false, (CFG&&CFG.antModel2)||'claude-haiku-4-5-20251001', 2000, null);
-      if(r3){ var dist=parseJSON(r3); rec.linkedin=dist.linkedin||''; rec.facebook=dist.facebook||''; rec.audio_script=dist.audio_script||''; rec.video_script=dist.video_script||''; }
-    } catch(e){}
-
-    rec.fecha_fuente = inv.fecha||'';
-    rec.html_publicable = buildHTML(rec);
-    rec._uid = rec.id;
-
-    // Guardar en bandeja (local + GS)
-    setNotif('Guardando en bandeja...');
-    localAddRec(rec);
-    records = localLoad();
-    if(GS_URL){ var id=await gsGuardar(rec); if(id) rec.id=id; }
-
-    clearNotif();
-    renderBandeja();
-    // Abrir la tarjeta recién generada
-    setTimeout(function(){ var b=document.getElementById('body-'+rec._uid); if(b) b.classList.add('open'); }, 200);
-
-  } catch(e) {
-    clearNotif();
-    var n=document.getElementById('autoGenNotif')||document.createElement('div');
-    n.id='autoGenNotif';
-    n.style.cssText='background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:10px 14px;font-size:12px;color:#be123c;margin-bottom:10px';
-    n.textContent='Error al generar: '+e.message;
-    var c=document.getElementById('bandejaContent'); if(c) c.insertAdjacentElement('afterbegin',n);
-  } finally {
-    if(btn){ btn.disabled=false; btn.innerHTML=origTxt; }
-  }
-}
-
 async function guardarTodosEnGS(){
   var recs=manualRecs||[manualRec];
-  if(!recs.length) return;
-  // Guardar siempre en localStorage
-  for(var r of recs) localAddRec(r);
-  records = localLoad();
-  renderBandeja();
-  // Si GS está conectado, sincronizar también
-  var gsOk=0;
-  if(GS_URL){
-    for(var r of recs){
-      var id=await gsGuardar(r);
-      if(id){ r.id=id; gsOk++; }
-    }
-    if(gsOk){
-      try {
-        var d=await gsCall({action:'listar'});
-        if(d.ok){ records=deduplicateRecs(mergeConLocal(d.records||[])); localSave(records); renderBandeja(); }
-      } catch(e){}
-    }
+  if(!recs.length||!GS_URL) return;
+  var ok=0;
+  for(var r of recs){
+    var id=await gsGuardar(r);
+    if(id){ r.id=id; ok++; }
   }
-  alert(recs.length+' informe'+(recs.length!==1?'s guardados':' guardado')+' en la bandeja editorial.'+(GS_URL&&!gsOk?' (solo local — verifica conexión GS)':''));
+  if(ok) alert(ok+' informe'+(ok!==1?'s guardados':'  guardado')+' en la bandeja editorial.');
+  else alert('No se pudo guardar. Verifica la conexión con Google Sheets.');
 }
 
 function dlManual(){ if(manualRec) dlRec(manualRec); }
 
 var manualRecs=[];
-var _busquedaAbort=null;
-
-function cancelarBusqueda(){
-  if(_busquedaAbort) _busquedaAbort.abort();
-}
 
 function buildPrompt(esp,foc,kw){
-  var id='REDIA es una antena de inteligencia acuícola. No replica noticias — las analiza en profundidad desde múltiples perspectivas para aportar a la toma de decisiones de todos los actores de la cadena de valor acuícola chilena.\n\nPRINCIPIOS: 1) Analiza en profundidad, nunca recomienda. 2) No toma partido entre sectores ni actores — todos son audiencia y clientes potenciales de REDIA. 3) Relevar otros rubros no significa restar al salmón — significa ampliar la mirada del sector completo. 4) EFECTO CADENA (ambas direcciones): al analizar salmones evalúa implicancias para mitilicultura/ostiones/algas/otros; al analizar otros rubros evalúa implicancias para salmonicultura. Sin forzarlo si no aplica. 5) ANTENA TECNOLÓGICA: rastrea I+D de universidades, startups, IFOP, Indespa. Explica qué significa para los actores y qué tan aplicable es en Chile hoy.\n\nVOCABULARIO: usar "sector" para la acuicultura en conjunto. "Industria" SOLO para grandes compañías. Alternativas: actividad, rubro, cadena acuícola, producción.\n\nFUENTES EXCLUIDAS: AmiChile e Intemit — puedes leer su contenido para contexto general, pero NUNCA los cites como fuente ni los menciones en el texto. Si la información relevante proviene de ellos, búscala en una fuente primaria alternativa (SERNAPESCA, SUBPESCA, universidades, medios independientes). EXCEPCIÓN: solo si el usuario escribe explícitamente "citar AmiChile" o "citar Intemit" en el campo de tema puntual.\n\nPALABRAS PROHIBIDAS: cabe destacar, es importante señalar, en el contexto de, en el marco de, sin lugar a dudas, robusto, transformador, paradigma, sin precedentes, potenciar, sinergia, punto de inflexión, industria (salvo grandes compañías).\n\nTEXTO HUMANO: Las citas reales son el corazón del análisis. Datos concretos y verificados. Audiencia: desde el mitilicultor artesanal de Chiloé hasta el gerente de una gran salmonera.\n\nANÁLISIS ESTRATÉGICO: solo la sección "Lo que muestra este análisis" — qué revela la noticia para el sector, en puntos concretos.';
+  var id='REDIA es una antena de inteligencia acuícola. No replica noticias — las analiza en profundidad desde múltiples perspectivas para aportar a la toma de decisiones de todos los actores de la cadena de valor acuícola chilena.\n\nPRINCIPIOS: 1) Analiza en profundidad, nunca recomienda. 2) No toma partido entre sectores ni actores — todos son audiencia y clientes potenciales de REDIA. 3) Relevar otros rubros no significa restar al salmón — significa ampliar la mirada del sector completo. 4) EFECTO CADENA (ambas direcciones): al analizar salmones evalúa implicancias para mitilicultura/ostiones/algas/otros; al analizar otros rubros evalúa implicancias para salmonicultura. Sin forzarlo si no aplica. 5) ANTENA TECNOLÓGICA: rastrea I+D de universidades, startups, IFOP, Indespa. Explica qué significa para los actores y qué tan aplicable es en Chile hoy.\n\nVOCABULARIO: usar "sector" para la acuicultura en conjunto. "Industria" SOLO para grandes compañías. Alternativas: actividad, rubro, cadena acuícola, producción.\n\nFUENTES: Aqua.cl, MundoAcuícola, Intesal, SERNAPESCA, SUBPESCA, FAO, Globefish, UACH, UCT, IFOP, Gobierno Regional Los Lagos, El Llanquihue, Diario de Aysén, SNA, ProChile.\nFUENTES EXCLUIDAS: AmiChile e Intemit — puedes leer su contenido para contexto general, pero NUNCA los cites como fuente ni los menciones en el texto. Si la información relevante proviene de ellos, búscala en una fuente primaria alternativa (SERNAPESCA, SUBPESCA, universidades, medios independientes). EXCEPCIÓN: solo si el usuario escribe explícitamente "citar AmiChile" o "citar Intemit" en el campo de tema puntual.\n\nPALABRAS PROHIBIDAS: cabe destacar, es importante señalar, en el contexto de, en el marco de, sin lugar a dudas, robusto, transformador, paradigma, sin precedentes, potenciar, sinergia, punto de inflexión, industria (salvo grandes compañías).\n\nTEXTO HUMANO: Las citas reales son el corazón del análisis. Datos concretos y verificados. Audiencia: desde el mitilicultor artesanal de Chiloé hasta el gerente de una gran salmonera.\n\nESTRUCTURA ANÁLISIS ESTRATÉGICO: Lo que muestra/revela · Lo que no resuelve/desafíos · Para quiénes es relevante · Efecto cadena si aplica.';
   var minW=CFG.words||700;
   var proh=(CFG.proh||'').split('\n').filter(Boolean).join(' · ');
   if(proh) id+='\nADICIONAL PROHIBIDO: '+proh;
-  var extras=(CFG.voz?'\nVOZ: '+CFG.voz:'')+(CFG.sensible?'\nINSTRUCCIONES ESPECIALES: '+CFG.sensible:'')+(CFG.aud?'\nAUDIENCIA: '+CFG.aud:'')+(CFG.dim?'\nDIMENSIONES: '+CFG.dim:'');
-  var _cfgF=CFG.fuentesCFG.fuentes.split('\n').filter(Boolean):[];
-  var _fArr=_cfgF.length>0?_cfgF:(typeof DEFAULT_FUENTES!=='undefined'?DEFAULT_FUENTES:[]);
-  var fuentesLib=_fArr.join(' · ');
+  var extras=(CFG.voz?'\nVOZ: '+CFG.voz:'')+(CFG.aud?'\nAUDIENCIA: '+CFG.aud:'')+(CFG.dim?'\nDIMENSIONES: '+CFG.dim:'')+(CFG.fuentes?'\nFUENTES ADICIONALES: '+CFG.fuentes.split('\n').filter(Boolean).join(' · '):'');
   return id+extras+`
 
 Eres el editor estratégico de REDIA. Busca noticias reales y recientes en la web.
@@ -2189,19 +1280,14 @@ ${esp.length ? 'ESPECIES DE INTERÉS: '+esp.join(', ') : 'ESPECIES: Toda la cade
 ${foc.length ? 'FOCOS TEMÁTICOS: '+foc.join(', ') : 'FOCOS: Todos los temas relevantes para la acuicultura chilena'}
 TEMA PUNTUAL: ${kw||'las noticias más relevantes e importantes de las últimas 48 horas para el sector acuícola chileno'}
 
-BIBLIOTECA DE FUENTES REDIA — consulta las más relevantes según el tema:
-${fuentesLib}
-
-INSTRUCCIÓN DE FUENTES: No consultes todas las fuentes. Analiza el tema y selecciona las 5-8 fuentes MÁS RELEVANTES para este caso específico. Usa web_search con queries específicos para cada fuente seleccionada.
-
 INSTRUCCIONES CRÍTICAS:
-1. Usa web_search con queries específicos para cada fuente seleccionada.
+1. Usa web_search. Consulta TODAS las fuentes indicadas.
 2. Identifica 3-4 noticias o ángulos DISTINTOS y RELEVANTES sobre el tema.
 3. Genera UN INFORME SEPARADO por cada noticia/ángulo — NO los mezcles en uno solo.
 4. Cada informe debe tener su propio análisis, su propia bajada y sus propias fuentes.
-5. Las fuentes consultadas SIEMPRE deben aparecer en cada informe — mínimo 3 fuentes reales. En fuentes_con_links incluye la URL directa y real del artículo o recurso — no URLs genéricas del dominio.
+5. Las fuentes consultadas SIEMPRE deben aparecer en cada informe — mínimo 3 fuentes reales.
 6. Aplica identidad editorial REDIA: tercera persona periodística, efecto cadena, sin recomendar.
-7. Análisis estratégico: solo la sección "Lo que muestra este análisis" — qué revela esta noticia para el sector acuícola.
+7. Análisis estratégico con 3 secciones: Lo que muestra / Lo que no resuelve / Para quiénes es relevante.
 8. NUNCA uses: punto de inflexión, sin precedentes, robusto, transformador, industria (general).
 9. Mínimo ${minW} palabras por informe.
 
@@ -2209,12 +1295,11 @@ Responde SOLO con JSON válido sin markdown — un array con múltiples informes
 [
   {
     "titulo_seo": "Título SEO máx 60 chars — específico al ángulo",
-    "descripcion_seo": "Descripción SEO — ESTRICTAMENTE máx 140 caracteres, sin punto final",
+    "descripcion_seo": "Descripción SEO máx 140 chars",
     "tags": ["t1","t2","t3","t4"],
     "categoria": "Categoría",
     "tiempo_lectura": "X min",
     "fuentes_consultadas": ["Nombre fuente 1 + URL o medio", "Fuente 2", "Fuente 3"],
-    "fuentes_con_links": [{"nombre": "Nombre del medio", "url": "https://url-real-verificada.cl/articulo", "descripcion": "Qué aportó esta fuente al análisis"}],
     "imagen_prompt": "Prompt fotorrealista en inglés para Gemini. Específico al tema, nunca genérico.",
     "articulo": {
       "titular": "Titular periodístico directo con dato concreto",
@@ -2223,137 +1308,23 @@ Responde SOLO con JSON válido sin markdown — un array con múltiples informes
       "analisis_muestra": "Lo que muestra este análisis — hechos concretos y verificados",
       "analisis_no_resuelve": "Lo que no resuelve por sí solo — limitaciones e incógnitas pendientes",
       "analisis_relevante_para": "Para quiénes es especialmente relevante y por qué — por actor y rubro"
-    }
+    },
+    "linkedin": "Post LinkedIn. Informativo, no publicitario. Emojis sectoriales. Máx 1200 chars. Link redia.pro.",
+    "facebook": "Post Facebook conversacional. Máx 500 chars. Link redia.pro.",
+    "audio_script": "Guión narración audio. Informativo y cercano. Mín 350 palabras.",
+    "video_script": "Guión YouTube. Timecodes 00:00. Descripción visual entre corchetes. CTA suscripción."
   }
 ]
-Genera entre 2 y 4 objetos en el array — uno por cada ángulo/noticia relevante y distinto que encuentres.`;
+Genera entre 2 y 4 objetos en el array — uno por cada ángulo/noticia relevante y distinto que encuentres.\`;
 }
 
-function getAIKey(p){ return p==='gem'?(CFG.gemKey||''):p==='deep'?(CFG.deepKey||''):(CFG.antKey||''); }
-
-function buildProvOrder(pref){
-  var all=['gem','deep','ant'];
-  if(pref==='auto') return all.filter(function(p){ return !!getAIKey(p); });
-  return [pref].concat(all.filter(function(p){ return p!==pref; }));
-}
-
-async function callAI(prompt, useSearch, antModel, maxTok, signal, searchQ, contentOverride){
-  var order=buildProvOrder(AI_PROV_SEARCH);
-  if(!order.length) throw new Error('Sin proveedores disponibles — configura una API key en Credenciales → API Keys IA.');
-  var lastErr;
-  for(var i=0;i<order.length;i++){
-    var p=order[i]; var key=getAIKey(p);
-    if(!key) continue;
-    try{
-      if(p==='gem') return await callGemini(prompt,key,signal,useSearch,maxTok,contentOverride);
-      if(p==='deep'){
-        if(contentOverride){ lastErr=new Error('DeepSeek no soporta imágenes'); continue; }
-        if(useSearch){
-          var tKey=CFG.tavilyKey||''; if(!tKey){ lastErr=new Error('Sin key Tavily'); continue; }
-          var ctx=await searchTavily(searchQ||prompt.substring(0,200),tKey);
-          return await callDeepSeek(prompt+'\n\nRESULTADOS DE BÚSQUEDA WEB:\n'+ctx,key,signal,maxTok||4000);
-        }
-        return await callDeepSeek(prompt,key,signal,maxTok||6000);
-      }
-      if(p==='ant') return await callClaude(prompt,key,contentOverride||null,signal,useSearch,antModel,maxTok);
-    }catch(e){ lastErr=e; /* continúa al siguiente proveedor */ }
-  }
-  throw lastErr||new Error('Todos los proveedores fallaron.');
-}
-
-function selProvSearch(p, init) {
-  AI_PROV_SEARCH = p;
-  if (!init) localStorage.setItem('ai_prov_search', p);
-  var btns = {auto:'provBtnAuto', gem:'provBtnGem', deep:'provBtnDp', ant:'provBtnAnt'};
-  Object.keys(btns).forEach(function(id){
-    var b = document.getElementById(btns[id]);
-    var on = id === p;
-    if (b) { b.style.background = on ? 'var(--p)' : 'transparent'; b.style.color = on ? '#fff' : 'var(--s5)'; b.style.borderColor = on ? 'var(--p)' : 'var(--s2)'; }
-  });
-}
-
-async function listarModelosGemini() {
-  var key = (CFG&&CFG.gemKey) || '';
-  var div = document.getElementById('geminiModelList');
-  if (!key) { div.textContent = 'Sin key Gemini configurada.'; return; }
-  div.textContent = 'Consultando...';
-  try {
-    var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + key);
-    var d = await res.json();
-    var models = (d.models || [])
-      .filter(function(m){ return m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'); })
-      .map(function(m){ return m.name.replace('models/',''); });
-    div.innerHTML = models.length
-      ? '<strong>Disponibles:</strong><br>' + models.map(function(n){ return '<span style="cursor:pointer;color:var(--p6)" onclick="document.getElementById(\'cfGeminiModel\').value=\''+n+'\'">' + n + '</span>'; }).join('<br>')
-      : 'No se encontraron modelos.';
-  } catch(e) { div.textContent = 'Error: ' + e.message; }
-}
-
-async function callGemini(prompt, key, signal, useSearch, maxTok, contentOverride) {
-  var gemModel = (CFG&&CFG.geminiModel) || 'gemini-2.5-flash';
-  var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + gemModel + ':generateContent?key=' + key;
-  var parts;
-  if (contentOverride && Array.isArray(contentOverride)) {
-    parts = contentOverride.map(function(b) {
-      if (b.type === 'image') return {inline_data:{mime_type:b.source.media_type, data:b.source.data}};
-      if (b.type === 'text') return {text:b.text};
-      return {text:''};
-    });
-  } else {
-    parts = [{text: prompt}];
-  }
-  var bodyObj = {
-    contents: [{role:'user', parts: parts}],
-    generationConfig: {maxOutputTokens: maxTok || 8192}
-  };
-  if (useSearch !== false && !contentOverride) bodyObj.tools = [{google_search:{}}];
-  var res = await fetch(url, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(bodyObj),
-    signal: signal || undefined
-  });
-  if (!res.ok) { var e = await res.json().catch(()=>({})); throw new Error(e.error?.message || 'Error HTTP ' + res.status); }
-  var d = await res.json();
-  return (d.candidates?.[0]?.content?.parts || []).filter(p => p.text && !p.thought).map(p => p.text).join('');
-}
-
-async function searchTavily(query, key) {
-  var res = await fetch('https://api.tavily.com/search', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({api_key:key, query:query, search_depth:'advanced', max_results:6, include_answer:true})
-  });
-  if (!res.ok) throw new Error('Tavily error HTTP ' + res.status);
-  var d = await res.json();
-  var lines = [];
-  if (d.answer) lines.push('RESUMEN: ' + d.answer);
-  (d.results||[]).forEach(function(r,i){ lines.push((i+1)+'. '+r.title+'\nURL: '+r.url+'\n'+r.content.substring(0,600)); });
-  return lines.join('\n\n');
-}
-
-async function callDeepSeek(prompt, key, signal, maxTok) {
-  var res = await fetch('https://api.deepseek.com/chat/completions', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json', 'Authorization':'Bearer '+key},
-    body: JSON.stringify({model:(CFG&&CFG.deepModel)||'deepseek-chat', max_tokens:maxTok||6000, messages:[{role:'user',content:prompt}]}),
-    signal: signal || undefined
-  });
-  if (!res.ok) { var e = await res.json().catch(()=>({})); throw new Error(e.error?.message || 'Error HTTP ' + res.status); }
-  var d = await res.json();
-  return d.choices?.[0]?.message?.content || '';
-}
-
-async function callClaude(prompt,key,contentOverride,signal,useSearch,model,maxTok){
-  var bodyObj={model:model||(CFG&&CFG.antModel1)||'claude-sonnet-4-20250514',max_tokens:maxTok||8096,messages:[{role:'user',content:contentOverride||prompt}]};
-  if(useSearch!==false) bodyObj.tools=[{type:'web_search_20250305',name:'web_search'}];
+async function callClaude(prompt,key){
   var res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify(bodyObj),
-    signal:signal||undefined
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4096,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:prompt}]})
   });
-  if(!res.ok){ var e=await res.json().catch(()=>({})); var em=e.error?.message||'Error HTTP '+res.status; if(res.status===429) em='RATE_LIMIT:'+em; throw new Error(em); }
+  if(!res.ok){ var e=await res.json().catch(()=>({})); throw new Error(e.error?.message||'Error HTTP '+res.status); }
   var d=await res.json();
   return d.content.filter(b=>b.type==='text').map(b=>b.text).join('');
 }
@@ -2361,122 +1332,33 @@ async function callClaude(prompt,key,contentOverride,signal,useSearch,model,maxT
 function parseJSON(raw){
   var clean=raw.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
   // Try array first (multiple reports)
-  try {
-    var arrMatch=clean.match(/\[[\s\S]*\]/);
-    if(arrMatch){
-      var arr=JSON.parse(arrMatch[0]);
-      if(Array.isArray(arr)&&arr.length) return arr;
-    }
-  } catch(e){}
-  // Try single object
-  try {
-    var m=clean.match(/\{[\s\S]*\}/);
-    if(m) return JSON.parse(m[0]);
-  } catch(e){
-    // Try to fix truncated JSON
-    var partial=clean.match(/\{[\s\S]*/);
-    if(partial){
-      var fixed=partial[0];
-      // Close open strings and brackets
-      var opens=(fixed.match(/\[/g)||[]).length-(fixed.match(/\]/g)||[]).length;
-      var openb=(fixed.match(/\{/g)||[]).length-(fixed.match(/\}/g)||[]).length;
-      for(var i=0;i<opens;i++) fixed+=']';
-      for(var i=0;i<openb;i++) fixed+='}';
-      try{ return JSON.parse(fixed); }catch(e2){}
-    }
-  }
-  throw new Error('No se pudo procesar la respuesta. Intenta de nuevo.');
+  var arrMatch=clean.match(/\[[\s\S]*\]/);
+  if(arrMatch){ try{ var arr=JSON.parse(arrMatch[0]); if(Array.isArray(arr)&&arr.length) return arr; }catch(e){} }
+  // Fall back to single object
+  var m=clean.match(/\{[\s\S]*\}/);
+  if(!m) throw new Error('No se pudo parsear la respuesta. Intenta de nuevo.');
+  return JSON.parse(m[0]);
 }
 
-function mdToHtml(s){
-  if(!s) return s;
-  var lines = s.split('\n');
-  var out = [];
-  var inP = false;
-  for(var i=0;i<lines.length;i++){
-    var l = lines[i].trim();
-    if(!l){ if(inP){ out.push('</p>'); inP=false; } continue; }
-    // Headings
-    if(l.startsWith('### ')){ if(inP){out.push('</p>');inP=false;} out.push('<h3>'+inlineMd(l.slice(4))+'</h3>'); continue; }
-    if(l.startsWith('## ')){ if(inP){out.push('</p>');inP=false;} out.push('<h2>'+inlineMd(l.slice(3))+'</h2>'); continue; }
-    if(l.startsWith('# ')){ if(inP){out.push('</p>');inP=false;} out.push('<h2>'+inlineMd(l.slice(2))+'</h2>'); continue; }
-    // Paragraph
-    if(!inP){ out.push('<p>'); inP=true; } else { out.push(' '); }
-    out.push(inlineMd(l));
-  }
-  if(inP) out.push('</p>');
-  return out.join('');
-}
-function inlineMd(s){
-  return s
-    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
-    .replace(/\*([^*]+)\*/g,'<em>$1</em>');
-}
-// Reemplazos automáticos de vocabulario prohibido — red de seguridad independiente del prompt
-function sanitizeVocab(s){
-  if(!s) return s;
-  return s
-    // industria → sector
-    .replace(/\bla industria acuícola\b/gi,'el sector acuícola')
-    .replace(/\bla industria salmonera\b/gi,'el sector salmonero')
-    .replace(/\bla industria del salmón\b/gi,'el sector del salmón')
-    .replace(/\bla industria mitilicultora\b/gi,'el sector mitilicultor')
-    .replace(/\bla industria\b/gi,'el sector')
-    .replace(/\bsu industria\b/gi,'su sector')
-    .replace(/\besta industria\b/gi,'este sector')
-    .replace(/\bnuestra industria\b/gi,'nuestro sector')
-    .replace(/\bdicha industria\b/gi,'dicho sector')
-    .replace(/\bla misma industria\b/gi,'el mismo sector')
-    .replace(/\bindustria acuícola\b/gi,'sector acuícola')
-    .replace(/\bindustria salmonera\b/gi,'sector salmonero')
-    .replace(/\bindustria del salmón\b/gi,'sector del salmón')
-    .replace(/\bindustria\b/gi,'sector')
-    // frases de relleno — se eliminan
-    .replace(/[Cc]abe destacar(,?\s*que)?\s*/g,'')
-    .replace(/[Cc]abe mencionar(,?\s*que)?\s*/g,'')
-    .replace(/[Ee]s importante señalar(,?\s*que)?\s*/g,'')
-    .replace(/[Rr]esulta relevante(,?\s*que)?\s*/g,'')
-    .replace(/[Ee]s fundamental(,?\s*que)?\s*/g,'')
-    .replace(/[Vv]ale la pena señalar(,?\s*que)?\s*/g,'')
-    .replace(/[Ee]n este sentido,?\s*/g,'')
-    .replace(/[Aa] modo de conclusión,?\s*/g,'')
-    .replace(/[Ss]in lugar a dudas,?\s*/g,'')
-    // palabras grandilocuentes → alternativas neutras
-    .replace(/\btrascendental(es)?\b/gi,'relevante$1')
-    .replace(/\bsin precedentes\b/gi,'inédito')
-    .replace(/\b[Pp]aradigma\b/g,'modelo')
-    .replace(/\b[Ss]inergia[s]?\b/gi,'colaboración')
-    .replace(/\b[Rr]obusto(s|a|as)?\b/gi,'sólido$1')
-    .replace(/\b[Tt]ransformador(a|es|as)?\b/gi,'relevante')
-    .replace(/\b[Tt]rascendental(es)?\b/gi,'relevante$1')
-    .replace(/\b[Pp]otenciar\b/gi,'mejorar')
-    .replace(/\b[Pp]otencia\b/gi,'impulsa')
-    // frases alarmistas en titulares/posts
-    .replace(/[Nn]oticia (clave|bomba|transformadora)\b/g,'Informe')
-    .replace(/\bun paso clave\b/gi,'un avance')
-    .replace(/\b[Bb]omba\b/g,'dato')
-    .replace(/\b[Ee]n el marco de\b/gi,'en')
-    .replace(/\b[Ee]n el contexto de\b/gi,'en el contexto del');
-}
 function normalizeRec(d){
   var a=d.articulo||{};
   var uid='M'+Date.now();
   return {
     id:uid, _uid:uid,
-    titulo_seo:(d.titulo_seo||'').substring(0,60), descripcion_seo:(d.descripcion_seo||'').substring(0,140),
+    titulo_seo:d.titulo_seo||'', descripcion_seo:d.descripcion_seo||'',
     tags:d.tags||[], categoria:d.categoria||'Análisis REDIA',
     tiempo_lectura:d.tiempo_lectura||'5 min',
-    fuentes_consultadas:d.fuentes_consultadas||[], fuentes_con_links:d.fuentes_con_links||[], imagen_prompt:d.imagen_prompt||'',
-    titular:sanitizeVocab(a.titular||''), bajada:sanitizeVocab(a.bajada||''), cuerpo_html:sanitizeVocab(mdToHtml(a.cuerpo||'')),
-    analisis_muestra:sanitizeVocab(mdToHtml(a.analisis_muestra||'')),
-    analisis_no_resuelve:sanitizeVocab(a.analisis_no_resuelve||''),
-    analisis_relevante_para:sanitizeVocab(a.analisis_relevante_para||''),
+    fuentes_consultadas:d.fuentes_consultadas||[], imagen_prompt:d.imagen_prompt||'',
+    titular:a.titular||'', bajada:a.bajada||'', cuerpo_html:a.cuerpo||'',
+    analisis_muestra:a.analisis_muestra||'', 
+    analisis_no_resuelve:a.analisis_no_resuelve||'',
+    analisis_relevante_para:a.analisis_relevante_para||'',
     beneficios:a.beneficios||[], dolores:a.dolores||[],
     alcances:a.alcances||[], coyuntura:a.coyuntura||'',
     linkedin:d.linkedin||'', facebook:d.facebook||'',
     audio_script:d.audio_script||'', video_script:d.video_script||'',
     estado:'pendiente', fuente_original:'Búsqueda manual',
-    fecha:new Date().toLocaleDateString('es-CL'), fecha_fuente:'', html_publicable:'',
+    fecha:new Date().toLocaleDateString('es-CL'), html_publicable:'',
   };
 }
 
@@ -2484,160 +1366,7 @@ function normalizeRec(d){
 function buildHTML(r){
   var tags=sj(r.tags,[]);
   var fecha=new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
-  var fc=sj(r.fuentes_con_links,[]);
-  var catExcl=['entrevista','mercado','patrocinado'];
-  var fechaFuente = r.fecha_fuente ? ' <span style="color:#94a3b8;font-weight:400">· '+r.fecha_fuente+'</span>' : '';
-  var srcBlock=(fc.length&&!catExcl.includes(r.categoria))
-    ? '<div class="srcs" style="margin-top:36px;padding-top:20px;border-top:1px solid #e2e8f0"><strong style="font-size:12px;color:#334155;display:block;margin-bottom:10px">Fuentes consultadas'+fechaFuente+'</strong><ul style="list-style:none;padding:0;margin:0">'+fc.map(function(f){return '<li style="margin:7px 0;font-size:12px;display:flex;gap:6px;align-items:flex-start"><a href="'+f.url+'" target="_blank" rel="noopener" style="color:#7e22ce;font-weight:700;text-decoration:none;flex-shrink:0">'+f.nombre+'</a><span style="color:#94a3b8">↗</span>'+(f.descripcion?'<span style="color:#64748b"> — '+f.descripcion+'</span>':'')+'</li>';}).join('')+'</ul></div>'
-    : '<div class="srcs"><strong>Fuentes consultadas'+fechaFuente+':</strong><br>'+sj(r.fuentes_consultadas||r.fuentes,[]).join(' · ')+'</div>';
-  return `<!DOCTYPE html>\n<html lang="es">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1.0">\n<title>${r.titulo_seo||r.titular}</title>\n<meta name="description" content="${r.descripcion_seo||''}">\n<meta name="keywords" content="${tags.join(', ')}">\n<meta property="og:title" content="${r.titulo_seo||r.titular}">\n<meta property="og:description" content="${r.descripcion_seo||''}">\n<meta property="og:site_name" content="REDIA — Red de Inteligencia Acuícola">\n<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">\n<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Inter,system-ui,sans-serif;background:#f8fafc;color:#0f172a;font-size:15px}.wrap{max-width:780px;margin:0 auto;padding:40px 24px 80px}.cat{display:inline-flex;align-items:center;gap:6px;background:#f3e8ff;color:#7e22ce;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 12px;border-radius:9999px;margin-bottom:14px}h1{font-size:2em;font-weight:900;letter-spacing:-.5px;line-height:1.25;color:#0f172a;margin-bottom:12px}.meta{font-size:11.5px;color:#94a3b8;margin-bottom:28px}.bajada{font-size:16px;font-weight:500;color:#7e22ce;border-left:4px solid #a855f7;padding-left:16px;line-height:1.7;margin-bottom:28px}h2{font-size:1.35em;font-weight:800;color:#0f172a;letter-spacing:-.3px;margin:32px 0 12px}h3{font-size:1.05em;font-weight:700;color:#7e22ce;margin:22px 0 8px}p{line-height:1.8;margin-bottom:16px;color:#334155}blockquote{border-left:4px solid #2dd4bf;background:#f0fdfa;padding:14px 18px;border-radius:0 10px 10px 0;margin:20px 0;font-style:italic;color:#475569}strong{color:#0f172a;font-weight:700}.insight{background:#0f172a;border-radius:20px;padding:28px;margin:32px 0}.ih{color:rgba(255,255,255,.9);font-size:14px;font-weight:700;margin:0 0 16px}.ig{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ic{background:rgba(255,255,255,.07);border-radius:10px;padding:12px 14px}.icl{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.4);margin-bottom:6px}.icb{font-size:12.5px;line-height:1.55;color:rgba(255,255,255,.85)}.srcs{margin-top:36px;padding-top:20px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8}.tag{display:inline-block;background:#0f172a;color:white;font-size:11px;font-weight:700;padding:4px 12px;border-radius:9999px;margin:3px}footer{text-align:center;margin-top:48px;padding-top:20px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8}</style>\n</head>\n<body>\n<div class="wrap">\n<div class="cat">● ${r.categoria||'Análisis REDIA'}</div>\n<h1>${r.titular}</h1>\n<div class="meta">REDIA · ${fecha} · ${r.tiempo_lectura||'5 min'} · ${tags.map(t=>'<span class="tag">#'+t+'</span>').join('')}</div>\n<div class="bajada">${r.bajada}</div>\n${r.cuerpo_html}\n<div class="insight">\n<p class="ih">★ Análisis estratégico REDIA</p>\n<div class="ig" style="grid-template-columns:1fr">\n<div class="ic"><div class="icl">Lo que muestra este análisis</div><div class="icb">${r.analisis_muestra||sj(r.beneficios,[]).map(b=>'· '+b).join('<br>')||''}</div></div>\n</div>\n</div>\n${srcBlock}\n<footer><strong style="color:#9333ea">REDIA</strong> — Red de Inteligencia Acuícola · <a href="https://redia.pro" style="color:#9333ea">redia.pro</a></footer>\n</div>\n
-<!-- MODAL PUBLICAR EN REDIA.PRO -->
-<div class="pub-modal" id="pubModal" style="display:none" onclick="if(event.target===this)cerrarPublicar()">
-  <div class="pub-box">
-    <div class="pub-title">Publicar en redia.pro</div>
-    <div class="pub-sub">El artículo aparecerá en la sección de Noticias de redia.pro. Revisa los datos antes de publicar.</div>
-    <div class="pub-field">
-      <label class="pub-label">Título</label>
-      <input type="text" class="pub-input" id="pubTitulo" placeholder="Título del artículo">
-    </div>
-    <div class="pub-field">
-      <label class="pub-label">Descripción corta (bajada)</label>
-      <input type="text" class="pub-input" id="pubDesc" placeholder="Resumen breve">
-    </div>
-    <div class="pub-field">
-      <label class="pub-label">Categoría</label>
-      <select class="pub-input" id="pubTipo">
-        <option value="noticia">Noticia</option>
-        <option value="mercado">Mercado</option>
-        <option value="normativa">Normativa</option>
-        <option value="tecnologia">Tecnología</option>
-        <option value="sostenibilidad">Sostenibilidad</option>
-        <option value="oportunidad">Oportunidad</option>
-      </select>
-    </div>
-    <div class="pub-field">
-      <label class="pub-label">Credenciales PocketBase admin</label>
-      <input type="email"    class="pub-input" id="pubPbEmail" placeholder="admin@redia.pro" style="margin-bottom:5px">
-      <input type="password" class="pub-input" id="pubPbPass"  placeholder="contraseña admin">
-      <div style="font-size:10px;color:var(--s4);margin-top:4px">Solo se necesita la primera vez — se guarda localmente</div>
-    </div>
-    <div class="pub-status" id="pubStatus"></div>
-    <div class="pub-row">
-      <button class="pub-cancel" onclick="cerrarPublicar()">Cancelar</button>
-      <button class="pub-confirm" id="pubConfirm" onclick="confirmarPublicar()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
-        Publicar ahora
-      </button>
-    </div>
-  </div>
-</div>
-
-
-<!-- MODAL PUBLICAR -->
-<div class="pub-modal" id="pubModal" style="display:none" onclick="if(event.target===this)cerrarPublicar()">
-  <div class="pub-box">
-    <div class="pub-title">Publicar publicación</div>
-    <div class="pub-sub">Selecciona dónde publicar. El link a redia.pro se incluye automáticamente.</div>
-
-    <div class="pub-section">
-      <div class="pub-sec-title">Datos del artículo</div>
-      <div class="pub-field">
-        <label class="pub-label">Titular <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--s4)">(pre-llenado — puedes editarlo)</span></label>
-        <input type="text" class="pub-input" id="pubTitulo" placeholder="Título del artículo">
-      </div>
-      <div class="pub-field">
-        <label class="pub-label">Bajada <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--s4)">(resumen visible en portada)</span></label>
-        <input type="text" class="pub-input" id="pubDesc" placeholder="Bajada del artículo">
-      </div>
-      <div class="pub-field">
-        <label class="pub-label">Categoría en redia.pro</label>
-        <select class="pub-input pub-select" id="pubTipo">
-          <option value="noticia">Noticia</option>
-          <option value="mercado">Mercado</option>
-          <option value="normativa">Normativa</option>
-          <option value="tecnologia">Tecnología</option>
-          <option value="sostenibilidad">Sostenibilidad</option>
-          <option value="oportunidad">Oportunidad</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="pub-section">
-      <div class="pub-sec-title">Publicar en</div>
-      <div class="plat-grid">
-        <div class="plat-row on redia" id="pt-redia" onclick="togglePlat('redia')">
-          <div class="plat-icon pi-redia">R</div>
-          <div class="plat-info">
-            <div class="plat-name">redia.pro</div>
-            <div class="plat-desc">Sección de Noticias</div>
-          </div>
-          <div class="plat-toggle on redia" id="ptg-redia"></div>
-        </div>
-        <div class="plat-row on li" id="pt-li" onclick="togglePlat('li')">
-          <div class="plat-icon pi-li">in</div>
-          <div class="plat-info">
-            <div class="plat-name">LinkedIn</div>
-            <div class="plat-desc">Página REDIA</div>
-          </div>
-          <div id="ptg-li-badge" class="plat-badge">Configurar primero</div>
-          <div class="plat-toggle on li" id="ptg-li"></div>
-        </div>
-        <div class="plat-row on fb" id="pt-fb" onclick="togglePlat('fb')">
-          <div class="plat-icon pi-fb">f</div>
-          <div class="plat-info">
-            <div class="plat-name">Facebook</div>
-            <div class="plat-desc">Página REDIA</div>
-          </div>
-          <div id="ptg-fb-badge" class="plat-badge">Configurar primero</div>
-          <div class="plat-toggle on fb" id="ptg-fb"></div>
-        </div>
-        <div class="plat-row" id="pt-yt" onclick="togglePlat('yt')">
-          <div class="plat-icon pi-yt">▶</div>
-          <div class="plat-info">
-            <div class="plat-name">YouTube</div>
-            <div class="plat-desc">Copia título, descripción y tags listos</div>
-          </div>
-          <div class="plat-toggle" id="ptg-yt"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="pub-status" id="pubStatus"></div>
-    <div class="pub-row">
-      <button class="pub-cancel" onclick="cerrarPublicar()">Cancelar</button>
-      <button class="pub-confirm" id="pubConfirm" onclick="confirmarPublicar()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
-        Publicar ahora
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- YOUTUBE MODAL -->
-<div class="pub-modal" id="ytModal" style="display:none" onclick="if(event.target===this)document.getElementById('ytModal').style.display='none'">
-  <div class="pub-box">
-    <div class="pub-title">Paquete YouTube listo</div>
-    <div class="pub-sub">Copia cada campo y pégalo al subir tu video a YouTube Studio.</div>
-    <div class="pub-field" style="margin-bottom:14px">
-      <label class="pub-label">Título (máx 100 caracteres)</label>
-      <div style="background:var(--s0);border:1px solid var(--s2);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--s9)" id="ytTitulo"></div>
-      <button class="cpbtn" onclick="cp(document.getElementById('ytTitulo').textContent,this)" style="margin-top:6px">Copiar título</button>
-    </div>
-    <div class="pub-field" style="margin-bottom:14px">
-      <label class="pub-label">Descripción</label>
-      <div style="background:var(--s0);border:1px solid var(--s2);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--s7);white-space:pre-line;max-height:180px;overflow-y:auto" id="ytDesc"></div>
-      <button class="cpbtn" onclick="cp(document.getElementById('ytDesc').textContent,this)" style="margin-top:6px">Copiar descripción</button>
-    </div>
-    <div class="pub-field">
-      <label class="pub-label">Tags</label>
-      <div style="background:var(--s0);border:1px solid var(--s2);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--s9)" id="ytTags"></div>
-      <button class="cpbtn" onclick="cp(document.getElementById('ytTags').textContent,this)" style="margin-top:6px">Copiar tags</button>
-    </div>
-    <div class="pub-row">
-      <button class="pub-cancel" onclick="document.getElementById('ytModal').style.display='none'">Cerrar</button>
-    </div>
-  </div>
-</div>
+  return `<!DOCTYPE html>\n<html lang="es">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1.0">\n<title>${r.titulo_seo||r.titular}</title>\n<meta name="description" content="${r.descripcion_seo||''}">\n<meta name="keywords" content="${tags.join(', ')}">\n<meta property="og:title" content="${r.titulo_seo||r.titular}">\n<meta property="og:description" content="${r.descripcion_seo||''}">\n<meta property="og:site_name" content="REDIA — Centro de Inteligencia Acuícola">\n<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">\n<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Inter,system-ui,sans-serif;background:#f8fafc;color:#0f172a;font-size:15px}.wrap{max-width:780px;margin:0 auto;padding:40px 24px 80px}.cat{display:inline-flex;align-items:center;gap:6px;background:#f3e8ff;color:#7e22ce;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 12px;border-radius:9999px;margin-bottom:14px}h1{font-size:2em;font-weight:900;letter-spacing:-.5px;line-height:1.25;color:#0f172a;margin-bottom:12px}.meta{font-size:11.5px;color:#94a3b8;margin-bottom:28px}.bajada{font-size:16px;font-weight:500;color:#7e22ce;border-left:4px solid #a855f7;padding-left:16px;line-height:1.7;margin-bottom:28px}h2{font-size:1.35em;font-weight:800;color:#0f172a;letter-spacing:-.3px;margin:32px 0 12px}h3{font-size:1.05em;font-weight:700;color:#7e22ce;margin:22px 0 8px}p{line-height:1.8;margin-bottom:16px;color:#334155}blockquote{border-left:4px solid #2dd4bf;background:#f0fdfa;padding:14px 18px;border-radius:0 10px 10px 0;margin:20px 0;font-style:italic;color:#475569}strong{color:#0f172a;font-weight:700}.insight{background:#0f172a;border-radius:20px;padding:28px;margin:32px 0}.ih{color:rgba(255,255,255,.9);font-size:14px;font-weight:700;margin:0 0 16px}.ig{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ic{background:rgba(255,255,255,.07);border-radius:10px;padding:12px 14px}.icl{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.4);margin-bottom:6px}.icb{font-size:12.5px;line-height:1.55;color:rgba(255,255,255,.85)}.srcs{margin-top:36px;padding-top:20px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8}.tag{display:inline-block;background:#0f172a;color:white;font-size:11px;font-weight:700;padding:4px 12px;border-radius:9999px;margin:3px}footer{text-align:center;margin-top:48px;padding-top:20px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8}</style>\n</head>\n<body>\n<div class="wrap">\n<div class="cat">● ${r.categoria||'Análisis REDIA'}</div>\n<h1>${r.titular}</h1>\n<div class="meta">REDIA · ${fecha} · ${r.tiempo_lectura||'5 min'} · ${tags.map(t=>'<span class="tag">#'+t+'</span>').join('')}</div>\n<div class="bajada">${r.bajada}</div>\n${r.cuerpo_html}\n<div class="insight">\n<p class="ih">★ Análisis estratégico REDIA</p>\n<div class="ig" style="grid-template-columns:1fr">\n<div class="ic"><div class="icl">Lo que muestra este análisis</div><div class="icb">${r.analisis_muestra||sj(r.beneficios,[]).map(b=>'· '+b).join('<br>')||''}</div></div>\n<div class="ic"><div class="icl">Lo que no resuelve por sí solo</div><div class="icb">${r.analisis_no_resuelve||sj(r.dolores,[]).map(b=>'· '+b).join('<br>')||''}</div></div>\n<div class="ic"><div class="icl">Para quiénes es especialmente relevante</div><div class="icb">${r.analisis_relevante_para||r.coyuntura||''}</div></div>\n</div>\n</div>\n<div class="srcs"><strong>Fuentes consultadas:</strong><br>${sj(r.fuentes_consultadas||r.fuentes,[]).join(' · ')}</div>\n<footer><strong style="color:#9333ea">REDIA</strong> — Centro de Inteligencia Acuícola · <a href="https://redia.pro" style="color:#9333ea">redia.pro</a></footer>\n</div>\n
 </body>\n</html>`;
 }
 
@@ -2673,87 +1402,11 @@ function cpHTML(uid,btn){
   cp(rec.html_publicable||buildHTML(rec), btn);
 }
 
-// ── AUTO-CONNECT ──────────────────────────────────────
-function setGsStatus(text, cls){
-  var st = document.getElementById('gsSt');
-  var nav = document.getElementById('gsNavSt');
-  if(st){ st.textContent=text; st.className='cst '+(cls||'cs-w'); }
-  if(nav){
-    nav.textContent = cls==='cs-ok' ? '● GS' : cls==='cs-err' ? '⚠ GS' : '○ GS';
-    nav.style.display = 'inline';
-    nav.style.background = cls==='cs-ok' ? '#dcfce7' : cls==='cs-err' ? '#fee2e2' : '#fef9c3';
-    nav.style.color = cls==='cs-ok' ? '#15803d' : cls==='cs-err' ? '#dc2626' : '#854d0e';
-  }
+// Auto-connect
+if(GS_URL){
+  document.getElementById('gsSt').textContent='Conectando...';
+  gsCall({action:'listar'}).then(d=>{ if(d.ok){ records=d.records||[]; document.getElementById('gsSt').textContent='Conectado'; document.getElementById('gsSt').className='cst cs-ok'; renderBandeja(); } }).catch(()=>{ document.getElementById('gsSt').textContent='Error al conectar'; document.getElementById('gsSt').className='cst cs-err'; });
 }
-
-var _gsRetries = 0;
-var _gsTimer = null;
-async function autoConectarGS(){
-  if(!GS_URL) return;
-  if(_gsTimer){ clearTimeout(_gsTimer); _gsTimer=null; }
-  try {
-    var d = await gsCall({action:'listar'});
-    if(d.ok){
-      records = deduplicateRecs(mergeConLocal(d.records||[]));
-      localSave(records);
-      setGsStatus('Conectado · '+records.length+' registro'+(records.length!==1?'s':''), 'cs-ok');
-      renderBandeja();
-      _gsRetries = 0;
-      // Resincronizar en segundo plano cada 5 minutos
-      _gsTimer = setTimeout(autoConectarGS, 5*60*1000);
-    } else {
-      throw new Error(d.error||'Sin ok');
-    }
-  } catch(e){
-    _gsRetries++;
-    // Reintentar indefinidamente con delay creciente (máx 30s)
-    var delay = Math.min(_gsRetries * 5000, 30000);
-    setGsStatus('Reconectando...', 'cs-w');
-    _gsTimer = setTimeout(autoConectarGS, delay);
-  }
-}
-
-// Mostrar registros locales inmediatamente
-if(records.length) renderBandeja();
-
-// Conectar a GS automáticamente al cargar
-autoConectarGS();
-
-// ── PUBLICAR EN REDIA.PRO ─────────────────────────────
-var pubUID = null;
-
-function abrirPublicar(uid) {
-  var rec = getRec(uid);
-  if (!rec) return;
-  pubUID = uid;
-  document.getElementById('pubTitulo').value = rec.titular || rec.titulo_seo || '';
-  document.getElementById('pubDesc').value   = rec.bajada || rec.descripcion_seo || '';
-  // pre-fill PB credentials if saved
-  var savedEmail = localStorage.getItem('pb_admin_email') || '';
-  var savedPass  = localStorage.getItem('pb_admin_pass')  || '';
-  if (savedEmail) document.getElementById('pubPbEmail').value = savedEmail;
-  if (savedPass)  document.getElementById('pubPbPass').value  = savedPass;
-  // set tipo based on categoria
-  var cat = (rec.categoria || '').toLowerCase();
-  var tipo = cat.includes('mercado') ? 'mercado' : cat.includes('normativa') ? 'normativa' : cat.includes('tecnol') ? 'tecnologia' : cat.includes('sostenib') ? 'sostenibilidad' : 'noticia';
-  document.getElementById('pubTipo').value = tipo;
-  document.getElementById('pubStatus').style.display = 'none';
-  document.getElementById('pubModal').style.display = 'flex';
-}
-
-function cerrarPublicar() {
-  document.getElementById('pubModal').style.display = 'none';
-  pubUID = null;
-}
-
-function mostrarPubStatus(msg, ok) {
-  var el = document.getElementById('pubStatus');
-  el.style.display = 'block';
-  el.textContent = msg;
-  el.className = 'pub-status ' + (ok === true ? 'pub-ok' : ok === false ? 'pub-err' : '');
-  if (ok === null) { el.style.background = 'var(--s1)'; el.style.color = 'var(--s5)'; el.style.border = '1px solid var(--s2)'; }
-}
-
 
 // ══════════════════════════════════════════════════════
 // CREDENCIALES
@@ -2909,27 +1562,9 @@ async function confirmarPublicar() {
       var token = (await authRes.json()).token;
       var slug  = titulo.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,'-').substring(0,80);
       var tags  = Array.isArray(rec.tags) ? rec.tags : (rec.tags||'').split(',').map(t=>t.trim()).filter(Boolean);
-      // Usar FormData para poder adjuntar imagen (PocketBase requiere multipart para uploads)
-      var fd = new FormData();
-      fd.append('titulo', titulo);
-      fd.append('descripcion_corta', desc);
-      fd.append('contenido', rec.cuerpo_html||'');
-      fd.append('tipo', tipo);
-      fd.append('publicado', 'true');
-      fd.append('slug', slug);
-      fd.append('fecha_publicacion', new Date().toISOString().replace('T',' ').substring(0,19));
-      tags.forEach(function(t){ if(t) fd.append('Tags', t); });
-      // Adjuntar imagen si existe (base64 → Blob)
-      if(rec.imagen_src && rec.imagen_src.startsWith('data:')){
-        try {
-          var arr=rec.imagen_src.split(','), mime=arr[0].match(/:(.*?);/)[1], bstr=atob(arr[1]);
-          var u8=new Uint8Array(bstr.length); for(var i=0;i<bstr.length;i++) u8[i]=bstr.charCodeAt(i);
-          fd.append('imagen', new Blob([u8],{type:mime}), 'redia-'+slug+'.jpg');
-        } catch(imgErr){ /* si falla la conversión, publicar sin imagen */ }
-      }
       var pubRes = await fetch(pbUrl + '/api/collections/post/records', {
-        method:'POST', headers:{'Authorization':'Bearer '+token},
-        body: fd
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+        body: JSON.stringify({titulo, descripcion_corta: desc, contenido: rec.cuerpo_html||'', tipo, publicado: true, slug, fecha_publicacion: new Date().toISOString().split('T')[0], Tags: tags})
       });
       if (!pubRes.ok) { var ed = await pubRes.json().catch(()=>({})); throw new Error(ed.message||'Error '+pubRes.status); }
       var pubData = await pubRes.json();
@@ -3068,8 +1703,6 @@ cargarCredenciales();
 var tipoActual = 'noticia';
 var crearRec   = null;
 
-var TIPO_LABELS = {noticia:'Análisis / Redacción propia', entrevista:'Entrevista', mercado:'Aviso de Mercado', patrocinado:'Contenido patrocinado'};
-
 function selTipo(tipo, el) {
   tipoActual = tipo;
   document.querySelectorAll('.tipo-card').forEach(c => c.classList.remove('on'));
@@ -3080,11 +1713,6 @@ function selTipo(tipo, el) {
   });
   document.getElementById('crear-result').style.display  = 'none';
   document.getElementById('crear-loading').style.display = 'none';
-  var tabBtn = document.querySelector('button.ntab[onclick*="\'crear\'"]');
-  if (tabBtn) {
-    var tn = [...tabBtn.childNodes].filter(n => n.nodeType === 3).pop();
-    if (tn) tn.textContent = '\n      ' + (TIPO_LABELS[tipo] || 'Crear contenido') + '\n    ';
-  }
 }
 
 var CREAR_STEPS = {
@@ -3094,99 +1722,14 @@ var CREAR_STEPS = {
   patrocinado: ['Procesando el mensaje del cliente...','Redactando con tono editorial...','Sin lenguaje publicitario...','Generando SEO y RRSS...','Generando imagen...'],
 };
 
-function previsualizarImg(input, imgId) {
-  var nmEl = document.getElementById(input.id + '-nm');
-  var file = input.files[0]; if (!file) return;
-  if (nmEl) nmEl.textContent = file.name;
-  var img = document.getElementById(imgId); if (!img) return;
-  var reader = new FileReader();
-  reader.onload = e => { img.src = e.target.result; img.style.display = 'block'; };
-  reader.readAsDataURL(file);
-}
-
-function previsualizarMulti(input, containerId) {
-  var container = document.getElementById(containerId); if (!container) return;
-  var nmEl = document.getElementById(input.id + '-nm');
-  var files = [...input.files].slice(0, 3);
-  if (nmEl) nmEl.textContent = files.length ? files.length + ' archivo' + (files.length > 1 ? 's' : '') + ' seleccionado' + (files.length > 1 ? 's' : '') : 'Sin archivos';
-  container.innerHTML = '';
-  files.forEach(file => {
-    var reader = new FileReader();
-    reader.onload = e => {
-      var img = document.createElement('img');
-      img.src = e.target.result;
-      img.style.cssText = 'height:60px;width:90px;object-fit:cover;border-radius:6px;border:1px solid var(--s2)';
-      container.appendChild(img);
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-function leerImagen64(inputId) {
-  return new Promise(resolve => {
-    var input = document.getElementById(inputId);
-    if (!input || !input.files || !input.files[0]) return resolve(null);
-    var file = input.files[0];
-    var reader = new FileReader();
-    reader.onload = e => {
-      var dataUrl = e.target.result;
-      resolve({dataUrl, base64: dataUrl.split(',')[1], mimeType: file.type || 'image/png'});
-    };
-    reader.onerror = () => resolve(null);
-    reader.readAsDataURL(file);
-  });
-}
-
-function leerImagenes64Multi(inputId, max) {
-  var input = document.getElementById(inputId);
-  if (!input || !input.files || !input.files.length) return Promise.resolve([]);
-  var files = [...input.files].slice(0, max);
-  return Promise.all(files.map(file => new Promise(resolve => {
-    var reader = new FileReader();
-    reader.onload = e => resolve(e.target.result);
-    reader.onerror = () => resolve(null);
-    reader.readAsDataURL(file);
-  }))).then(r => r.filter(Boolean));
-}
-
-function injectMediaIntoHTML(html, logoSrc, productImages) {
-  if (logoSrc) {
-    html = html.replace('<div class="cat">', '<div style="margin-bottom:18px"><img src="' + logoSrc + '" style="height:52px;object-fit:contain;display:block"></div><div class="cat">');
-  }
-  if (productImages && productImages.length) {
-    var cols = productImages.length === 1 ? '1fr' : productImages.length === 2 ? '1fr 1fr' : '1fr 1fr 1fr';
-    var gallery = '<div style="display:grid;grid-template-columns:' + cols + ';gap:12px;margin:28px 0">' +
-      productImages.map(s => '<img src="' + s + '" style="width:100%;border-radius:10px;object-fit:cover;aspect-ratio:16/9">').join('') +
-      '</div>';
-    html = html.replace('<div class="insight">', gallery + '<div class="insight">');
-  }
-  return html;
-}
-
-function leerArchivoAdjunto(inputId) {
-  return new Promise(resolve => {
-    var input = document.getElementById(inputId);
-    if (!input || !input.files || !input.files[0]) return resolve(null);
-    var file = input.files[0];
-    var name = file.name.toLowerCase();
-    var reader = new FileReader();
-    if (name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg')) {
-      reader.onload = e => {
-        var b64 = e.target.result.split(',')[1];
-        resolve({imageBase64: b64, mimeType: name.endsWith('.png') ? 'image/png' : 'image/jpeg'});
-      };
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(file);
-    } else {
-      reader.onload = e => resolve({text: e.target.result});
-      reader.onerror = () => resolve(null);
-      reader.readAsText(file, 'UTF-8');
-    }
-  });
-}
-
 async function generarCrear(tipo) {
-  var gemKey = (CFG&&CFG.gemKey) || '';
+  var keyField = document.getElementById(tipo[0] + '-antkey') || document.getElementById('n-antkey');
+  var key = (keyField ? keyField.value.trim() : '') || ANT_KEY;
+  if (!key) return alert('Ingresa tu API key de Anthropic.');
+  localStorage.setItem('ant_key', key); ANT_KEY = key;
+
+  var gemKey = document.getElementById('crear-gemini-key').value.trim() || localStorage.getItem('cr_gemini_key') || '';
+  if (gemKey) localStorage.setItem('cr_gemini_key', gemKey);
 
   // Hide forms, show loading
   document.getElementById('form-' + tipo).style.display = 'none';
@@ -3205,51 +1748,20 @@ async function generarCrear(tipo) {
   }, 40000 / steps.length);
 
   try {
-    var adjunto = await leerArchivoAdjunto(tipo[0] + '-archivo');
-    var logoData = tipo === 'patrocinado' ? await leerImagen64('p-logo') : null;
-    var productImages = [];
-    if (tipo === 'patrocinado') {
-      productImages = await leerImagenes64Multi('p-imagenes', 3);
-    } else if (tipo === 'mercado') {
-      var mImg = await leerImagen64('m-imagen-prod');
-      if (mImg) productImages = [mImg.dataUrl];
-    }
-    var prompt  = buildPromptByTipo(tipo);
-    var searchQ = document.getElementById(tipo[0]+'-titulo')?.value.trim() || document.getElementById(tipo[0]+'-persona')?.value.trim() || '';
-    var raw;
-    if (logoData) {
-      var logoTxt = prompt + '\n\nLogo del cliente adjunto como imagen. Analízalo para describir mejor la identidad visual de la empresa en el contenido.';
-      if (adjunto && adjunto.text) logoTxt += '\n\nDOCUMENTO ADJUNTO:\n' + adjunto.text.substring(0, 8000);
-      raw = await callAI(null, false, (CFG&&CFG.antModel1)||'claude-sonnet-4-20250514', null, null, null, [
-        {type:'image', source:{type:'base64', media_type:logoData.mimeType, data:logoData.base64}},
-        {type:'text', text:logoTxt}
-      ]);
-    } else if (adjunto && adjunto.imageBase64) {
-      raw = await callAI(null, true, (CFG&&CFG.antModel1)||'claude-sonnet-4-20250514', null, null, searchQ, [
-        {type:'image', source:{type:'base64', media_type:adjunto.mimeType, data:adjunto.imageBase64}},
-        {type:'text', text:prompt+'\n\nDOCUMENTO ADJUNTO: imagen proporcionada arriba. Analízala, extrae la información relevante y úsala como fuente primaria para el informe.'}
-      ]);
-    } else {
-      if (adjunto && adjunto.text) prompt += '\n\nDOCUMENTO ADJUNTO:\n' + adjunto.text.substring(0, 8000) + '\n\nAnaliza este documento, extrae la información relevante y úsala como fuente primaria para el informe.';
-      raw = await callAI(prompt, true, (CFG&&CFG.antModel1)||'claude-sonnet-4-20250514', null, null, searchQ);
-    }
+    var prompt = buildPromptByTipo(tipo);
+    var raw    = await callClaude(prompt, key);
     clearInterval(st);
     document.getElementById('crear-pfill').style.width = '90%';
 
     var data = parseJSON(raw);
     crearRec  = normalizeRec(data);
-    if (logoData) crearRec._logoSrc = logoData.dataUrl;
-    if (productImages.length) crearRec._productImages = productImages;
     crearRec.html_publicable = buildHTML(crearRec);
-    if (crearRec._logoSrc || crearRec._productImages) {
-      crearRec.html_publicable = injectMediaIntoHTML(crearRec.html_publicable, crearRec._logoSrc, crearRec._productImages);
-    }
 
     // Generate image with Gemini
     if (gemKey && crearRec.imagen_prompt) {
       document.getElementById('crear-step').textContent = 'Generando imagen con Gemini...';
-      var imgRaw = await generarImagenGemini(crearRec.imagen_prompt, gemKey);
-      if (imgRaw) crearRec._imagenSrc = await resizarImg820x400(imgRaw);
+      var imgSrc = await generarImagenGemini(crearRec.imagen_prompt, gemKey);
+      if (imgSrc) crearRec._imagenSrc = imgSrc;
     }
 
     document.getElementById('crear-pfill').style.width = '100%';
@@ -3267,23 +1779,10 @@ async function generarCrear(tipo) {
 
     res.innerHTML =
       '<div class="cards-hd"><div><div class="cards-title">Publicación generada</div><div class="cards-sub">Revisa, edita si necesitas, luego publica</div></div>' +
-      '<div style="display:flex;gap:7px;flex-wrap:wrap">' +
+      '<div style="display:flex;gap:7px">' +
       '<button class="rbtn" onclick="dlCrear()">Descargar HTML</button>' +
-      '<button class="rbtn" onclick="copiarHTMLCrear(this)">Copiar HTML</button>' +
       (GS_URL ? '<button class="rbtn" style="background:linear-gradient(135deg,var(--ok),var(--t5))" onclick="guardarCrearEnGS()">Guardar en bandeja</button>' : '') +
       '</div></div>' +
-      '<div style="background:var(--s1);border:1px solid var(--s2);border-radius:12px;padding:16px;margin-bottom:16px">' +
-      '<div style="font-size:12px;font-weight:700;color:var(--s7);margin-bottom:10px">Editar antes de publicar</div>' +
-      '<label style="font-size:11px;color:var(--s5);display:block;margin-bottom:4px">Titular</label>' +
-      '<input id="edit-titular" value="'+esc(crearRec.articulo?.titular||'')+'" style="width:100%;padding:8px 10px;border:1px solid var(--s3);border-radius:8px;font-size:13px;font-weight:600;background:var(--s0);color:var(--s8);box-sizing:border-box;margin-bottom:8px">' +
-      '<label style="font-size:11px;color:var(--s5);display:block;margin-bottom:4px">Bajada</label>' +
-      '<textarea id="edit-bajada" rows="2" style="width:100%;padding:8px 10px;border:1px solid var(--s3);border-radius:8px;font-size:12px;background:var(--s0);color:var(--s8);box-sizing:border-box;resize:vertical;margin-bottom:10px">'+esc(crearRec.articulo?.bajada||'')+'</textarea>' +
-      '<button onclick="aplicarEdicionManual()" style="padding:7px 14px;background:var(--p6);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-right:8px">Aplicar cambios</button>' +
-      '<span style="font-size:11px;color:var(--s4)">— o —</span>' +
-      '<div style="margin-top:10px"><label style="font-size:11px;color:var(--s5);display:block;margin-bottom:4px">Pedir corrección a la IA</label>' +
-      '<div style="display:flex;gap:8px"><input id="edit-ia-instruccion" placeholder="Ej: acorta el titular, cambia el tono a más formal, agrega contexto sobre Chile..." style="flex:1;padding:8px 10px;border:1px solid var(--s3);border-radius:8px;font-size:12px;background:var(--s0);color:var(--s8)">' +
-      '<button onclick="corregirConIA()" style="padding:7px 14px;background:var(--t5);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Corregir con IA</button></div></div>' +
-      '</div>' +
       imgBlock +
       buildCard(crearRec);
 
@@ -3378,122 +1877,27 @@ function buildCrearPrompt(tipo) {
   throw new Error('Tipo no reconocido');
 }
 
-// Redimensiona cualquier imagen base64 a 820×400px (formato publicación REDIA) con center-crop
-function resizarImg820x400(dataUrl) {
-  return new Promise(function(resolve){
-    var img = new Image();
-    img.onload = function(){
-      var W=820, H=400;
-      var canvas = document.createElement('canvas');
-      canvas.width=W; canvas.height=H;
-      var ctx = canvas.getContext('2d');
-      // Center-crop (object-fit: cover)
-      var scale = Math.max(W/img.width, H/img.height);
-      var sw = W/scale, sh = H/scale;
-      var sx = (img.width - sw)/2, sy = (img.height - sh)/2;
-      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, W, H);
-      resolve(canvas.toDataURL('image/jpeg', 0.92));
-    };
-    img.onerror = function(){ resolve(dataUrl); }; // fallback: retornar original
-    img.src = dataUrl;
-  });
-}
-
 async function generarImagenGemini(prompt, key) {
-  // Modelos soportados: gemini-2.0-flash-preview-image-generation (default, clave estándar)
-  // Para Imagen 3 configura imagenModel='imagen-3.0-generate-001' en Configuración editorial (requiere plan pago)
-  var model = (CFG&&CFG.imagenModel) || '';
-  // Cascade: solo v1beta (v1 no acepta responseModalities)
-  // gemini-3.1-flash-image-preview = Nano Banana 2 (modelo principal REDIA)
-  var IMG_MODELS = [
-    {m: 'gemini-3.1-flash-image-preview',            mod: ['IMAGE']},
-    {m: 'gemini-3.1-flash-image-preview',            mod: ['TEXT','IMAGE']},
-    {m: 'gemini-2.0-flash-preview-image-generation', mod: ['IMAGE']},
-    {m: 'gemini-2.0-flash-exp-image-generation',     mod: ['TEXT','IMAGE']},
-  ];
-  // Honrar modelo configurado solo si es de generación de imagen (contiene "image"/"imagen")
-  var customOk = model && (model.includes('image') || model.includes('imagen') || model.includes('imgen'))
-                       && !model.startsWith('imagen');
-  var GEMINI_TRIES = model.startsWith('imagen') ? [] :
-    (customOk
-      ? [{m:model,mod:['IMAGE']},{m:model,mod:['TEXT','IMAGE']}].concat(IMG_MODELS)
-      : IMG_MODELS);
   try {
-    if (!model.startsWith('imagen')) {
-      var allErrs = [];
-      for (var mi = 0; mi < GEMINI_TRIES.length; mi++) {
-        var tryModel = GEMINI_TRIES[mi].m;
-        var modalities = GEMINI_TRIES[mi].mod;
-        try {
-          var apiVer = GEMINI_TRIES[mi].api || 'v1beta';
-          var res = await fetch('https://generativelanguage.googleapis.com/' + apiVer + '/models/' + tryModel + ':generateContent?key=' + key, {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({
-              contents: [{parts:[{text: prompt}]}],
-              generationConfig: {responseModalities: modalities}
-            })
-          });
-          var respTxt = await res.text();
-          if (!res.ok) {
-            allErrs.push(tryModel + '[' + modalities.join('+') + '/' + apiVer + ']: HTTP ' + res.status + ' — ' + respTxt.slice(0,100));
-            continue;
-          }
-          var d = JSON.parse(respTxt);
-          var parts = d.candidates?.[0]?.content?.parts || [];
-          var imgPart = parts.find(function(p){ return p.inlineData; });
-          if (!imgPart) {
-            allErrs.push(tryModel + '[' + modalities.join('+') + ']: sin imagen — ' + JSON.stringify(d).slice(0,100));
-            continue;
-          }
-          return 'data:' + imgPart.inlineData.mimeType + ';base64,' + imgPart.inlineData.data;
-        } catch(ex) {
-          allErrs.push(tryModel + ': ' + ex.message);
-        }
-      }
-      // Fallback: Pollinations.ai (gratuito, sin clave, 820×400px nativo)
-      try {
-        var polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) +
-                     '?width=820&height=400&nologo=true&seed=' + Math.floor(Math.random()*99999);
-        var polRes = await fetch(polUrl);
-        if (polRes.ok) {
-          var blob = await polRes.blob();
-          return await new Promise(function(resolve, reject){
-            var reader = new FileReader();
-            reader.onloadend = function(){ resolve(reader.result); };
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          });
-        } else {
-          allErrs.push('pollinations: HTTP ' + polRes.status);
-        }
-      } catch(pe) { allErrs.push('pollinations: ' + pe.message); }
-      throw new Error('Sin modelos disponibles. Errores:\n' + allErrs.join('\n'));
-    } else {
-      // Imagen 3 (predict) — requiere plan pago Google AI
-      var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':predict?key=' + key, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({instances:[{prompt}], parameters:{sampleCount:1, aspectRatio:'16:9'}})
-      });
-      if (!res.ok) {
-        var errTxt = await res.text().catch(function(){ return res.status+''; });
-        throw new Error('API ' + res.status + ': ' + errTxt.slice(0,200));
-      }
-      var d = await res.json();
-      var b64 = d.predictions?.[0]?.bytesBase64Encoded;
-      if (!b64) throw new Error('Sin imagen en respuesta de Imagen 3: ' + JSON.stringify(d).slice(0,200));
-      return 'data:' + (d.predictions[0].mimeType||'image/png') + ';base64,' + b64;
-    }
-  } catch(e) { throw e; } // propagar el error para que lo muestre el llamador
+    var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=' + key, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({instances:[{prompt}], parameters:{sampleCount:1, aspectRatio:'16:9'}})
+    });
+    if (!res.ok) return null;
+    var d = await res.json();
+    var b64 = d.predictions?.[0]?.bytesBase64Encoded;
+    if (!b64) return null;
+    var mime = d.predictions[0].mimeType || 'image/png';
+    return 'data:' + mime + ';base64,' + b64;
+  } catch { return null; }
 }
 
 async function generarImgManual() {
   if (!crearRec) return;
-  var gemKey = (CFG&&CFG.gemKey) || '';
-  if (!gemKey) return alert('Ingresa tu API key de Gemini en Credenciales → API Keys IA.');
-  var raw = await generarImagenGemini(crearRec.imagen_prompt, gemKey);
-  var src = raw ? await resizarImg820x400(raw) : null;
+  var gemKey = document.getElementById('crear-gemini-key').value.trim() || localStorage.getItem('cr_gemini_key') || '';
+  if (!gemKey) return alert('Ingresa tu API key de Gemini en el panel izquierdo.');
+  var src = await generarImagenGemini(crearRec.imagen_prompt, gemKey);
   if (src) {
     crearRec._imagenSrc = src;
     crearRec.html_publicable = buildHTML(crearRec);
@@ -3517,7 +1921,6 @@ async function guardarCrearEnGS() {
   if (id) {
     crearRec.id = id;
     records.unshift(crearRec);
-    renderBandeja();
     alert('Guardado en la bandeja editorial.');
   } else {
     alert('Error al guardar. Verifica la conexión con Google Sheets.');
@@ -3528,54 +1931,11 @@ function dlCrear() {
   if (crearRec) dlRec(crearRec);
 }
 
-function copiarHTMLCrear(btn) {
-  if (!crearRec) return;
-  navigator.clipboard.writeText(crearRec.html_publicable || '').then(function() {
-    var orig = btn.textContent; btn.textContent = 'Copiado!';
-    setTimeout(function(){ btn.textContent = orig; }, 2000);
-  });
+// Load gemini key from storage
+var savedGemini = localStorage.getItem('cr_gemini_key') || '';
+if (savedGemini && document.getElementById('crear-gemini-key')) {
+  document.getElementById('crear-gemini-key').value = savedGemini;
 }
-
-function aplicarEdicionManual() {
-  if (!crearRec) return;
-  var t = document.getElementById('edit-titular');
-  var b = document.getElementById('edit-bajada');
-  if (t && crearRec.articulo) crearRec.articulo.titular = t.value;
-  if (b && crearRec.articulo) crearRec.articulo.bajada = b.value;
-  crearRec.html_publicable = buildHTML(crearRec);
-  // Actualizar titular visible en la card
-  var tEl = document.querySelector('#body-' + crearRec.id + ' .art-titular, #card-' + crearRec.id + ' .art-titular');
-  if (tEl) tEl.textContent = crearRec.articulo.titular;
-  var bEl = document.querySelector('#body-' + crearRec.id + ' .art-bajada, #card-' + crearRec.id + ' .art-bajada');
-  if (bEl) bEl.textContent = crearRec.articulo.bajada;
-  alert('Cambios aplicados. El HTML descargable está actualizado.');
-}
-
-async function corregirConIA() {
-  var instruccion = document.getElementById('edit-ia-instruccion');
-  if (!instruccion || !instruccion.value.trim()) return alert('Escribe qué quieres corregir.');
-  if (!crearRec) return;
-  var btn = document.querySelector('[onclick="corregirConIA()"]');
-  if (btn) { btn.textContent = 'Corrigiendo...'; btn.disabled = true; }
-  try {
-    var prompt = 'Eres el editor de REDIA. Tienes este contenido ya generado:\n\nTITULAR: ' + (crearRec.articulo?.titular||'') + '\nBAJADA: ' + (crearRec.articulo?.bajada||'') + '\nCUERPO:\n' + (crearRec.articulo?.cuerpo||'').replace(/<[^>]+>/g,' ').substring(0,3000) +
-      '\n\nINSTRUCCIÓN DE CORRECCIÓN: ' + instruccion.value.trim() +
-      '\n\nResponde SOLO con JSON válido sin markdown con los campos que deban cambiar. Ejemplo: {"titular":"nuevo titular","bajada":"nueva bajada"} o {"cuerpo":"<p>nuevo cuerpo html</p>"}. Solo incluye los campos que cambian.';
-    var raw = await callAI(prompt, false, (CFG&&CFG.antModel2)||'claude-haiku-4-5-20251001', 4000, null);
-    var data = parseJSON(raw);
-    if (data.titular && crearRec.articulo) { crearRec.articulo.titular = data.titular; var t = document.getElementById('edit-titular'); if(t) t.value = data.titular; }
-    if (data.bajada && crearRec.articulo) { crearRec.articulo.bajada = data.bajada; var b = document.getElementById('edit-bajada'); if(b) b.value = data.bajada; }
-    if (data.cuerpo && crearRec.articulo) crearRec.articulo.cuerpo = data.cuerpo;
-    crearRec.html_publicable = buildHTML(crearRec);
-    instruccion.value = '';
-    alert('Corrección aplicada.');
-  } catch(e) {
-    alert('Error: ' + e.message);
-  } finally {
-    if (btn) { btn.textContent = 'Corregir con IA'; btn.disabled = false; }
-  }
-}
-
 
 // ══════════════════════════════════════════════════════
 // IDENTIDAD EDITORIAL REDIA — v4 COMPLETA
@@ -3584,7 +1944,7 @@ async function corregirConIA() {
 var REDIA_IDENTITY = `
 IDENTIDAD EDITORIAL REDIA
 
-Eres el editor estratégico de REDIA (redia.pro), el Red de Inteligencia Acuícola de Chile.
+Eres el editor estratégico de REDIA (redia.pro), el Centro de Inteligencia Acuícola de Chile.
 
 QUIÉN ES REDIA:
 REDIA es una antena de inteligencia acuícola. No replica noticias — las analiza en profundidad desde múltiples perspectivas para aportar a la toma de decisiones de todos los actores de la cadena de valor acuícola chilena. Nunca recomienda, nunca toma partido — presenta hechos, cifras y perspectivas para que el lector saque sus propias conclusiones.
@@ -3603,8 +1963,9 @@ Toda la cadena acuícola con igual rigor: salmón atlántico, trucha arcoíris, 
 
 VOCABULARIO OBLIGATORIO:
 - Usa "sector" cuando hables de la acuicultura en su conjunto o de múltiples actores
-- PROHIBIDO: la palabra "industria" en cualquier contexto acuícola. Sin excepciones.
-- Alternativas: "sector", "actividad", "rubro", "cadena acuícola", "producción", "el sector mitilicultor", "la actividad salmonera", "el rubro", "las empresas salmoneras"
+- Usa "industria" SOLO cuando te refieras específicamente a grandes compañías o a la dimensión corporativa/industrial
+- Alternativas válidas: "actividad", "rubro", "cadena acuícola", "producción", "el sector mitilicultor", "la actividad salmonera", "el rubro"
+- NUNCA uses "industria" para referirte al sector en general
 
 TRES REGISTROS DE ESCRITURA:
 1. Tercera persona periodística → noticias, informes estratégicos, análisis técnico-científico
@@ -3615,7 +1976,7 @@ AUDIENCIA:
 Desde pescadores artesanales reconvertidos a la acuicultura hasta gerentes y dueños de grandes compañías. Lenguaje técnico pero claro y accesible para toda la audiencia simultáneamente. Cuando uses términos muy especializados, agrega una breve explicación contextual entre paréntesis o en la siguiente oración.
 
 PALABRAS Y FRASES PROHIBIDAS (NUNCA deben aparecer):
-cabe destacar · es importante señalar · en el contexto de · en el marco de · sin lugar a dudas · robusto · transformador · paradigma · sin precedentes · potenciar · sinergia · cabe mencionar · vale la pena señalar · en este sentido · a modo de conclusión · es fundamental · resulta relevante · hoy en día · en la actualidad · doble clic estratégico · punto de inflexión · ecuación insostenible · INDUSTRIA (en cualquier contexto acuícola — usar sector, actividad, rubro o cadena acuícola)
+cabe destacar · es importante señalar · en el contexto de · en el marco de · sin lugar a dudas · robusto · transformador · paradigma · sin precedentes · potenciar · sinergia · cabe mencionar · vale la pena señalar · en este sentido · a modo de conclusión · es fundamental · resulta relevante · hoy en día · en la actualidad · doble clic estratégico · punto de inflexión · ecuación insostenible · industria (cuando hables del sector en general)
 
 EL TEXTO DEBE SONAR HUMANO:
 Que no parezca generado por IA. Directo, concreto, con voz periodística propia. Las citas reales son el corazón del análisis — NUNCA se inventan ni se parafrasean sin indicarlo. Los datos son concretos y verificados con fuente. Sin lenguaje corporativo ni abstracto.
@@ -3626,11 +1987,6 @@ ESTRUCTURA DEL CUADRO DE ANÁLISIS ESTRATÉGICO REDIA (al final de cada publicac
 - Para quiénes es especialmente relevante y por qué (por actor/rubro)
 NO usar "beneficios/dolores/alcances" — usar estas tres secciones en su lugar.
 NUNCA recomendar en este cuadro — solo presentar perspectivas.
-
-FUENTES EXCLUIDAS — consultar solo para contexto, NUNCA citar ni mencionar en ningún texto publicado:
-- AmiChile: se puede leer para contexto pero nunca aparece como fuente ni se menciona en el texto. Si la información viene de AmiChile, buscar confirmación en SERNAPESCA, SalmonChile, Consejo del Salmón u otra fuente primaria.
-- Intemit: misma regla que AmiChile.
-EXCEPCIÓN: solo si el usuario escribe explícitamente "citar AmiChile" o "citar Intemit" en el campo de tema puntual.
 `;
 
 // ── PROMPT BUILDERS POR TIPO ───────────────────────────────────────────────
@@ -3648,17 +2004,17 @@ MATERIAL:
 - Categoría: ${tipo}
 
 INSTRUCCIONES:
-1. Si hay link, léelo completo con web_search — es el punto de partida y el EJE del artículo
-2. Busca mínimo 3 fuentes adicionales para enriquecer y contrastar — pero solo incluye información que sirva directamente al eje central
-3. REGLA NARRATIVA: todo el artículo gira en torno al tema o evento principal. El contexto (cifras, leyes, antecedentes) se integra al hilo narrativo central — nunca como sección separada ni tema paralelo. Si un dato no ilumina directamente el eje, no va
-4. Subtítulos directos que adelantan la idea principal — nunca genéricos como "Contexto" o "Antecedentes"
-5. Incluye datos concretos con fuente: cifras, fechas, nombres verificados
-6. El efecto cadena solo si es genuinamente relevante al eje — no forzarlo
-7. Cierra con el cuadro de análisis estratégico REDIA (solo "Lo que muestra este análisis", sin recomendar)
+1. Si hay link, léelo completo con web_search — es el punto de partida, no la única fuente
+2. Busca mínimo 3 fuentes adicionales para enriquecer y contrastar el análisis
+3. Analiza desde múltiples perspectivas: productores, procesadores, proveedores, autoridad, comunidad, mercado — según aplique
+4. Activa el efecto cadena: ¿qué implicancias tiene esto para otros rubros del sector? Desarrollarlo si aplica
+5. Subtítulos directos que adelantan la idea principal — nunca genéricos como "Contexto" o "Análisis"
+6. Incluye datos concretos con fuente: cifras, fechas, nombres verificados
+7. Cierra con el cuadro de análisis estratégico REDIA (3 secciones, sin recomendar)
 8. Extensión mínima del cuerpo: ${minWords} palabras
 
 Responde SOLO con JSON válido sin markdown:
-{"titulo_seo":"máx 60 chars","descripcion_seo":"MÁXIMO 140 CARACTERES exactos — frase completa, sin punto final","tags":["t1","t2","t3","t4"],"categoria":"${tipo}","tiempo_lectura":"X min","fuentes_consultadas":["F1","F2","F3"],"fuentes_con_links":[{"nombre":"Nombre medio","url":"https://url-real.cl/nota","descripcion":"Qué aportó"},{"nombre":"Fuente 2","url":"https://url2.cl","descripcion":"Qué aportó"},{"nombre":"Fuente 3","url":"https://url3.cl","descripcion":"Qué aportó"}],"imagen_prompt":"Prompt fotorrealista en inglés para Gemini Imagen 3 — específico al tema, variado, nunca genérico. Ej: Photorealistic aerial view of [descripción concreta], professional photography, natural light, 16:9","articulo":{"titular":"Titular periodístico directo con dato concreto si es posible","bajada":"2-3 oraciones con el hecho más relevante y una cifra concreta","cuerpo":"HTML completo: h2 con titulares directos, h3 si aplica, p, strong para datos clave, blockquote para citas verificadas. Cuadro análisis REDIA al final. Mín ${minWords} palabras.","analisis_muestra":"Lo que muestra este análisis — qué revela esta noticia para el sector acuícola, en 2-4 puntos concretos"},"linkedin":"Post LinkedIn. Tono informativo, no publicitario. Emojis sectoriales. Máx 1200 chars. Incluye link redia.pro. Sin recomendar.","facebook":"Post Facebook. Más conversacional. Máx 500 chars. Link redia.pro.","audio_script":"Guión narración audio. Informativo y cercano. Mín 350 palabras. Tono REDIA.","video_script":"Guión YouTube. Timecodes 00:00. [Descripción visual entre corchetes]. Voz en off. CTA suscripción. Mín 300 palabras."}`;
+{"titulo_seo":"máx 60 chars","descripcion_seo":"máx 140 chars","tags":["t1","t2","t3","t4"],"categoria":"${tipo}","tiempo_lectura":"X min","fuentes_consultadas":["F1","F2","F3"],"imagen_prompt":"Prompt fotorrealista en inglés para Gemini Imagen 3 — específico al tema, variado, nunca genérico. Ej: Photorealistic aerial view of [descripción concreta], professional photography, natural light, 16:9","articulo":{"titular":"Titular periodístico directo con dato concreto si es posible","bajada":"2-3 oraciones con el hecho más relevante y una cifra concreta","cuerpo":"HTML completo: h2 con titulares directos, h3 si aplica, p, strong para datos clave, blockquote para citas verificadas. Cuadro análisis REDIA al final. Mín ${minWords} palabras.","analisis_muestra":"Lo que muestra este análisis — hechos concretos","analisis_no_resuelve":"Lo que no resuelve por sí solo — limitaciones e incógnitas","analisis_relevante_para":"Para quiénes es especialmente relevante y por qué"},"linkedin":"Post LinkedIn. Tono informativo, no publicitario. Emojis sectoriales. Máx 1200 chars. Incluye link redia.pro. Sin recomendar.","facebook":"Post Facebook. Más conversacional. Máx 500 chars. Link redia.pro.","audio_script":"Guión narración audio. Informativo y cercano. Mín 350 palabras. Tono REDIA.","video_script":"Guión YouTube. Timecodes 00:00. [Descripción visual entre corchetes]. Voz en off. CTA suscripción. Mín 300 palabras."}`;
 }
 
 function buildPromptEntrevista(persona, contexto, link, contenido, minWords) {
@@ -3690,7 +2046,7 @@ ESTRUCTURA OBLIGATORIA:
 Avatar del entrevistado: usar teal (#14b8a6) — es persona, no empresa.
 
 Responde SOLO con JSON válido sin markdown:
-{"titulo_seo":"máx 60 chars","descripcion_seo":"MÁXIMO 140 CARACTERES exactos — frase completa, sin punto final","tags":["t1","t2","t3","t4"],"categoria":"entrevista","tiempo_lectura":"X min","fuentes_consultadas":["REDIA"],"imagen_prompt":"Prompt fotorrealista en inglés — retrato profesional en contexto acuícola real. Nunca stock genérico. 16:9","entrevistado_nombre":"${persona}","entrevistado_iniciales":"XX","articulo":{"titular":"Titular de entrevista — directo y con gancho","bajada":"Quién es, qué revela y por qué importa ahora para el sector","cuerpo":"HTML completo con intro + Q&A editado + cita en blockquote + cierre editorial + cuadro análisis REDIA. Mín ${minWords} palabras.","analisis_muestra":"Lo que revela esta conversación para el sector","analisis_no_resuelve":"Lo que queda abierto o sin respuesta","analisis_relevante_para":"Para quiénes es clave esta perspectiva"},"linkedin":"Post LinkedIn presentando la entrevista. Informativo. Máx 1200 chars. Link redia.pro.","facebook":"Post Facebook conversacional. Máx 500 chars. Link redia.pro.","audio_script":"Introducción narrada para audio/podcast. Presenta al entrevistado y los temas clave. Mín 300 palabras.","video_script":"Guión YouTube presentando la entrevista. Timecodes. Descripción visual. CTA. Mín 250 palabras."}`;
+{"titulo_seo":"máx 60 chars","descripcion_seo":"máx 140 chars","tags":["t1","t2","t3","t4"],"categoria":"entrevista","tiempo_lectura":"X min","fuentes_consultadas":["REDIA"],"imagen_prompt":"Prompt fotorrealista en inglés — retrato profesional en contexto acuícola real. Nunca stock genérico. 16:9","entrevistado_nombre":"${persona}","entrevistado_iniciales":"XX","articulo":{"titular":"Titular de entrevista — directo y con gancho","bajada":"Quién es, qué revela y por qué importa ahora para el sector","cuerpo":"HTML completo con intro + Q&A editado + cita en blockquote + cierre editorial + cuadro análisis REDIA. Mín ${minWords} palabras.","analisis_muestra":"Lo que revela esta conversación para el sector","analisis_no_resuelve":"Lo que queda abierto o sin respuesta","analisis_relevante_para":"Para quiénes es clave esta perspectiva"},"linkedin":"Post LinkedIn presentando la entrevista. Informativo. Máx 1200 chars. Link redia.pro.","facebook":"Post Facebook conversacional. Máx 500 chars. Link redia.pro.","audio_script":"Introducción narrada para audio/podcast. Presenta al entrevistado y los temas clave. Mín 300 palabras.","video_script":"Guión YouTube presentando la entrevista. Timecodes. Descripción visual. CTA. Mín 250 palabras."}`;
 }
 
 function buildPromptCiencia(titulo, link, fuente, notas, minWords) {
@@ -3718,18 +2074,18 @@ INSTRUCCIONES:
 5. Efecto cadena obligatorio en este tipo: evalúa implicancias para distintos rubros
 
 Responde SOLO con JSON válido sin markdown:
-{"titulo_seo":"máx 60 chars","descripcion_seo":"MÁXIMO 140 CARACTERES exactos — frase completa, sin punto final","tags":["t1","t2","t3","t4"],"categoria":"tecnologia","tiempo_lectura":"X min","fuentes_consultadas":["F1","F2"],"fuentes_con_links":[{"nombre":"Nombre institución/medio","url":"https://url-real.cl/paper-o-nota","descripcion":"Qué aportó"},{"nombre":"Fuente 2","url":"https://url2.cl","descripcion":"Qué aportó"},{"nombre":"Fuente 3","url":"https://url3.cl","descripcion":"Qué aportó"}],"imagen_prompt":"Prompt fotorrealista en inglés — instalación científica, laboratorio acuícola, tecnología aplicada al sector. Específico, nunca genérico. 16:9","articulo":{"titular":"Titular directo con el hallazgo concreto","bajada":"Qué se descubrió, quién lo hizo y qué significa para el sector","cuerpo":"HTML: h2 para cada pregunta del análisis, p con datos concretos, blockquote para citas de investigadores si las hay. Cuadro análisis REDIA al final. Mín ${minWords} palabras.","analisis_muestra":"Lo que este avance evidencia para el sector","analisis_no_resuelve":"Lo que falta para su aplicación real en Chile","analisis_relevante_para":"Qué rubros y actores deben estar atentos a este desarrollo"},"linkedin":"Post LinkedIn. Tono de divulgación técnica. Máx 1200 chars. Link redia.pro.","facebook":"Post Facebook. Accesible. Máx 500 chars. Link redia.pro.","audio_script":"Guión narración. Explica el avance y su relevancia para el sector. Mín 300 palabras.","video_script":"Guión YouTube con timecodes y descripción visual del proceso/tecnología. Mín 250 palabras."}`;
+{"titulo_seo":"máx 60 chars","descripcion_seo":"máx 140 chars","tags":["t1","t2","t3","t4"],"categoria":"tecnologia","tiempo_lectura":"X min","fuentes_consultadas":["F1","F2"],"imagen_prompt":"Prompt fotorrealista en inglés — instalación científica, laboratorio acuícola, tecnología aplicada al sector. Específico, nunca genérico. 16:9","articulo":{"titular":"Titular directo con el hallazgo concreto","bajada":"Qué se descubrió, quién lo hizo y qué significa para el sector","cuerpo":"HTML: h2 para cada pregunta del análisis, p con datos concretos, blockquote para citas de investigadores si las hay. Cuadro análisis REDIA al final. Mín ${minWords} palabras.","analisis_muestra":"Lo que este avance evidencia para el sector","analisis_no_resuelve":"Lo que falta para su aplicación real en Chile","analisis_relevante_para":"Qué rubros y actores deben estar atentos a este desarrollo"},"linkedin":"Post LinkedIn. Tono de divulgación técnica. Máx 1200 chars. Link redia.pro.","facebook":"Post Facebook. Accesible. Máx 500 chars. Link redia.pro.","audio_script":"Guión narración. Explica el avance y su relevancia para el sector. Mín 300 palabras.","video_script":"Guión YouTube con timecodes y descripción visual del proceso/tecnología. Mín 250 palabras."}`;
 }
 
-function buildPromptMercado(tipoAviso, empresa, link, descripcion, precio, minWords, anonimo) {
+function buildPromptMercado(tipoAviso, empresa, link, descripcion, precio, minWords) {
   return REDIA_IDENTITY + `
 
 TIPO DE CONTENIDO: Aviso de Mercado
 REGISTRO: Tercera persona directa y concreta — tono editorial, nunca publicitario. El lector recibe información útil, no un anuncio.
-${anonimo ? '\nANONIMATO: No menciones el nombre de la empresa ni datos que la identifiquen. Usa expresiones como "una empresa del sector", "un productor de la región", "una compañía acuícola", etc.\n' : ''}
+
 MATERIAL:
 - Tipo de aviso: ${tipoAviso}
-- Empresa o persona: ${empresa || (anonimo ? 'anónimo' : '')}
+- Empresa o persona: ${empresa || ''}
 - Link de referencia: ${link || 'ninguno'}
 - Descripción: ${descripcion}
 - Precio o condiciones: ${precio || 'a convenir'}
@@ -3742,7 +2098,7 @@ INSTRUCCIONES:
 5. Extensión: 300-500 palabras — útil y concreto, sin relleno
 
 Responde SOLO con JSON válido sin markdown:
-{"titulo_seo":"máx 60 chars","descripcion_seo":"MÁXIMO 140 CARACTERES exactos — frase completa, sin punto final","tags":["t1","t2","t3","t4"],"categoria":"mercado","tiempo_lectura":"3 min","fuentes_consultadas":["${empresa||'REDIA'}"],"imagen_prompt":"Prompt fotorrealista en inglés — producto, servicio o contexto del aviso. Específico y concreto. 16:9","articulo":{"titular":"Titular directo del aviso — qué es y para quién","bajada":"Resumen concreto: qué, quién, dónde y en qué condiciones","cuerpo":"HTML: p con datos concretos, strong para información clave, cierre con CTA de contacto. 300-500 palabras.","analisis_muestra":"Qué necesidad del sector cubre este aviso","analisis_no_resuelve":"Condiciones o limitaciones a considerar","analisis_relevante_para":"A qué actores o rubros del sector le interesa este aviso"},"linkedin":"Post LinkedIn para el aviso. Informativo y directo. Máx 1200 chars. Link redia.pro.","facebook":"Post Facebook. Conversacional. Máx 500 chars. Link redia.pro.","audio_script":"Presentación narrada del aviso. Mín 200 palabras.","video_script":"Guión corto para video. Timecodes. Mín 200 palabras."}`;
+{"titulo_seo":"máx 60 chars","descripcion_seo":"máx 140 chars","tags":["t1","t2","t3","t4"],"categoria":"mercado","tiempo_lectura":"3 min","fuentes_consultadas":["${empresa||'REDIA'}"],"imagen_prompt":"Prompt fotorrealista en inglés — producto, servicio o contexto del aviso. Específico y concreto. 16:9","articulo":{"titular":"Titular directo del aviso — qué es y para quién","bajada":"Resumen concreto: qué, quién, dónde y en qué condiciones","cuerpo":"HTML: p con datos concretos, strong para información clave, cierre con CTA de contacto. 300-500 palabras.","analisis_muestra":"Qué necesidad del sector cubre este aviso","analisis_no_resuelve":"Condiciones o limitaciones a considerar","analisis_relevante_para":"A qué actores o rubros del sector le interesa este aviso"},"linkedin":"Post LinkedIn para el aviso. Informativo y directo. Máx 1200 chars. Link redia.pro.","facebook":"Post Facebook. Conversacional. Máx 500 chars. Link redia.pro.","audio_script":"Presentación narrada del aviso. Mín 200 palabras.","video_script":"Guión corto para video. Timecodes. Mín 200 palabras."}`;
 }
 
 function buildPromptCaso(productor, proveedor, problema, link, descripcion, patrocinado, minWords) {
@@ -3768,7 +2124,7 @@ INSTRUCCIONES:
 6. Si es patrocinado: incluir al final "Contenido patrocinado por ${proveedor}" — transparente y sin disimular
 
 Responde SOLO con JSON válido sin markdown:
-{"titulo_seo":"máx 60 chars","descripcion_seo":"MÁXIMO 140 CARACTERES exactos — frase completa, sin punto final","tags":["t1","t2","t3","t4"],"categoria":"noticia","tiempo_lectura":"X min","fuentes_consultadas":["${productor||'REDIA'}","${proveedor||''}"],"imagen_prompt":"Prompt fotorrealista en inglés — productor trabajando en su centro de cultivo, contexto real acuícola. Humano y cercano. 16:9","es_patrocinado":${patrocinado === 'si' ? 'true' : 'false'},"patrocinador":"${patrocinado === 'si' ? proveedor : ''}","articulo":{"titular":"Titular que cuenta el problema resuelto — con resultado concreto","bajada":"Quién, qué problema tenía y qué lograron — con cifra si está disponible","cuerpo":"HTML: narrativa real con p, strong para resultados, blockquote para cita del productor. ${patrocinado === 'si' ? 'Cierra con nota Contenido patrocinado por ' + proveedor + '.' : ''} Mín ${minWords} palabras.","analisis_muestra":"Qué demuestra este caso para el sector","analisis_no_resuelve":"Qué condiciones o factores hicieron posible esto que no siempre están disponibles","analisis_relevante_para":"Qué otros productores o rubros pueden aprender de este caso"},"linkedin":"Post LinkedIn presentando el caso. Humano e inspirador sin ser publicitario. Máx 1200 chars. Link redia.pro.","facebook":"Post Facebook conversacional. Máx 500 chars. Link redia.pro.","audio_script":"Narración del caso en primera persona cercana. Mín 300 palabras.","video_script":"Guión YouTube narrando el caso. Timecodes. Descripción visual del centro de cultivo. Mín 250 palabras."}`;
+{"titulo_seo":"máx 60 chars","descripcion_seo":"máx 140 chars","tags":["t1","t2","t3","t4"],"categoria":"noticia","tiempo_lectura":"X min","fuentes_consultadas":["${productor||'REDIA'}","${proveedor||''}"],"imagen_prompt":"Prompt fotorrealista en inglés — productor trabajando en su centro de cultivo, contexto real acuícola. Humano y cercano. 16:9","es_patrocinado":${patrocinado === 'si' ? 'true' : 'false'},"patrocinador":"${patrocinado === 'si' ? proveedor : ''}","articulo":{"titular":"Titular que cuenta el problema resuelto — con resultado concreto","bajada":"Quién, qué problema tenía y qué lograron — con cifra si está disponible","cuerpo":"HTML: narrativa real con p, strong para resultados, blockquote para cita del productor. ${patrocinado === 'si' ? 'Cierra con nota Contenido patrocinado por ' + proveedor + '.' : ''} Mín ${minWords} palabras.","analisis_muestra":"Qué demuestra este caso para el sector","analisis_no_resuelve":"Qué condiciones o factores hicieron posible esto que no siempre están disponibles","analisis_relevante_para":"Qué otros productores o rubros pueden aprender de este caso"},"linkedin":"Post LinkedIn presentando el caso. Humano e inspirador sin ser publicitario. Máx 1200 chars. Link redia.pro.","facebook":"Post Facebook conversacional. Máx 500 chars. Link redia.pro.","audio_script":"Narración del caso en primera persona cercana. Mín 300 palabras.","video_script":"Guión YouTube narrando el caso. Timecodes. Descripción visual del centro de cultivo. Mín 250 palabras."}`;
 }
 
 function buildPromptPatrocinado(cliente, mensaje, tono, link, minWords) {
@@ -3793,7 +2149,7 @@ INSTRUCCIONES:
 7. Si el tema tiene efecto cadena para otros rubros, inclúyelo — da valor editorial real
 
 Responde SOLO con JSON válido sin markdown:
-{"titulo_seo":"máx 60 chars","descripcion_seo":"MÁXIMO 140 CARACTERES exactos — frase completa, sin punto final","tags":["t1","t2","t3","t4"],"categoria":"patrocinado","tiempo_lectura":"X min","fuentes_consultadas":["${cliente||''}"],"imagen_prompt":"Prompt fotorrealista en inglés — contexto profesional acuícola relacionado al cliente. Nunca imagen corporativa genérica. 16:9","articulo":{"titular":"Titular editorial — no publicitario","bajada":"Qué aporta este contenido al lector del sector","cuerpo":"HTML editorial. Mín ${minWords} palabras. Cierra con 'Contenido patrocinado por ${cliente}'.","analisis_muestra":"Qué valor aporta este contenido al sector","analisis_no_resuelve":"Qué queda fuera del alcance de este contenido","analisis_relevante_para":"Para qué actores del sector es más útil"},"linkedin":"Post LinkedIn editorial. No publicitario. Máx 1200 chars. Link redia.pro.","facebook":"Post Facebook. Máx 500 chars. Link redia.pro.","audio_script":"Guión narración editorial. Mín 300 palabras.","video_script":"Guión YouTube editorial. Timecodes. Mín 250 palabras."}`;
+{"titulo_seo":"máx 60 chars","descripcion_seo":"máx 140 chars","tags":["t1","t2","t3","t4"],"categoria":"patrocinado","tiempo_lectura":"X min","fuentes_consultadas":["${cliente||''}"],"imagen_prompt":"Prompt fotorrealista en inglés — contexto profesional acuícola relacionado al cliente. Nunca imagen corporativa genérica. 16:9","articulo":{"titular":"Titular editorial — no publicitario","bajada":"Qué aporta este contenido al lector del sector","cuerpo":"HTML editorial. Mín ${minWords} palabras. Cierra con 'Contenido patrocinado por ${cliente}'.","analisis_muestra":"Qué valor aporta este contenido al sector","analisis_no_resuelve":"Qué queda fuera del alcance de este contenido","analisis_relevante_para":"Para qué actores del sector es más útil"},"linkedin":"Post LinkedIn editorial. No publicitario. Máx 1200 chars. Link redia.pro.","facebook":"Post Facebook. Máx 500 chars. Link redia.pro.","audio_script":"Guión narración editorial. Mín 300 palabras.","video_script":"Guión YouTube editorial. Timecodes. Mín 250 palabras."}`;
 }
 
 function buildPromptByTipo(tipo) {
@@ -3826,16 +2182,13 @@ function buildPromptByTipo(tipo) {
     );
   }
   if (tipo === 'mercado') {
-    var mEmpresa = document.getElementById('m-empresa')?.value.trim() || '';
-    var mAnonimo = document.getElementById('m-anonimo')?.checked;
     return buildPromptMercado(
       document.getElementById('m-tipo-aviso')?.value || 'oferta',
-      mAnonimo ? '' : mEmpresa,
+      document.getElementById('m-empresa')?.value.trim() || '',
       document.getElementById('m-link')?.value.trim() || '',
       document.getElementById('m-descripcion')?.value.trim() || '',
       document.getElementById('m-precio')?.value.trim() || '',
-      minW,
-      mAnonimo
+      minW
     );
   }
   if (tipo === 'caso') {
@@ -3879,11 +2232,11 @@ function clearAll(gridId, cls) {
     <div class="pub-section">
       <div class="pub-sec-title">Datos del artículo</div>
       <div class="pub-field">
-        <label class="pub-label">Titular <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--s4)">(pre-llenado — puedes editarlo)</span></label>
+        <label class="pub-label">Título</label>
         <input type="text" class="pub-input" id="pubTitulo" placeholder="Título del artículo">
       </div>
       <div class="pub-field">
-        <label class="pub-label">Bajada <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--s4)">(resumen visible en portada)</span></label>
+        <label class="pub-label">Descripción corta</label>
         <input type="text" class="pub-input" id="pubDesc" placeholder="Bajada del artículo">
       </div>
       <div class="pub-field">
