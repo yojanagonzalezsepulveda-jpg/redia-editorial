@@ -1445,11 +1445,71 @@ function dirty(uid){ var btn=document.getElementById('savebtn-'+uid); if(btn){ b
 
 function getRec(uid){ return records.find(r=>r._uid===uid||r.id===uid) || manualRec; }
 
+async function autoPublicarRedia(rec) {
+  var pbUrl   = localStorage.getItem('cr_pb_url')   || 'https://publicar.redia.pro';
+  var pbEmail = localStorage.getItem('cr_pb_email') || '';
+  var pbPass  = localStorage.getItem('cr_pb_pass')  || '';
+  if (!pbEmail || !pbPass) throw new Error('Configura las credenciales de redia.pro en Credenciales');
+  var token = null;
+  var authEndpoints = [
+    pbUrl + '/api/collections/_superusers/auth-with-password',
+    pbUrl + '/api/admins/auth-with-password',
+    pbUrl + '/api/collections/users/auth-with-password'
+  ];
+  for (var i = 0; i < authEndpoints.length; i++) {
+    var ar = await fetch(authEndpoints[i], {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({identity: pbEmail, password: pbPass})
+    });
+    if (ar.ok) { var aj = await ar.json(); token = aj.token; break; }
+  }
+  if (!token) throw new Error('Credenciales de redia.pro incorrectas');
+  var titulo = rec.titular || rec.titulo_seo || '';
+  var desc   = rec.bajada  || rec.descripcion_seo || '';
+  var cat    = (rec.categoria || '').toLowerCase();
+  var tipo   = cat.includes('mercado') ? 'mercado' : cat.includes('entrevista') ? 'entrevista' : cat.includes('indicador') ? 'indicadores' : 'publicación';
+  var slug   = titulo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,'-').substring(0,80);
+  var fd = new FormData();
+  fd.append('titulo', titulo);
+  fd.append('descripcion_corta', desc.substring(0, 139));
+  fd.append('contenido', rec.cuerpo_html || '');
+  fd.append('tipo', tipo);
+  fd.append('publicado', 'true');
+  fd.append('slug', slug);
+  fd.append('fecha_publicacion', new Date().toISOString().replace('T',' ').substring(0,19));
+  fd.append('verificationLevel', '1');
+  if (tipo === 'mercado') fd.append('Disponiblemercado', 'true');
+  if (rec.imagen_src && rec.imagen_src.startsWith('data:')) {
+    try {
+      var arr = rec.imagen_src.split(','), mime = arr[0].match(/:(.*?);/)[1], bstr = atob(arr[1]);
+      var u8 = new Uint8Array(bstr.length); for (var j = 0; j < bstr.length; j++) u8[j] = bstr.charCodeAt(j);
+      fd.append('imagen', new Blob([u8], {type: mime}), 'redia-' + slug + '.jpg');
+    } catch(e) { /* publicar sin imagen si falla */ }
+  }
+  var res = await fetch(pbUrl + '/api/collections/post/records', {
+    method: 'POST', headers: {'Authorization': 'Bearer ' + token}, body: fd
+  });
+  if (!res.ok) { var ed = await res.json().catch(()=>({})); throw new Error(ed.message || 'Error HTTP ' + res.status); }
+  var data = await res.json();
+  rec._rediaId   = data.id;
+  rec._rediaSlug = slug;
+}
+
 async function estado(uid, newEstado){
   var rec=getRec(uid);
   if(!rec) return;
   rec.estado=newEstado;
   await gsActualizar(rec.id, 'estado', newEstado);
+  if (newEstado === 'aprobado') {
+    var btn = document.querySelector('.ab-ok[onclick*="'+uid+'"]');
+    if (btn) { btn.disabled = true; btn.textContent = 'Publicando...'; }
+    try {
+      await autoPublicarRedia(rec);
+      await gsActualizar(rec.id, '_rediaId', rec._rediaId || '');
+    } catch(e) {
+      alert('Aprobado en bandeja, pero error al publicar en redia.pro:\n' + e.message + '\n\nPuedes publicarlo manualmente con el botón "Publicar en redia.pro".');
+    }
+  }
   renderBandeja();
   setTimeout(()=>{ var b=document.getElementById('body-'+uid); if(b) b.classList.add('open'); },50);
 }
