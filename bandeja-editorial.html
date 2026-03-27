@@ -1285,7 +1285,7 @@ function renderBandeja(){
   }
   var fecha=new Date().toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
   lista = deduplicateRecs(lista);
-  c.innerHTML='<div class="cards-hd"><div><div class="cards-title">'+lista.length+' informe'+(lista.length!==1?'s':'')+' · '+filtro+'</div><div class="cards-sub">'+fecha+'</div></div><button class="rbtn" onclick="cargarBandeja()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>Actualizar</button></div>'+
+  c.innerHTML='<div class="cards-hd"><div><div class="cards-title">'+lista.length+' informe'+(lista.length!==1?'s':'')+' · '+filtro+'</div><div class="cards-sub">'+fecha+'</div></div><div style="display:flex;gap:8px"><button id="autoGenBtn" class="rbtn" onclick="generarAutomatico(this)" style="background:var(--grad)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Generar ahora</button><button class="rbtn" onclick="cargarBandeja()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>Actualizar</button></div></div>'+
   lista.map(r=>buildCard(r)).join('');
 }
 
@@ -2033,6 +2033,110 @@ async function guardarManualEnGS(){
   var id=await gsGuardar(manualRec);
   if(id){ manualRec.id=id; alert('Guardado en la bandeja editorial.'); }
   else alert('No se pudo guardar. Verifica la conexión con Google Sheets.');
+}
+
+// ── GENERAR AUTOMÁTICO ────────────────────────────────
+// Ejecuta el flujo completo (paso1+paso2+paso3) y guarda directo en bandeja
+async function generarAutomatico(btn){
+  var gemKey = getAIKey('gem');
+  if(!gemKey){ alert('Configura la API key de Gemini en Credenciales → API Keys IA'); return; }
+
+  var origTxt = btn ? btn.innerHTML : '';
+  if(btn){ btn.disabled=true; btn.innerHTML='<div class="spnw"></div> Generando...'; }
+
+  // Notificación de progreso en bandeja
+  function setNotif(txt){
+    var n = document.getElementById('autoGenNotif');
+    if(!n){ n=document.createElement('div'); n.id='autoGenNotif';
+      n.style.cssText='background:#fef9c3;border:1px solid #fde047;border-radius:10px;padding:10px 14px;font-size:12px;color:#713f12;margin-bottom:10px;display:flex;gap:8px;align-items:center';
+      var c=document.getElementById('bandejaContent');
+      if(c) c.insertAdjacentElement('afterbegin',n);
+    }
+    n.innerHTML='<div class="spnw" style="border-top-color:#713f12"></div> '+txt;
+  }
+  function clearNotif(){ var n=document.getElementById('autoGenNotif'); if(n) n.remove(); }
+
+  try {
+    // Rotación automática de especies
+    var temasCubiertos = (records||[]).map(function(r){ return r.titular||r.titulo_seo||''; }).filter(Boolean);
+    var SALMON_KW = /salm[oó]n|salmonicultura|salmón|trucha|acuicultura.*salm|salm.*acuicultura/i;
+    var ultimosSalmones = (records||[]).slice(-5).filter(function(r){ return SALMON_KW.test(r.titular||r.titulo_seo||''); }).length;
+    var especiesForzar = '';
+    if(ultimosSalmones >= 2){
+      var cubiertas = temasCubiertos.join(' ').toLowerCase();
+      var candidatas = [
+        {e:'mitilicultura y mejillones (choritos)',k:'mitilicultura|mejillón|chorito'},
+        {e:'ostiones y pectinicultura',k:'ostión|pectinicultura'},
+        {e:'ostras',k:'ostra'},
+        {e:'algas marinas (pelillo, luga, huiro)',k:'alga|pelillo|luga|huiro'},
+        {e:'erizo de mar',k:'erizo'},
+        {e:'abalón',k:'abalón|abalon'}
+      ];
+      var elegida = candidatas.find(function(c){ return !new RegExp(c.k,'i').test(cubiertas); }) || candidatas[0];
+      especiesForzar = elegida.e;
+    }
+
+    // PASO 1 — Investigar
+    setNotif('Paso 1/3 — Investigando con Gemini + Google Search...');
+    var r1 = await callGemini(buildPromptInvestigar([],[],null,temasCubiertos,especiesForzar), gemKey, null, true, null);
+    if(!r1 || r1.trim().length < 30) throw new Error('La investigación no devolvió datos. Intenta de nuevo.');
+
+    function p1Field(text,key){ var m=text.match(new RegExp(key+':\\s*(.+)','i')); return m?m[1].trim():''; }
+    function p1List(text,key){ var m=text.match(new RegExp(key+':\\s*\\n((?:\\s*-[^\\n]+\\n?)+)','i')); if(!m) return []; return m[1].split('\n').map(function(l){ return l.replace(/^\s*-\s*/,'').trim(); }).filter(Boolean); }
+    var inv = {
+      titulo: p1Field(r1,'TITULO'), url: p1Field(r1,'URL'), fuente: p1Field(r1,'FUENTE'),
+      fecha: p1Field(r1,'FECHA'), angulo: p1Field(r1,'ANGULO'), contexto: p1Field(r1,'CONTEXTO'),
+      hechos: p1List(r1,'HECHOS'), noticias_recientes: p1List(r1,'NOTICIAS_RECIENTES'),
+      fuentes_adicionales: p1List(r1,'OTRAS_FUENTES').map(function(l){
+        var nm=l.match(/Nombre:\s*([^|]+)/i),ul=l.match(/URL:\s*([^|]+)/i),ap=l.match(/Aporte:\s*(.+)/i);
+        return {nombre:(nm?nm[1].trim():''),url:(ul?ul[1].trim():''),aporte:(ap?ap[1].trim():'')};
+      })
+    };
+    if(!inv.titulo) throw new Error('No se encontró una noticia. Intenta de nuevo.');
+
+    // PASO 2 — Redactar
+    setNotif('Paso 2/3 — Redactando: <em>'+inv.titulo.substring(0,55)+'</em>...');
+    var minW = parseInt(CFG.words||'600');
+    var r2 = await callGemini(buildPromptRedactar(inv,minW), gemKey, null, false, 6000);
+    var rec;
+    try { rec = normalizeRec(parseJSON(r2)); }
+    catch(e){
+      var r2b = await callGemini('El siguiente JSON tiene errores. Corrígelo devolviendo SOLO el JSON válido:\n\n'+r2.substring(0,4000), gemKey, null, false, 3000);
+      rec = normalizeRec(parseJSON(r2b));
+    }
+
+    // PASO 3 — Distribución
+    setNotif('Paso 3/3 — Generando LinkedIn, Facebook y guiones...');
+    try {
+      var r3 = await callAI(buildPromptDistribuir(rec.titular,rec.bajada,rec.analisis_muestra), false, (CFG&&CFG.antModel2)||'claude-haiku-4-5-20251001', 2000, null);
+      if(r3){ var dist=parseJSON(r3); rec.linkedin=dist.linkedin||''; rec.facebook=dist.facebook||''; rec.audio_script=dist.audio_script||''; rec.video_script=dist.video_script||''; }
+    } catch(e){}
+
+    rec.fecha_fuente = inv.fecha||'';
+    rec.html_publicable = buildHTML(rec);
+    rec._uid = rec.id;
+
+    // Guardar en bandeja (local + GS)
+    setNotif('Guardando en bandeja...');
+    localAddRec(rec);
+    records = localLoad();
+    if(GS_URL){ var id=await gsGuardar(rec); if(id) rec.id=id; }
+
+    clearNotif();
+    renderBandeja();
+    // Abrir la tarjeta recién generada
+    setTimeout(function(){ var b=document.getElementById('body-'+rec._uid); if(b) b.classList.add('open'); }, 200);
+
+  } catch(e) {
+    clearNotif();
+    var n=document.getElementById('autoGenNotif')||document.createElement('div');
+    n.id='autoGenNotif';
+    n.style.cssText='background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:10px 14px;font-size:12px;color:#be123c;margin-bottom:10px';
+    n.textContent='Error al generar: '+e.message;
+    var c=document.getElementById('bandejaContent'); if(c) c.insertAdjacentElement('afterbegin',n);
+  } finally {
+    if(btn){ btn.disabled=false; btn.innerHTML=origTxt; }
+  }
 }
 
 async function guardarTodosEnGS(){
