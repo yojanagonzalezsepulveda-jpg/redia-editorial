@@ -2917,18 +2917,21 @@ async function confirmarPublicar() {
       }
       if (!token) throw new Error('Credenciales de redia.pro incorrectas — verifica email y contraseña en la pestaña Credenciales');
       var slug  = titulo.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,'-').substring(0,80);
-      var tags  = Array.isArray(rec.tags) ? rec.tags : (rec.tags||'').split(',').map(t=>t.trim()).filter(Boolean);
+      var descCorta = desc.substring(0, 139); // PocketBase: máx 139 chars
+      // Mapear tipo al valor que acepta PocketBase
+      var tipoMap = { 'noticia':'publicación', 'mercado':'mercado', 'normativa':'publicación', 'tecnologia':'publicación', 'sostenibilidad':'publicación', 'oportunidad':'publicación', 'entrevista':'entrevista', 'patrocinado':'publicación' };
+      var tipoFinal = tipoMap[tipo] || 'publicación';
       // Usar FormData para poder adjuntar imagen (PocketBase requiere multipart para uploads)
       var fd = new FormData();
       fd.append('titulo', titulo);
-      fd.append('descripcion_corta', desc);
+      fd.append('descripcion_corta', descCorta);
       fd.append('contenido', rec.cuerpo_html||'');
-      fd.append('tipo', tipo);
+      fd.append('tipo', tipoFinal);
       fd.append('publicado', 'true');
       fd.append('slug', slug);
       fd.append('fecha_publicacion', new Date().toISOString().replace('T',' ').substring(0,19));
       fd.append('verificationLevel', '1');
-      tags.forEach(function(t){ if(t) fd.append('Tags', t); });
+      // Nota: Etiquetas es campo de relación en PocketBase — no se envían strings
       // Adjuntar imagen si existe (base64 → Blob)
       if(rec.imagen_src && rec.imagen_src.startsWith('data:')){
         try {
