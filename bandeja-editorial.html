@@ -1330,7 +1330,7 @@ async function callClaude(prompt,key){
 }
 
 function parseJSON(raw){
-  var clean=raw.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+  var clean=raw.split('```json').join('').split('```').join('').trim();
   // Try array first (multiple reports)
   var arrMatch=clean.match(/\[[\s\S]*\]/);
   if(arrMatch){ try{ var arr=JSON.parse(arrMatch[0]); if(Array.isArray(arr)&&arr.length) return arr; }catch(e){} }
