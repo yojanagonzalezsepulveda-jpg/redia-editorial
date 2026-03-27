@@ -1661,20 +1661,11 @@ async function buscarManual(){
     rb(); return;
   }
 
-  // ── PASO 2: Redactar — Claude si hay key, si no Gemini. Sin búsqueda (datos ya vienen de paso 1) ──
-  var antKey = getAIKey('ant');
-  var p2model = antKey ? 'Claude' : 'Gemini';
-  sp(38,'Paso 2/3 — Redactando con '+p2model+': <em>'+esc((inv.titulo||'').substring(0,55))+'</em>...');
+  // ── PASO 2: Redactar — Gemini. Sin búsqueda (datos ya vienen de paso 1) ──
+  sp(38,'Paso 2/3 — Redactando con Gemini: <em>'+esc((inv.titulo||'').substring(0,55))+'</em>...');
   var t2=na(90000); var r2;
-  try {
-    if(antKey){
-      r2=await callClaude(buildPromptRedactar(inv,minW),antKey,null,_busquedaAbort.signal,false,(CFG&&CFG.antModel)||'claude-sonnet-4-6',6000);
-    } else {
-      r2=await callGemini(buildPromptRedactar(inv,minW),gemKey,_busquedaAbort.signal,false,6000);
-    }
-    clearTimeout(t2);
-  }
-  catch(e){ clearTimeout(t2); _busquedaAbort=null; err('Error en redacción ('+p2model+'): '+errMsg(e)); rb(); return; }
+  try { r2=await callGemini(buildPromptRedactar(inv,minW),gemKey,_busquedaAbort.signal,false,6000); clearTimeout(t2); }
+  catch(e){ clearTimeout(t2); _busquedaAbort=null; err('Error en redacción (Gemini): '+errMsg(e)); rb(); return; }
 
   var rec;
   try { rec=normalizeRec(parseJSON(r2)); }
