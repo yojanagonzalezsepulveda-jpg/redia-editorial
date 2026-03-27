@@ -1483,7 +1483,7 @@ var STEPS=[
   {t:'Empaquetando para <strong>redia.pro</strong>...',p:99},
 ];
 
-function buildPromptInvestigar(esp,foc,kw){
+function buildPromptInvestigar(esp,foc,kw,temasYaCubiertos){
   // Fuentes base siempre presentes
   var BASE_CL=['Aqua.cl','MundoAcuícola','SERNAPESCA','SUBPESCA','SMA'];
   var fuentesCl=BASE_CL.slice(), fuentesIntl=[];
@@ -1502,15 +1502,21 @@ function buildPromptInvestigar(esp,foc,kw){
   var fLib=fuentesCl.slice(0,20).concat(fuentesIntl.slice(0,10)).join(', ');
   var temaLabel = kw ? 'TEMA ESPECÍFICO' : 'ESCANEO GENERAL DEL SECTOR';
   var temaVal = kw || 'sector acuícola chileno — últimas 48-72 horas';
+  var yaStr = (temasYaCubiertos&&temasYaCubiertos.length)
+    ? '\nTEMAS YA CUBIERTOS (no repetir salvo novedad significativa de seguimiento):\n'+temasYaCubiertos.slice(-20).map(t=>'- '+t).join('\n')
+    : '';
+  var diversidadStr = (!kw && !esp.length)
+    ? '\nDIVERSIDAD DE ESPECIES: El sector acuícola chileno no es solo salmón. Considera también noticias relevantes de mitilicultura (choritos/mejillones), ostiones, ostras, algas, erizo de mar u otras especies. Si hay noticias importantes de estas especies, priorízalas sobre otra noticia de salmón.'
+    : '';
   return `Eres un investigador del sector acuícola chileno. Usa web_search activamente.
 
 ${temaLabel}: ${temaVal}
 ${esp.length?'ESPECIES: '+esp.join(', '):''}${foc.length?'\nFOCOS: '+foc.join(', '):''}
-FUENTES PRIORITARIAS: ${fLib}
+FUENTES PRIORITARIAS: ${fLib}${yaStr}${diversidadStr}
 
 PROCESO (sigue este orden):
 1. Busca las noticias recientes del sector en las fuentes prioritarias — escanea titulares de los últimos 3 días
-2. ${kw ? 'Profundiza en el tema específico indicado, buscando en al menos 3 fuentes distintas' : 'Identifica la noticia más relevante e impactante para el sector y profundiza en ella con al menos 3 fuentes'}
+2. ${kw ? 'Profundiza en el tema específico indicado, buscando en al menos 3 fuentes distintas' : 'Identifica la noticia más relevante e impactante del sector — evitando los temas ya cubiertos — y profundiza en ella con al menos 3 fuentes'}
 3. Recopila hechos verificados con cifras concretas de cada fuente
 
 Responde con este formato exacto:
@@ -1625,7 +1631,8 @@ async function buscarManual(){
   if(!gemKey){ err('Paso 1 requiere la API key de Gemini para buscar en la web. Configúrala en Credenciales → API Keys IA.'); rb(); return; }
   sp(5,'Paso 1/3 — Investigando con Gemini + Google Search...');
   var t1=na(90000); var r1;
-  try { r1=await callGemini(buildPromptInvestigar(esp,foc,kw),gemKey,_busquedaAbort.signal,true,null); clearTimeout(t1); }
+  var temasCubiertos=(records||[]).map(function(r){ return r.titular||r.titulo_seo||''; }).filter(Boolean);
+  try { r1=await callGemini(buildPromptInvestigar(esp,foc,kw,temasCubiertos),gemKey,_busquedaAbort.signal,true,null); clearTimeout(t1); }
   catch(e){ clearTimeout(t1); _busquedaAbort=null; err('Error en investigación (Gemini): '+errMsg(e)); rb(); return; }
 
   // Parsear respuesta de texto plano de paso 1
