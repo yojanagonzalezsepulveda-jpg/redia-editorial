@@ -1472,11 +1472,15 @@ BAJADA: ${bajada}
 RESUMEN: ${cuerpo}
 
 Genera SOLO el post de ${esLI?'LinkedIn':'Facebook'} para este informe.
-${esLI
-  ? 'Tono profesional e informativo. Emojis sectoriales acuícolas (🐟🌊⚓🦐). Incluye link https://redia.pro al final. Máx 1200 caracteres.'
-  : 'Tono conversacional y cercano. Breve. Incluye link https://redia.pro al final. Máx 500 caracteres.'}
 
-Responde SOLO con el texto del post completo, sin explicaciones ni etiquetas. El post debe terminar con una oración completa y el link. NUNCA lo cortes a mitad.`;
+REGLAS:
+- El gancho de apertura debe reflejar el tema específico del artículo — NUNCA uses frases genéricas como "¡Gran noticia!" o "Noticia clave"
+- Abre con el dato o hecho más relevante del artículo, de forma directa
+${esLI
+  ? '- Tono profesional e informativo\n- Puedes usar 1-2 emojis relacionados con el tema (no obligatorio)\n- Incluye link https://redia.pro al final\n- Entre 600 y 1000 caracteres'
+  : '- Tono conversacional y directo\n- Máx 400 caracteres\n- Incluye link https://redia.pro al final'}
+
+Responde SOLO con el texto del post completo, sin explicaciones ni etiquetas. Termina con oración completa y el link. NUNCA cortes a mitad.`;
 
     var raw=await callGemini(prompt,gemKey,null,false,2000);
     if(!raw||raw.trim().length<10) throw new Error('Respuesta vacía');
