@@ -1348,11 +1348,11 @@ function buildCard(r){
     <div class="cpanel" id="cp-${uid}-rrss">
       <div class="sgrid">
         <div class="sc">
-          <div class="sl">LinkedIn <button class="cpbtn" style="margin-left:6px" onclick="generarRedSocial('${uid}','linkedin',this)">↺ Generar</button><button class="cpbtn" onclick="cp(document.getElementById('rrss-li-${uid}').value,this)">Copiar</button><button class="cpbtn" style="background:#15803d;color:#fff" onclick="guardarRRSS('${uid}','linkedin')">Guardar</button></div>
+          <div class="sl">LinkedIn <button class="cpbtn" style="margin-left:6px" onclick="generarRedSocial('${uid}','linkedin',this)">↺ Generar</button><button class="cpbtn" onclick="cp(document.getElementById('rrss-li-${uid}').value,this)">Copiar</button><button id="savebtn-rrss-li-${uid}" class="cpbtn" style="background:#94a3b8;color:#fff;opacity:.5" disabled onclick="guardarRRSS('${uid}','linkedin')">Guardar</button></div>
           <textarea class="efi" id="rrss-li-${uid}" rows="6" oninput="dirtyRRSS('${uid}','linkedin')">${esc(r.linkedin||'')}</textarea>
         </div>
         <div class="sc">
-          <div class="sl">Facebook <button class="cpbtn" style="margin-left:6px" onclick="generarRedSocial('${uid}','facebook',this)">↺ Generar</button><button class="cpbtn" onclick="cp(document.getElementById('rrss-fb-${uid}').value,this)">Copiar</button><button class="cpbtn" style="background:#15803d;color:#fff" onclick="guardarRRSS('${uid}','facebook')">Guardar</button></div>
+          <div class="sl">Facebook <button class="cpbtn" style="margin-left:6px" onclick="generarRedSocial('${uid}','facebook',this)">↺ Generar</button><button class="cpbtn" onclick="cp(document.getElementById('rrss-fb-${uid}').value,this)">Copiar</button><button id="savebtn-rrss-fb-${uid}" class="cpbtn" style="background:#94a3b8;color:#fff;opacity:.5" disabled onclick="guardarRRSS('${uid}','facebook')">Guardar</button></div>
           <textarea class="efi" id="rrss-fb-${uid}" rows="4" oninput="dirtyRRSS('${uid}','facebook')">${esc(r.facebook||'')}</textarea>
         </div>
       </div>
@@ -1437,20 +1437,22 @@ async function guardarEdicion(uid){
 
 // ── GENERAR DISTRIBUCIÓN ──────────────────────────────
 function dirtyRRSS(uid, red){
-  var btn=document.querySelector('#cp-'+uid+'-rrss .sl button[onclick*="guardarRRSS(\''+uid+'\',\''+red+'\'"]');
-  if(btn){ btn.textContent='Guardar *'; btn.style.background='#d97706'; }
+  var key = red==='linkedin' ? 'li' : 'fb';
+  var btn=document.getElementById('savebtn-rrss-'+key+'-'+uid);
+  if(btn){ btn.textContent='Guardar'; btn.style.background='#d97706'; btn.style.opacity='1'; btn.disabled=false; }
 }
 
 async function guardarRRSS(uid, red){
   var rec=getRec(uid); if(!rec) return;
-  var elId = red==='linkedin' ? 'rrss-li-'+uid : 'rrss-fb-'+uid;
-  var texto=(document.getElementById(elId)?.value||'').trim();
+  var key = red==='linkedin' ? 'li' : 'fb';
+  var btn=document.getElementById('savebtn-rrss-'+key+'-'+uid);
+  var texto=(document.getElementById('rrss-'+key+'-'+uid)?.value||'').trim();
   rec[red]=texto;
   localAddRec(rec);
   if(rec.id) await gsActualizar(rec.id, red, texto);
-  // Feedback visual
-  var btns=document.querySelectorAll('#cp-'+uid+'-rrss .sl button');
-  btns.forEach(function(b){ if(b.textContent.startsWith('Guardar')){ b.textContent='Guardado ✓'; b.style.background='#15803d'; setTimeout(function(){ b.textContent='Guardar'; b.style.background='#15803d'; },2000); } });
+  if(btn){ btn.textContent='Guardado ✓'; btn.style.background='#15803d'; btn.style.opacity='1';
+    setTimeout(function(){ btn.textContent='Guardar'; btn.style.background='#94a3b8'; btn.style.opacity='.5'; btn.disabled=true; },2000);
+  }
 }
 
 async function generarRedSocial(uid, red, btn){
@@ -1482,10 +1484,11 @@ Responde SOLO con el texto del post, sin explicaciones ni etiquetas.`;
     rec[red]=texto;
     localAddRec(rec);
     if(rec.id) await gsActualizar(rec.id, red, texto);
-    // Actualizar textarea
+    // Actualizar textarea y activar botón guardar
     var box=document.getElementById('rrss-'+(esLI?'li':'fb')+'-'+uid);
     if(box) box.value=texto;
     btn.textContent='↺ Generar'; btn.disabled=false;
+    dirtyRRSS(uid, red);
   } catch(e){
     btn.textContent=orig; btn.disabled=false;
     alert('Error: '+e.message);
