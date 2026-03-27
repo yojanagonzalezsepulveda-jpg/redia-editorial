@@ -1536,17 +1536,19 @@ ${hechosList}
 
 Fuentes consultadas en la investigación: ${fuentesStr}
 
-REGLAS DE REDACCIÓN:
-1. NUNCA inventes ni parafrasees citas textuales de personas. No uses blockquote ni comillas atribuidas a nadie. El artículo analiza hechos y datos, no reproduce declaraciones.
-2. El tema o evento central ("${inv.titulo}") es el EJE. El contexto solo se incluye cuando sirve para explicar o dimensionar ese eje — nunca como sección independiente.
-3. Si un dato no ilumina directamente el eje central, no va.
+REGLAS DE REDACCIÓN (obligatorias, sin excepción):
+1. NUNCA inventes citas, parafrasees declaraciones de personas, ni uses blockquote ni comillas atribuidas a nadie.
+2. NUNCA inventes cifras, porcentajes, estadísticas ni datos. Solo usa los datos que aparecen explícitamente en los "Hechos clave" o en el contexto entregado arriba.
+3. Cuando uses un dato, indica en el mismo párrafo de dónde proviene: "(según [Fuente])" o "(de acuerdo a [Fuente])". Si no sabes la fuente de un dato, no lo uses.
+4. El tema o evento central ("${inv.titulo}") es el EJE. El contexto solo se incluye cuando sirve para explicar o dimensionar ese eje — nunca como sección independiente.
+5. Si un dato o subtema no ilumina directamente el eje central, no va.
 
 Redacta el informe completo con voz REDIA. Mín ${minW} palabras en el cuerpo.
 IMPORTANTE: en fuentes_consultadas y fuentes_con_links lista TODAS las fuentes reales usadas en la investigación, no solo la principal.
 IMPORTANTE JSON: En el campo "cuerpo", usa comillas simples en todos los atributos HTML (ej: href='url' no href="url") para que el JSON sea válido.
 
 Responde SOLO con JSON válido:
-{"titulo_seo":"máx 60 chars","descripcion_seo":"máx 140 chars","tags":["t1","t2","t3","t4"],"categoria":"noticia","tiempo_lectura":"X min","fuentes_consultadas":["Medio o fuente 1","Medio o fuente 2","Medio o fuente 3"],"fuentes_con_links":[{"nombre":"Nombre real del medio","url":"https://url-real.cl/nota","descripcion":"Qué aportó esta fuente"},{"nombre":"Fuente 2","url":"https://url2.cl","descripcion":"Qué aportó"},{"nombre":"Fuente 3","url":"https://url3.cl","descripcion":"Qué aportó"}],"imagen_prompt":"Prompt fotorrealista en inglés para Gemini Imagen 3. Específico al tema. 16:9","articulo":{"titular":"titular periodístico directo con dato concreto","bajada":"2-3 oraciones con el hecho más relevante y cifra concreta","cuerpo":"HTML: usa comillas simples en atributos. h2 subtítulos, p, strong datos. Sin blockquote ni citas textuales. Mín ${minW} palabras.","analisis_muestra":"Lo que muestra este análisis — qué revela para el sector acuícola, en 2-4 puntos concretos"}}`;
+{"titulo_seo":"máx 60 chars","descripcion_seo":"máx 140 chars","tags":["t1","t2","t3","t4"],"categoria":"noticia","tiempo_lectura":"X min","fuentes_consultadas":["Medio o fuente 1","Medio o fuente 2","Medio o fuente 3"],"fuentes_con_links":[{"nombre":"Nombre real del medio","url":"https://url-real.cl/nota","descripcion":"Qué aportó esta fuente"},{"nombre":"Fuente 2","url":"https://url2.cl","descripcion":"Qué aportó"},{"nombre":"Fuente 3","url":"https://url3.cl","descripcion":"Qué aportó"}],"imagen_prompt":"Prompt fotorrealista en inglés para Gemini Imagen 3. Específico al tema. 16:9","articulo":{"titular":"titular periodístico directo con dato concreto","bajada":"2-3 oraciones con el hecho más relevante y cifra concreta, con fuente entre paréntesis","cuerpo":"HTML: usa comillas simples en atributos. h2 subtítulos, p, strong datos con fuente. Sin blockquote ni citas. Mín ${minW} palabras.","analisis_muestra":"Lo que muestra este análisis — qué revela para el sector acuícola, en 2-4 puntos concretos basados solo en los datos entregados"}}`;
 }
 
 function buildPromptDistribuir(titular,bajada,analisisMuestra){
