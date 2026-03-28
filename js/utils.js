@@ -120,7 +120,9 @@ export function sanitizeVocab(s) {
 }
 
 export function normalizeRec(d) {
+  // Manejar caso donde los campos vienen en el nivel raíz en vez de anidados en "articulo"
   var a = d.articulo || {};
+  if (!a.titular && d.titular) a = d; // fallback: usar raíz si articulo está vacío
   var uid = 'M' + Date.now();
   return {
     id: uid, _uid: uid,
