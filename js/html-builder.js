@@ -1,5 +1,5 @@
 // ── HTML BUILDER — construye el HTML publicable de un artículo ───────────────
-import { sj } from './utils.js';
+import { sj } from './utils.js?v=7';
 
 export function buildHTML(r) {
   var tags = sj(r.tags, []);

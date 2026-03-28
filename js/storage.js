@@ -1,5 +1,5 @@
 // ── STORAGE — localStorage y Google Sheets ──────────────────────────────────
-import { state, LOCAL_RECS_KEY } from './state.js';
+import { state, LOCAL_RECS_KEY } from './state.js?v=7';
 
 export function deduplicateRecs(recs) {
   var seen = {}; var out = [];

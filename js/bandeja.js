@@ -1,10 +1,10 @@
 // ── BANDEJA — renderizado de tarjetas y acciones ─────────────────────────────
-import { state } from './state.js';
-import { deduplicateRecs, localAddRec, gsActualizar, gsGuardar } from './storage.js';
-import { esc, sj, cp, cpHTML, dlHTML } from './utils.js';
-import { getAIKey, callGemini } from './ai.js';
-import { generarImagenGemini, resizarImg820x400 } from './media.js';
-import { sanitizeVocab } from './utils.js';
+import { state } from './state.js?v=7';
+import { deduplicateRecs, localAddRec, gsActualizar, gsGuardar } from './storage.js?v=7';
+import { esc, sj, cp, cpHTML, dlHTML } from './utils.js?v=7';
+import { getAIKey, callGemini } from './ai.js?v=7';
+import { generarImagenGemini, resizarImg820x400 } from './media.js?v=7';
+import { sanitizeVocab } from './utils.js?v=7';
 
 // Inyección de dependencias circulares
 var _buildHTML;
@@ -185,7 +185,7 @@ export function buildCard(r) {
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
         Publicar en redia.pro
       </button>` : ''}
-      ${r._rediaId ? `<button class="abtn" id="updbtn-${uid}" onclick="actualizarEnRedia('${uid}')" style="background:#0369a1;color:#fff">↑ Actualizar en redia.pro</button>` : ''}
+      ${r._rediaId ? `<button class="abtn" id="updbtn-${uid}" onclick="actualizarEnRedia('${uid}')" style="background:#0369a1;color:#fff">↑ Actualizar en redia.pro</button><button class="abtn" onclick="eliminarDeRedia('${uid}')" style="background:#dc2626;color:#fff">✕ Eliminar de redia.pro</button>` : ''}
       <button class="abtn ab-grad" onclick="dlHTML('${uid}')">Descargar HTML</button>
       <button class="abtn ab-out" onclick="cpHTML('${uid}',this)">Copiar HTML</button>
     </div>

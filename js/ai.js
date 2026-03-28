@@ -1,5 +1,5 @@
 // ── AI — proveedores de inteligencia artificial ──────────────────────────────
-import { state } from './state.js';
+import { state } from './state.js?v=7';
 
 export function getAIKey(p) {
   var CFG = state.CFG;

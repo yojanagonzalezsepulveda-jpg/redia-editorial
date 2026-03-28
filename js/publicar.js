@@ -1,8 +1,8 @@
 // ── PUBLICAR — modal de publicación multi-plataforma ─────────────────────────
-import { state } from './state.js';
-import { gsActualizar, localAddRec } from './storage.js';
-import { guardarHistorial } from './config.js';
-import { cp, sj } from './utils.js';
+import { state } from './state.js?v=7';
+import { gsActualizar, localAddRec } from './storage.js?v=7';
+import { guardarHistorial } from './config.js?v=7';
+import { cp, sj } from './utils.js?v=7';
 
 // Inyección de dependencias circulares
 var _getRec, _renderBandeja;
@@ -284,5 +284,29 @@ export async function actualizarEnRedia(uid) {
   } catch(e) {
     alert('Error al actualizar: ' + e.message);
     if (btn) { btn.disabled = false; btn.textContent = '↑ Actualizar en redia.pro'; }
+  }
+}
+
+export async function eliminarDeRedia(uid) {
+  var rec = _getRec(uid);
+  if (!rec || !rec._rediaId) return;
+  if (!confirm('¿Eliminar esta publicación de redia.pro? Esta acción no se puede deshacer.')) return;
+  var pbUrl   = localStorage.getItem('cr_pb_url')   || 'https://publicar.redia.pro';
+  var pbEmail = localStorage.getItem('cr_pb_email') || '';
+  var pbPass  = localStorage.getItem('cr_pb_pass')  || '';
+  if (!pbEmail || !pbPass) { alert('Configura las credenciales de redia.pro en la sección Credenciales'); return; }
+  try {
+    var token = await pbAuth(pbUrl, pbEmail, pbPass);
+    if (!token) throw new Error('Credenciales incorrectas');
+    var res = await fetch(pbUrl + '/api/collections/post/records/' + rec._rediaId, {
+      method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok && res.status !== 404) { var ed = await res.json().catch(() => ({})); throw new Error(ed.message || 'HTTP ' + res.status); }
+    delete rec._rediaId;
+    localAddRec(rec);
+    _renderBandeja();
+    alert('Publicación eliminada de redia.pro.');
+  } catch(e) {
+    alert('Error al eliminar: ' + e.message);
   }
 }

@@ -1,8 +1,8 @@
 // ── MEDIA — imagen, audio, video, RRSS ───────────────────────────────────────
-import { state } from './state.js';
-import { localAddRec, gsActualizar } from './storage.js';
-import { sanitizeVocab } from './utils.js';
-import { getAIKey, callGemini } from './ai.js';
+import { state } from './state.js?v=7';
+import { localAddRec, gsActualizar } from './storage.js?v=7';
+import { sanitizeVocab } from './utils.js?v=7';
+import { getAIKey, callGemini } from './ai.js?v=7';
 
 // Inyección de dependencias circulares
 var _getRec, _buildHTML, _renderBandeja;

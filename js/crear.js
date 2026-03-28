@@ -1,11 +1,11 @@
 // ── CREAR — generación de contenido editorial por tipo ───────────────────────
-import { state } from './state.js';
-import { gsGuardar } from './storage.js';
-import { esc, parseJSON, normalizeRec, sleep } from './utils.js';
-import { callAI } from './ai.js';
-import { buildPromptByTipo } from './prompts.js';
-import { leerArchivoAdjunto, leerImagen64, leerImagenes64Multi, generarImagenGemini, resizarImg820x400, injectMediaIntoHTML } from './media.js';
-import { renderBandeja, buildCard } from './bandeja.js';
+import { state } from './state.js?v=7';
+import { gsGuardar } from './storage.js?v=7';
+import { esc, parseJSON, normalizeRec, sleep } from './utils.js?v=7';
+import { callAI } from './ai.js?v=7';
+import { buildPromptByTipo } from './prompts.js?v=7';
+import { leerArchivoAdjunto, leerImagen64, leerImagenes64Multi, generarImagenGemini, resizarImg820x400, injectMediaIntoHTML } from './media.js?v=7';
+import { renderBandeja, buildCard } from './bandeja.js?v=7';
 
 // Inyección de dependencias circulares
 var _buildHTML;
