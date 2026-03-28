@@ -1,14 +1,44 @@
 // ── PUBLICAR — modal de publicación multi-plataforma ─────────────────────────
 import { state } from './state.js';
-import { gsActualizar } from './storage.js';
+import { gsActualizar, localAddRec } from './storage.js';
 import { guardarHistorial } from './config.js';
-import { cp } from './utils.js';
+import { cp, sj } from './utils.js';
 
 // Inyección de dependencias circulares
 var _getRec, _renderBandeja;
 export function _injectPublicarDeps(deps) {
   _getRec = deps.getRec;
   _renderBandeja = deps.renderBandeja;
+}
+
+function buildContenidoPublicable(rec) {
+  var analisisHtml = rec.analisis_muestra
+    ? '<div style="background:#0f172a;border-radius:16px;padding:24px;margin:32px 0"><p style="color:rgba(255,255,255,.9);font-size:13px;font-weight:700;margin:0 0 12px">★ Análisis REDIA</p><div style="background:rgba(255,255,255,.07);border-radius:8px;padding:12px 14px"><p style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4);margin:0 0 6px">Lo que muestra este análisis</p><p style="font-size:12px;line-height:1.6;color:rgba(255,255,255,.85);margin:0">' + rec.analisis_muestra + '</p></div></div>'
+    : '';
+  var fc = sj(rec.fuentes_con_links, []);
+  var catExcl = ['entrevista', 'mercado', 'patrocinado'];
+  var srcHtml = (fc.length && !catExcl.includes(rec.categoria))
+    ? '<div style="margin-top:36px;padding-top:20px;border-top:1px solid #e2e8f0"><strong style="font-size:12px;color:#334155;display:block;margin-bottom:10px">Fuentes consultadas</strong><ul style="list-style:none;padding:0;margin:0">' +
+      fc.map(function(f) { return '<li style="margin:7px 0;font-size:12px"><a href="' + f.url + '" target="_blank" rel="noopener" style="color:#7e22ce;font-weight:700">' + f.nombre + '</a>' + (f.descripcion ? '<span style="color:#64748b"> — ' + f.descripcion + '</span>' : '') + '</li>'; }).join('') +
+      '</ul></div>'
+    : '';
+  return (rec.cuerpo_html || '') + analisisHtml + srcHtml;
+}
+
+async function pbAuth(pbUrl, pbEmail, pbPass) {
+  var endpoints = [
+    pbUrl + '/api/collections/_superusers/auth-with-password',
+    pbUrl + '/api/admins/auth-with-password',
+    pbUrl + '/api/collections/users/auth-with-password'
+  ];
+  for (var i = 0; i < endpoints.length; i++) {
+    var r = await fetch(endpoints[i], {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identity: pbEmail, password: pbPass })
+    });
+    if (r.ok) { var j = await r.json(); return j.token || null; }
+  }
+  return null;
 }
 
 export function abrirPublicar(uid) {
@@ -84,27 +114,14 @@ export async function confirmarPublicar() {
       var pbEmail = localStorage.getItem('cr_pb_email') || '';
       var pbPass  = localStorage.getItem('cr_pb_pass')  || '';
       if (!pbEmail || !pbPass) throw new Error('Configura las credenciales de redia.pro en la sección Credenciales');
-      var token = null;
-      var authEndpoints = [
-        pbUrl + '/api/collections/_superusers/auth-with-password',
-        pbUrl + '/api/admins/auth-with-password',
-        pbUrl + '/api/collections/users/auth-with-password'
-      ];
-      for (var _ai = 0; _ai < authEndpoints.length; _ai++) {
-        var _ar = await fetch(authEndpoints[_ai], {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ identity: pbEmail, password: pbPass })
-        });
-        if (_ar.ok) { var _aj = await _ar.json(); token = _aj.token || (_aj.record && _aj.token); break; }
-      }
+      var token = await pbAuth(pbUrl, pbEmail, pbPass);
       if (!token) throw new Error('Credenciales de redia.pro incorrectas — verifica email y contraseña en la pestaña Credenciales');
       var slug = titulo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-').substring(0, 80);
-      var descCorta  = desc;
       var tipoFinal  = (['publicación', 'mercado', 'entrevista', 'indicadores'].indexOf(tipo) >= 0) ? tipo : 'publicación';
       var fd = new FormData();
       fd.append('titulo', titulo);
-      fd.append('descripcion_corta', descCorta);
-      fd.append('contenido', rec.cuerpo_html || '');
+      fd.append('descripcion_corta', desc);
+      fd.append('contenido', buildContenidoPublicable(rec));
       fd.append('tipo', tipoFinal);
       fd.append('publicado', 'true');
       fd.append('slug', slug);
@@ -134,6 +151,7 @@ export async function confirmarPublicar() {
       var pubData = await pubRes.json();
       rec._rediaId   = pubData.id;
       rec._rediaSlug = slug;
+      localAddRec(rec);
       resultados.push('redia.pro');
     } catch(e) { errores.push('redia.pro: ' + e.message); }
   }
@@ -227,4 +245,40 @@ export function mostrarYouTube(rec, titulo, desc) {
   document.getElementById('ytDesc').textContent   = ytDesc;
   document.getElementById('ytTags').textContent   = ytTagStr;
   document.getElementById('ytModal').style.display = 'flex';
+}
+
+export async function actualizarEnRedia(uid) {
+  var rec = _getRec(uid);
+  if (!rec) return;
+  if (!rec._rediaId) { alert('Este artículo no fue publicado desde esta herramienta o el ID no está guardado. Usa "Publicar en redia.pro" para publicarlo primero.'); return; }
+  var pbUrl   = localStorage.getItem('cr_pb_url')   || 'https://publicar.redia.pro';
+  var pbEmail = localStorage.getItem('cr_pb_email') || '';
+  var pbPass  = localStorage.getItem('cr_pb_pass')  || '';
+  if (!pbEmail || !pbPass) { alert('Configura las credenciales de redia.pro en la sección Credenciales'); return; }
+  var btn = document.getElementById('updbtn-' + uid);
+  if (btn) { btn.disabled = true; btn.textContent = 'Actualizando...'; }
+  try {
+    var token = await pbAuth(pbUrl, pbEmail, pbPass);
+    if (!token) throw new Error('Credenciales incorrectas');
+    var fd = new FormData();
+    fd.append('titulo', rec.titular || rec.titulo_seo || '');
+    fd.append('descripcion_corta', rec.bajada || rec.descripcion_seo || '');
+    fd.append('contenido', buildContenidoPublicable(rec));
+    if (rec.imagen_src && rec.imagen_src.startsWith('data:')) {
+      try {
+        var arr = rec.imagen_src.split(','), mime = arr[0].match(/:(.*?);/)[1], bstr = atob(arr[1]);
+        var u8 = new Uint8Array(bstr.length);
+        for (var i = 0; i < bstr.length; i++) u8[i] = bstr.charCodeAt(i);
+        fd.append('imagen', new Blob([u8], { type: mime }), 'redia-' + rec._rediaId + '.jpg');
+      } catch(e) {}
+    }
+    var res = await fetch(pbUrl + '/api/collections/post/records/' + rec._rediaId, {
+      method: 'PATCH', headers: { 'Authorization': 'Bearer ' + token }, body: fd
+    });
+    if (!res.ok) { var ed = await res.json().catch(() => ({})); throw new Error(ed.message || 'HTTP ' + res.status); }
+    if (btn) { btn.disabled = false; btn.textContent = '✓ Actualizado'; setTimeout(() => { if (btn) btn.textContent = '↑ Actualizar en redia.pro'; }, 3000); }
+  } catch(e) {
+    alert('Error al actualizar: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = '↑ Actualizar en redia.pro'; }
+  }
 }

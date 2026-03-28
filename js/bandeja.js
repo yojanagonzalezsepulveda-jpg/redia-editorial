@@ -179,6 +179,7 @@ export function buildCard(r) {
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
         Publicar en redia.pro
       </button>` : ''}
+      ${r._rediaId ? `<button class="abtn" id="updbtn-${uid}" onclick="actualizarEnRedia('${uid}')" style="background:#0369a1;color:#fff">↑ Actualizar en redia.pro</button>` : ''}
       <button class="abtn ab-grad" onclick="dlHTML('${uid}')">Descargar HTML</button>
       <button class="abtn ab-out" onclick="cpHTML('${uid}',this)">Copiar HTML</button>
     </div>

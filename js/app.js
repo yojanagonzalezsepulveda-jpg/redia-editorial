@@ -8,7 +8,7 @@ import { getAIKey, buildProvOrder, callAI, callGemini, callDeepSeek, callClaude,
 import { buildHTML } from './html-builder.js';
 import { renderBandeja, filtrar, buildCard, toggleCard, showCTab, dirty, getRec, autoPublicarRedia, estado, guardarEdicion, toggleCollapse, _injectBandejaDeps } from './bandeja.js';
 import { generarImgBandeja, dirtyMedia, guardarMedia, generarMedia, dirtyRRSS, guardarRRSS, generarRedSocial, generarDistribucion, resizarImg820x400, generarImagenGemini, generarImgManual, previsualizarImg, previsualizarMulti, leerImagen64, leerImagenes64Multi, injectMediaIntoHTML, leerArchivoAdjunto, _injectMediaDeps } from './media.js';
-import { abrirPublicar, cerrarPublicar, confirmarPublicar, mostrarPubStatus, togglePlat, mostrarYouTube, _injectPublicarDeps } from './publicar.js';
+import { abrirPublicar, cerrarPublicar, confirmarPublicar, mostrarPubStatus, togglePlat, mostrarYouTube, actualizarEnRedia, _injectPublicarDeps } from './publicar.js';
 import { updEsp, updFoc, buscarManual, guardarManualEnGS, generarAutomatico, guardarTodosEnGS, cancelarBusqueda, setGsStatus, autoConectarGS, _injectBusquedaDeps } from './busqueda.js';
 import { selTipo, generarCrear, buildCrearPrompt, guardarCrearEnGS, dlCrear, copiarHTMLCrear, aplicarEdicionManual, corregirConIA, selAll, clearAll, _injectCrearDeps } from './crear.js';
 import { deduplicateRecs, mergeConLocal, localAddRec, gsCall, guardarGS, limpiarDuplicados, cargarBandeja, gsGuardar, gsActualizar } from './storage.js';
@@ -140,6 +140,7 @@ window.confirmarPublicar   = confirmarPublicar;
 window.mostrarPubStatus    = mostrarPubStatus;
 window.togglePlat          = togglePlat;
 window.mostrarYouTube      = mostrarYouTube;
+window.actualizarEnRedia   = actualizarEnRedia;
 
 // busqueda
 window.updEsp              = updEsp;
