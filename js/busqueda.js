@@ -144,7 +144,11 @@ export async function buscarManual() {
   try { r1 = await callAI(buildPromptInvestigar(esp, foc, kw, temasCubiertos, especiesForzar), true, null, null, state._busquedaAbort.signal, searchQ || 'acuicultura Chile noticias'); clearTimeout(t1); }
   catch(e) { clearTimeout(t1); state._busquedaAbort = null; err('Error en investigación: ' + errMsg(e)); rb(); return; }
 
-  if (!r1 || r1.trim().length < 30) { err('La investigación no devolvió datos. Intenta con otro tema o URL.'); rb(); return; }
+  if (!r1 || r1.trim().length < 30) {
+    var preview = r1 ? r1.trim().substring(0, 200) : '(respuesta vacía)';
+    err('La investigación no devolvió datos.<br><small style="opacity:.7">Respuesta del AI: ' + esc(preview) + '</small><br><small>Verifica que las API keys estén configuradas en <b>Credenciales → API Keys IA</b>.</small>');
+    rb(); return;
+  }
 
   function p1Field(text, key) { var m = text.match(new RegExp(key + ':\\s*(.+)', 'i')); return m ? m[1].trim() : ''; }
   function p1List(text, key) {
