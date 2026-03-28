@@ -63,11 +63,23 @@ export async function callGemini(prompt, key, signal, useSearch, maxTok, content
   });
   if (!res.ok) { var e = await res.json().catch(() => ({})); throw new Error(e.error?.message || 'Error HTTP ' + res.status); }
   var d = await res.json();
-  var allParts = d.candidates?.[0]?.content?.parts || [];
-  // Preferir partes de texto no-thinking; si no hay, usar cualquier texto (incluyendo thinking)
+  // Verificar si fue bloqueado por safety
+  var finishReason = d.candidates?.[0]?.finishReason;
+  if (finishReason && finishReason !== 'STOP' && finishReason !== 'MAX_TOKENS') {
+    throw new Error('Gemini bloqueó la respuesta: ' + finishReason);
+  }
+  if (!d.candidates || d.candidates.length === 0) {
+    var blocked = d.promptFeedback?.blockReason;
+    throw new Error(blocked ? 'Prompt bloqueado por Gemini: ' + blocked : 'Gemini no devolvió candidatos');
+  }
+  var allParts = d.candidates[0]?.content?.parts || [];
   var textParts = allParts.filter(p => p.text && !p.thought);
   if (textParts.length > 0) return textParts.map(p => p.text).join('');
-  return allParts.filter(p => p.text).map(p => p.text).join('');
+  var anyText = allParts.filter(p => p.text).map(p => p.text).join('');
+  if (anyText) return anyText;
+  // Sin texto — mostrar qué tipos de partes devolvió para diagnóstico
+  var tipos = allParts.map(p => Object.keys(p).join('+')).join(' | ') || 'ninguna parte';
+  throw new Error('Gemini devolvió respuesta sin texto. Partes: ' + tipos);
 }
 
 export async function callDeepSeek(prompt, key, signal, maxTok) {
