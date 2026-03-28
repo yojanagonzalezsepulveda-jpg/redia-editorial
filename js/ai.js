@@ -7,7 +7,7 @@ export function getAIKey(p) {
 }
 
 export function buildProvOrder(pref) {
-  var all = ['gem', 'deep', 'ant'];
+  var all = ['gem', 'deep', 'ant']; // orden: Gemini → DeepSeek → Claude (Claude último por costo)
   if (pref === 'auto') return all.filter(function(p) { return !!getAIKey(p); });
   return [pref].concat(all.filter(function(p) { return p !== pref; }));
 }
