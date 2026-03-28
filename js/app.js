@@ -60,11 +60,13 @@ if (state.records.length) renderBandeja();
 // Conectar a GS automáticamente
 autoConectarGS();
 
-// Listeners de chips (búsqueda manual) — addEventListener para que no pueda ser sobreescrito
-document.getElementById('eGrid').addEventListener('click', function(e) {
+// Listeners de chips (búsqueda manual) — con null check para no crashear app.js si el elemento no existe
+var _eGrid = document.getElementById('eGrid');
+var _fGrid = document.getElementById('fGrid');
+if (_eGrid) _eGrid.addEventListener('click', function(e) {
   var c = e.target.closest('.chip'); if (c) { c.classList.toggle('on'); try { updEsp(); } catch(e2) {} }
 });
-document.getElementById('fGrid').addEventListener('click', function(e) {
+if (_fGrid) _fGrid.addEventListener('click', function(e) {
   var c = e.target.closest('.ftag'); if (c) { c.classList.toggle('on'); try { updFoc(); } catch(e2) {} }
 });
 
