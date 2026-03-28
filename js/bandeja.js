@@ -105,11 +105,11 @@ export function buildCard(r) {
     <div class="cpanel" id="cp-${uid}-seo">
       <div class="ef">
         <label class="efl">Título SEO <span id="seo-tl-${uid}" class="${tl <= 60 ? 'cok' : 'cbad'}">${tl}/60</span></label>
-        <input type="text" class="efi" id="ef-${uid}-tseo" value="${esc(r.titulo_seo || '')}" maxlength="80" oninput="dirty('${uid}');var s=this.value;document.getElementById('seo-tl-${uid}').textContent=s.length+'/60';document.getElementById('seo-tl-${uid}').className=s.length<=60?'cok':'cbad';var p=document.getElementById('seo-prev-t-${uid}');if(p)p.textContent=s;">
+        <input type="text" class="efi" id="ef-${uid}-tseo" value="${esc(r.titulo_seo || '')}" maxlength="80" oninput="dirty('${uid}');_seoCount('${uid}','t',this.value)">
       </div>
       <div class="ef">
         <label class="efl">Descripción SEO <span id="seo-dl-${uid}" class="${dl <= 140 ? 'cok' : 'cbad'}">${dl}/140</span></label>
-        <textarea class="efi" id="ef-${uid}-dseo" rows="3" oninput="dirty('${uid}');var s=this.value;document.getElementById('seo-dl-${uid}').textContent=s.length+'/140';document.getElementById('seo-dl-${uid}').className=s.length<=140?'cok':'cbad';var p=document.getElementById('seo-prev-d-${uid}');if(p)p.textContent=s;">${esc(r.descripcion_seo || '')}</textarea>
+        <textarea class="efi" id="ef-${uid}-dseo" rows="3" oninput="dirty('${uid}');_seoCount('${uid}','d',this.value)">${esc(r.descripcion_seo || '')}</textarea>
       </div>
       <div class="sgrid">
         <div class="sc"><div class="sl">Tags</div><div class="trow">${tags.map(t => '<div class="tpill">#' + t + '</div>').join('')}</div><button class="cpbtn" onclick="cp('${tags.map(t => '#' + t).join(' ')}',this)">Copiar tags</button></div>
@@ -214,6 +214,21 @@ export function dirty(uid) {
   if (btn) { btn.textContent = 'Guardar cambios *'; btn.style.background = '#d97706'; }
 }
 
+// Actualiza contadores de caracteres en el tab SEO (t=titulo, d=descripcion)
+export function _seoCount(uid, field, val) {
+  if (field === 't') {
+    var span = document.getElementById('seo-tl-' + uid);
+    var prev  = document.getElementById('seo-prev-t-' + uid);
+    if (span) { span.textContent = val.length + '/60'; span.className = val.length <= 60 ? 'cok' : 'cbad'; }
+    if (prev) prev.textContent = val;
+  } else {
+    var span = document.getElementById('seo-dl-' + uid);
+    var prev  = document.getElementById('seo-prev-d-' + uid);
+    if (span) { span.textContent = val.length + '/140'; span.className = val.length <= 140 ? 'cok' : 'cbad'; }
+    if (prev) prev.textContent = val;
+  }
+}
+
 export function toggleCollapse(sId, aId) {
   var s = document.getElementById(sId), a = document.getElementById(aId);
   if (!s) return;
@@ -315,8 +330,8 @@ export async function guardarEdicion(uid) {
     coyuntura:      document.getElementById('ef-' + uid + '-coy')?.value  || '',
     linkedin:       document.getElementById('ef-' + uid + '-li')?.value   || '',
     facebook:       document.getElementById('ef-' + uid + '-fb')?.value   || '',
-    titulo_seo:     document.getElementById('ef-' + uid + '-tseo')?.value || rec.titulo_seo || '',
-    descripcion_seo: document.getElementById('ef-' + uid + '-dseo')?.value || rec.descripcion_seo || '',
+    titulo_seo:      (el => el ? el.value : rec.titulo_seo)(document.getElementById('ef-' + uid + '-tseo')) || '',
+    descripcion_seo: (el => el ? el.value : rec.descripcion_seo)(document.getElementById('ef-' + uid + '-dseo')) || '',
   };
   Object.assign(rec, campos);
   if (rec.id) {
