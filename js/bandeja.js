@@ -324,4 +324,7 @@ export async function guardarEdicion(uid) {
       btn.style.background = 'var(--p6)';
     }, 2000);
   }
+  if (rec._rediaId && typeof window.actualizarEnRedia === 'function') {
+    window.actualizarEnRedia(uid);
+  }
 }
