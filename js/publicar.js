@@ -118,6 +118,7 @@ export async function confirmarPublicar() {
       if (!token) throw new Error('Credenciales de redia.pro incorrectas — verifica email y contraseña en la pestaña Credenciales');
       var slug = titulo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-').substring(0, 80);
       var tipoFinal  = (['publicación', 'mercado', 'entrevista', 'indicadores'].indexOf(tipo) >= 0) ? tipo : 'publicación';
+      var recTags = sj(rec.tags, []);
       var fd = new FormData();
       fd.append('titulo', titulo);
       fd.append('descripcion_corta', desc);
@@ -127,6 +128,7 @@ export async function confirmarPublicar() {
       fd.append('slug', slug);
       fd.append('fecha_publicacion', new Date().toISOString().replace('T', ' ').substring(0, 19));
       fd.append('verificationLevel', '1');
+      if (recTags.length) fd.append('Tags', JSON.stringify(recTags));
       if (tipoFinal === 'mercado') fd.append('Disponiblemercado', 'true');
       if (rec.imagen_src && rec.imagen_src.startsWith('data:')) {
         try {
@@ -260,10 +262,12 @@ export async function actualizarEnRedia(uid) {
   try {
     var token = await pbAuth(pbUrl, pbEmail, pbPass);
     if (!token) throw new Error('Credenciales incorrectas');
+    var updTags = sj(rec.tags, []);
     var fd = new FormData();
     fd.append('titulo', rec.titular || rec.titulo_seo || '');
     fd.append('descripcion_corta', rec.bajada || rec.descripcion_seo || '');
     fd.append('contenido', buildContenidoPublicable(rec));
+    if (updTags.length) fd.append('Tags', JSON.stringify(updTags));
     if (rec.imagen_src && rec.imagen_src.startsWith('data:')) {
       try {
         var arr = rec.imagen_src.split(','), mime = arr[0].match(/:(.*?);/)[1], bstr = atob(arr[1]);

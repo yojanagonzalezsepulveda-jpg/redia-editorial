@@ -263,8 +263,8 @@ export function resizarImg820x400(dataUrl) {
 }
 
 export async function generarImagenPollinations(prompt) {
-  var polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) +
-               '?width=820&height=400&nologo=true&seed=' + Math.floor(Math.random() * 99999);
+  var polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt.substring(0, 500)) +
+               '?model=flux&width=820&height=400&nologo=true&seed=' + Math.floor(Math.random() * 99999);
   var polRes = await fetch(polUrl);
   if (!polRes.ok) throw new Error('Pollinations HTTP ' + polRes.status);
   var blob = await polRes.blob();
@@ -286,10 +286,10 @@ export async function generarImagenGemini(prompt, key) {
   }
   var model = (CFG && CFG.imagenModel) || '';
   var IMG_MODELS = [
-    { m: 'gemini-3.1-flash-image-preview',            mod: ['IMAGE'] },
-    { m: 'gemini-3.1-flash-image-preview',            mod: ['TEXT', 'IMAGE'] },
+    { m: 'gemini-2.0-flash-exp',                      mod: ['IMAGE'] },
+    { m: 'gemini-2.0-flash-exp',                      mod: ['TEXT', 'IMAGE'] },
     { m: 'gemini-2.0-flash-preview-image-generation', mod: ['IMAGE'] },
-    { m: 'gemini-2.0-flash-exp-image-generation',     mod: ['TEXT', 'IMAGE'] },
+    { m: 'gemini-2.0-flash-preview-image-generation', mod: ['TEXT', 'IMAGE'] },
   ];
   var customOk = model && (model.includes('image') || model.includes('imagen') || model.includes('imgen'))
                        && !model.startsWith('imagen');
@@ -332,8 +332,8 @@ export async function generarImagenGemini(prompt, key) {
       }
       // Fallback: Pollinations.ai
       try {
-        var polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) +
-                     '?width=820&height=400&nologo=true&seed=' + Math.floor(Math.random() * 99999);
+        var polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt.substring(0, 500)) +
+                     '?model=flux&width=820&height=400&nologo=true&seed=' + Math.floor(Math.random() * 99999);
         var polRes = await fetch(polUrl);
         if (polRes.ok) {
           var blob = await polRes.blob();
