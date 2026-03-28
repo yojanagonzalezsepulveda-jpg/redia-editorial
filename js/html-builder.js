@@ -33,7 +33,7 @@ export function buildHTML(r) {
 <div class="bajada">${r.bajada}</div>
 ${r.cuerpo_html}
 <div class="insight">
-<p class="ih">★ Análisis estratégico REDIA</p>
+<p class="ih">★ Análisis REDIA</p>
 <div class="ig" style="grid-template-columns:1fr">
 <div class="ic"><div class="icl">Lo que muestra este análisis</div><div class="icb">${r.analisis_muestra || sj(r.beneficios, []).map(b => '· ' + b).join('<br>') || ''}</div></div>
 </div>

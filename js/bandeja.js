@@ -87,7 +87,7 @@ export function buildCard(r) {
     <div class="cpanel on" id="cp-${uid}-art">
       <div class="art-prev">${r.cuerpo_html || '<p>Sin contenido</p>'}</div>
       <div class="ibox">
-        <div class="ibox-t">Análisis estratégico REDIA</div>
+        <div class="ibox-t">Análisis REDIA</div>
         <div class="ibox-g" style="grid-template-columns:1fr">
           <div class="ibox-c"><div class="ibox-l">Lo que muestra este análisis</div><div class="ibox-v">${r.analisis_muestra || sj(r.beneficios, []).map(b => '· ' + b).join('<br>') || ''}</div></div>
         </div>
