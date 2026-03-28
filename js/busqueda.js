@@ -6,10 +6,12 @@ import { getAIKey, buildProvOrder, callGemini, callAI } from './ai.js';
 import { buildPromptInvestigar, buildPromptRedactar, buildPromptDistribuir } from './prompts.js';
 
 // Inyección de dependencias circulares
-var _buildHTML, _renderBandeja;
+var _buildHTML, _renderBandeja, _generarImagenGemini, _resizarImg820x400;
 export function _injectBusquedaDeps(deps) {
   _buildHTML = deps.buildHTML;
   _renderBandeja = deps.renderBandeja;
+  _generarImagenGemini = deps.generarImagenGemini;
+  _resizarImg820x400 = deps.resizarImg820x400;
 }
 
 // ── CHIPS / TAGS ──────────────────────────────────────────────────────────────
@@ -208,6 +210,18 @@ export async function buscarManual() {
   catch(e) { clearTimeout(t3); r3 = null; }
 
   if (r3) { try { var dist = parseJSON(r3); rec.linkedin = dist.linkedin || ''; rec.facebook = dist.facebook || ''; rec.audio_script = dist.audio_script || ''; rec.video_script = dist.video_script || ''; } catch(e) {} }
+
+  // ── Imagen (automática, no bloquea si falla) ──
+  if (rec.imagen_prompt && _generarImagenGemini && _resizarImg820x400) {
+    sp(90, 'Generando imagen...');
+    try {
+      var imgKey = getAIKey('gem');
+      if (imgKey) {
+        var imgRaw = await _generarImagenGemini(rec.imagen_prompt, imgKey);
+        if (imgRaw) rec.imagen_src = await _resizarImg820x400(imgRaw);
+      }
+    } catch(e) { /* imagen no crítica — continúa sin ella */ }
+  }
 
   rec.fecha_fuente     = inv.fecha || '';
   rec.html_publicable  = _buildHTML(rec);

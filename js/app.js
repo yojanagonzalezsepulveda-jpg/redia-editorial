@@ -19,7 +19,7 @@ _injectUtilsDeps({ getRec, buildHTML });
 _injectBandejaDeps({ buildHTML });
 _injectMediaDeps({ getRec, buildHTML, renderBandeja });
 _injectPublicarDeps({ getRec, renderBandeja });
-_injectBusquedaDeps({ buildHTML, renderBandeja });
+_injectBusquedaDeps({ buildHTML, renderBandeja, generarImagenGemini, resizarImg820x400 });
 _injectCrearDeps({ buildHTML });
 
 // ── INICIALIZACIÓN ─────────────────────────────────────────────────────────────
