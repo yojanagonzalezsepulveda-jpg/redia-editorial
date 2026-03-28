@@ -108,10 +108,15 @@ export async function buscarManual() {
   kw = cleanTrackingUrl(kw);
   var searchQ = ((kw || '') + ' ' + (esp.join(' ')) + ' ' + (foc.join(' '))).trim();
 
-  // ── PASO 1: Investigar ──
-  var gemKey = getAIKey('gem');
-  if (!gemKey) { err('Paso 1 requiere la API key de Gemini para buscar en la web. Configúrala en Credenciales → API Keys IA.'); rb(); return; }
-  sp(5, 'Paso 1/3 — Investigando con Gemini + Google Search...');
+  // ── PASO 1: Investigar (con fallback automático entre proveedores) ──
+  var avail1 = avail.filter(function(p) {
+    if (p === 'gem' || p === 'ant') return true;
+    if (p === 'deep') return !!(state.CFG && state.CFG.tavilyKey);
+    return false;
+  });
+  if (!avail1.length) { err('Paso 1 requiere búsqueda web. Configura Gemini, Claude o DeepSeek+Tavily en Credenciales → API Keys IA.'); rb(); return; }
+  var provLabel = avail1[0] === 'gem' ? 'Gemini + Google Search' : avail1[0] === 'ant' ? 'Claude + Web Search' : 'DeepSeek + Tavily';
+  sp(5, 'Paso 1/3 — Investigando con ' + provLabel + '...');
   var t1 = na(90000); var r1;
   var temasCubiertos = (state.records || []).map(function(r) { return r.titular || r.titulo_seo || ''; }).filter(Boolean);
 
@@ -134,8 +139,8 @@ export async function buscarManual() {
     especiesForzar = elegida.e;
   }
 
-  try { r1 = await callGemini(buildPromptInvestigar(esp, foc, kw, temasCubiertos, especiesForzar), gemKey, state._busquedaAbort.signal, true, null); clearTimeout(t1); }
-  catch(e) { clearTimeout(t1); state._busquedaAbort = null; err('Error en investigación (Gemini): ' + errMsg(e)); rb(); return; }
+  try { r1 = await callAI(buildPromptInvestigar(esp, foc, kw, temasCubiertos, especiesForzar), true, null, null, state._busquedaAbort.signal, searchQ || 'acuicultura Chile noticias'); clearTimeout(t1); }
+  catch(e) { clearTimeout(t1); state._busquedaAbort = null; err('Error en investigación: ' + errMsg(e)); rb(); return; }
 
   if (!r1 || r1.trim().length < 30) { err('La investigación no devolvió datos. Intenta con otro tema o URL.'); rb(); return; }
 
