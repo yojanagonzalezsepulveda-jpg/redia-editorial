@@ -83,7 +83,7 @@
 <div class="page" id="page-busqueda">
   <div class="search-sb">
     <div style="margin-bottom:10px">
-      <div onclick="toggleCollapse('eSection','eArrow')" style="background:#f3e8ff;color:#7e22ce;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:700;font-size:12px;display:flex;justify-content:space-between;align-items:center;user-select:none">
+      <div onclick="var s=document.getElementById('eSection'),a=document.getElementById('eArrow');var o=s.style.display!=='none';s.style.display=o?'none':'block';if(a)a.style.transform=o?'':'rotate(180deg)'" style="background:#f3e8ff;color:#7e22ce;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:700;font-size:12px;display:flex;justify-content:space-between;align-items:center;user-select:none">
         <span id="eLabel">Especies (opcional) — Todas</span>
         <span id="eArrow" style="font-size:10px;transition:transform .2s;display:inline-block">▼</span>
       </div>
@@ -109,7 +109,7 @@
       </div>
     </div>
     <div style="margin-bottom:10px">
-      <div onclick="toggleCollapse('fSection','fArrow')" style="background:#f3e8ff;color:#7e22ce;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:700;font-size:12px;display:flex;justify-content:space-between;align-items:center;user-select:none">
+      <div onclick="var s=document.getElementById('fSection'),a=document.getElementById('fArrow');var o=s.style.display!=='none';s.style.display=o?'none':'block';if(a)a.style.transform=o?'':'rotate(180deg)'" style="background:#f3e8ff;color:#7e22ce;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:700;font-size:12px;display:flex;justify-content:space-between;align-items:center;user-select:none">
         <span id="fLabel">Focos temáticos (opcional) — Todos</span>
         <span id="fArrow" style="font-size:10px;transition:transform .2s;display:inline-block">▼</span>
       </div>
