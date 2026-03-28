@@ -118,7 +118,7 @@ cabe destacar · es importante señalar · en el contexto de · en el marco de �
 EL TEXTO DEBE SONAR HUMANO:
 Que no parezca generado por IA. Directo, concreto, con voz periodística propia. Las citas reales son el corazón del análisis — NUNCA se inventan ni se parafrasean sin indicarlo. Los datos son concretos y verificados con fuente. Sin lenguaje corporativo ni abstracto.
 
-ESTRUCTURA DEL CUADRO DE ANÁLISIS ESTRATÉGICO REDIA (al final de cada publicación):
+ESTRUCTURA DEL CUADRO DE ANÁLISIS REDIA (al final de cada publicación):
 - Lo que muestra/revela/evidencia este análisis (hechos concretos)
 - Lo que no resuelve por sí solo (limitaciones, incógnitas pendientes)
 - Para quiénes es especialmente relevante y por qué (por actor/rubro)
@@ -136,12 +136,12 @@ export function buildPromptInvestigar(esp, foc, kw, temasYaCubiertos, especiesFo
     'Aqua.cl','MundoAcuícola','Visión Acuícola','Portal Acuícola','SalmonExpert','IntraFish','SalmonBusiness','Undercurrent News',
     'SERNAPESCA','SUBPESCA','SMA','INDESPA','IFOP',
     'Centro INCAR','ANID','UACH','Nofima','CSIRO Australia',
-    'SalmonChile','Consejo del Salmón','Asociación de Mitilicultores','AmiChile',
+    'SalmonChile','Consejo del Salmón','Asociación de Mitilicultores',
     'El Llanquihue','Diario de Aysén','Diario Chiloé',
     'FDA','FAO','Globefish'
   ];
   // Fuentes de contexto interno: usar para informarse, NUNCA citar como fuente en el artículo
-  var FUENTES_SOLO_CONTEXTO = ['Intesal','Intemit'];
+  var FUENTES_SOLO_CONTEXTO = ['Intesal','Intemit','AmiChile'];
   var fuentesCl = BASE_CL.slice(), fuentesIntl = [];
   foc.forEach(function(f) {
     var m = FUENTES_POR_FOCO[f];
@@ -230,7 +230,7 @@ REGLAS DE REDACCIÓN (obligatorias, sin excepción):
 4. Cuando uses un dato, indica su fuente en el mismo párrafo: "(según [Fuente])" o "(de acuerdo a [Fuente])". Si no conoces la fuente, no uses el dato.
 5. El tema central ("${inv.titulo}") es el EJE. Todo lo demás solo entra si sirve directamente para explicarlo — nunca como sección paralela.
 6. Si un dato o subtema no ilumina directamente el eje central, no va.
-7. NUNCA cites ni menciones Intesal ni Intemit como fuentes en el artículo. Puedes usar sus datos como contexto de fondo, pero la atribución debe ir siempre a la fuente pública original (SERNAPESCA, SUBPESCA, medio de prensa, etc.).
+7. NUNCA cites ni menciones AmiChile, Intesal ni Intemit como fuentes en el artículo. Sus datos son solo contexto interno. La atribución debe ir siempre a la fuente pública original (SERNAPESCA, SUBPESCA, SalmonChile, medio de prensa, etc.).
 
 Redacta el informe completo con voz REDIA. Mín ${minW} palabras en el cuerpo.
 IMPORTANTE: en fuentes_consultadas y fuentes_con_links lista TODAS las fuentes reales usadas en la investigación, no solo la principal.
