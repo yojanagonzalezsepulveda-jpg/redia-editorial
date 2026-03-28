@@ -46,7 +46,7 @@ export function abrirPublicar(uid) {
   if (!rec) return;
   state.pubUID = uid;
   document.getElementById('pubTitulo').value = rec.titular || rec.titulo_seo || '';
-  document.getElementById('pubDesc').value   = rec.bajada  || rec.descripcion_seo || '';
+  document.getElementById('pubDesc').value   = rec.descripcion_seo || rec.bajada || '';
   var cat  = (rec.categoria || '').toLowerCase();
   var tipo = cat.includes('mercado') ? 'mercado' : cat.includes('entrevista') ? 'entrevista' : cat.includes('indicador') ? 'indicadores' : 'publicación';
   document.getElementById('pubTipo').value = tipo;
@@ -265,7 +265,7 @@ export async function actualizarEnRedia(uid) {
     var updTags = sj(rec.tags, []);
     var fd = new FormData();
     fd.append('titulo', rec.titular || rec.titulo_seo || '');
-    fd.append('descripcion_corta', rec.bajada || rec.descripcion_seo || '');
+    fd.append('descripcion_corta', rec.descripcion_seo || rec.bajada || '');
     fd.append('contenido', buildContenidoPublicable(rec));
     if (updTags.length) fd.append('Tags', JSON.stringify(updTags));
     if (rec.imagen_src && rec.imagen_src.startsWith('data:')) {
