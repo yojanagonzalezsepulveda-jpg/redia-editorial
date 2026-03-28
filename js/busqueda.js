@@ -195,6 +195,12 @@ export async function buscarManual() {
     }
   }
 
+  // Validar que el artículo tiene contenido
+  if (!rec.cuerpo_html || rec.cuerpo_html.length < 100) {
+    err('El artículo se generó sin contenido. Intenta de nuevo o cambia el proveedor IA.');
+    rb(); return;
+  }
+
   // ── PASO 3: Distribución ──
   sp(72, 'Paso 3/3 — Generando LinkedIn, Facebook y guiones...');
   var t3 = na(60000); var r3;
