@@ -1,6 +1,6 @@
 // ── PROMPTS — constructores de prompts para cada tipo de contenido ────────────
-import { state } from './state.js?v=7';
-import { DEFAULT_FUENTES, getFuentesActivas } from './config.js?v=7';
+import { state } from './state.js?v=8';
+import { DEFAULT_FUENTES, getFuentesActivas } from './config.js?v=8';
 
 // Mapeo foco → fuentes prioritarias por categoría
 var FUENTES_POR_FOCO = {

@@ -1,8 +1,8 @@
 // ── PUBLICAR — modal de publicación multi-plataforma ─────────────────────────
-import { state } from './state.js?v=7';
-import { gsActualizar, localAddRec } from './storage.js?v=7';
-import { guardarHistorial } from './config.js?v=7';
-import { cp, sj } from './utils.js?v=7';
+import { state } from './state.js?v=8';
+import { gsActualizar, localAddRec } from './storage.js?v=8';
+import { guardarHistorial } from './config.js?v=8';
+import { cp, sj } from './utils.js?v=8';
 
 // Inyección de dependencias circulares
 var _getRec, _renderBandeja;

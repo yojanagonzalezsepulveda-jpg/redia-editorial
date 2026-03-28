@@ -1,10 +1,10 @@
 // ── BANDEJA — renderizado de tarjetas y acciones ─────────────────────────────
-import { state } from './state.js?v=7';
-import { deduplicateRecs, localAddRec, gsActualizar, gsGuardar } from './storage.js?v=7';
-import { esc, sj, cp, cpHTML, dlHTML } from './utils.js?v=7';
-import { getAIKey, callGemini } from './ai.js?v=7';
-import { generarImagenGemini, resizarImg820x400 } from './media.js?v=7';
-import { sanitizeVocab } from './utils.js?v=7';
+import { state } from './state.js?v=8';
+import { deduplicateRecs, localAddRec, gsActualizar, gsGuardar } from './storage.js?v=8';
+import { esc, sj, cp, cpHTML, dlHTML } from './utils.js?v=8';
+import { getAIKey, callGemini } from './ai.js?v=8';
+import { generarImagenGemini, resizarImg820x400 } from './media.js?v=8';
+import { sanitizeVocab } from './utils.js?v=8';
 
 // Inyección de dependencias circulares
 var _buildHTML;

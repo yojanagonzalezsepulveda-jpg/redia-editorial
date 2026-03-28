@@ -1,9 +1,9 @@
 // ── BÚSQUEDA — búsqueda manual y generación automática ───────────────────────
-import { state } from './state.js?v=7';
-import { localLoad, localAddRec, localSave, deduplicateRecs, mergeConLocal, gsCall, gsGuardar } from './storage.js?v=7';
-import { esc, sleep, parseJSON, normalizeRec } from './utils.js?v=7';
-import { getAIKey, buildProvOrder, callGemini, callAI } from './ai.js?v=7';
-import { buildPromptInvestigar, buildPromptRedactar, buildPromptDistribuir } from './prompts.js?v=7';
+import { state } from './state.js?v=8';
+import { localLoad, localAddRec, localSave, deduplicateRecs, mergeConLocal, gsCall, gsGuardar } from './storage.js?v=8';
+import { esc, sleep, parseJSON, normalizeRec } from './utils.js?v=8';
+import { getAIKey, buildProvOrder, callGemini, callAI } from './ai.js?v=8';
+import { buildPromptInvestigar, buildPromptRedactar, buildPromptDistribuir } from './prompts.js?v=8';
 
 // Inyección de dependencias circulares
 var _buildHTML, _renderBandeja, _generarImagenGemini, _resizarImg820x400;

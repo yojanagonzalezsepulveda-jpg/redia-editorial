@@ -1,17 +1,17 @@
 // ── APP — punto de entrada, inyección de dependencias y exposición global ─────
-import { state } from './state.js?v=7';
-import { localLoad, localSave, _injectStorageDeps } from './storage.js?v=7';
-import { loadCFG, saveCFG, applyCFG, guardarCfg, cargarCredenciales, guardarCredPB, guardarCredLI, guardarCredFB, probarPB, showCredSec, renderFuentesPills, getFuentesActivas, agregarFuente, renderHistorial, borrarHistorial, guardarHistorial, updatePlatBadges } from './config.js?v=7';
-import { showPage, showCfg } from './nav.js?v=7';
-import { esc, sj, sleep, cp, cpRec, dlHTML, dlRec, dlManual, cpHTML, _injectUtilsDeps } from './utils.js?v=7';
-import { getAIKey, buildProvOrder, callAI, callGemini, callDeepSeek, callClaude, searchTavily, listarModelosGemini, selProvSearch } from './ai.js?v=7';
-import { buildHTML } from './html-builder.js?v=7';
-import { renderBandeja, filtrar, buildCard, toggleCard, showCTab, dirty, _seoCount, getRec, autoPublicarRedia, estado, guardarEdicion, toggleCollapse, _injectBandejaDeps } from './bandeja.js?v=7';
-import { generarImgBandeja, dirtyMedia, guardarMedia, generarMedia, dirtyRRSS, guardarRRSS, generarRedSocial, generarDistribucion, resizarImg820x400, generarImagenGemini, generarImgManual, previsualizarImg, previsualizarMulti, leerImagen64, leerImagenes64Multi, injectMediaIntoHTML, leerArchivoAdjunto, _injectMediaDeps } from './media.js?v=7';
-import { abrirPublicar, cerrarPublicar, confirmarPublicar, mostrarPubStatus, togglePlat, mostrarYouTube, actualizarEnRedia, eliminarDeRedia, _injectPublicarDeps } from './publicar.js?v=7';
-import { updEsp, updFoc, buscarManual, guardarManualEnGS, generarAutomatico, guardarTodosEnGS, cancelarBusqueda, setGsStatus, autoConectarGS, _injectBusquedaDeps } from './busqueda.js?v=7';
-import { selTipo, generarCrear, buildCrearPrompt, guardarCrearEnGS, dlCrear, copiarHTMLCrear, aplicarEdicionManual, corregirConIA, selAll, clearAll, _injectCrearDeps } from './crear.js?v=7';
-import { deduplicateRecs, mergeConLocal, localAddRec, gsCall, guardarGS, limpiarDuplicados, cargarBandeja, gsGuardar, gsActualizar } from './storage.js?v=7';
+import { state } from './state.js?v=8';
+import { localLoad, localSave, _injectStorageDeps } from './storage.js?v=8';
+import { loadCFG, saveCFG, applyCFG, guardarCfg, cargarCredenciales, guardarCredPB, guardarCredLI, guardarCredFB, probarPB, showCredSec, renderFuentesPills, getFuentesActivas, agregarFuente, renderHistorial, borrarHistorial, guardarHistorial, updatePlatBadges } from './config.js?v=8';
+import { showPage, showCfg } from './nav.js?v=8';
+import { esc, sj, sleep, cp, cpRec, dlHTML, dlRec, dlManual, cpHTML, _injectUtilsDeps } from './utils.js?v=8';
+import { getAIKey, buildProvOrder, callAI, callGemini, callDeepSeek, callClaude, searchTavily, listarModelosGemini, selProvSearch } from './ai.js?v=8';
+import { buildHTML } from './html-builder.js?v=8';
+import { renderBandeja, filtrar, buildCard, toggleCard, showCTab, dirty, _seoCount, getRec, autoPublicarRedia, estado, guardarEdicion, toggleCollapse, _injectBandejaDeps } from './bandeja.js?v=8';
+import { generarImgBandeja, dirtyMedia, guardarMedia, generarMedia, dirtyRRSS, guardarRRSS, generarRedSocial, generarDistribucion, resizarImg820x400, generarImagenGemini, generarImgManual, previsualizarImg, previsualizarMulti, leerImagen64, leerImagenes64Multi, injectMediaIntoHTML, leerArchivoAdjunto, _injectMediaDeps } from './media.js?v=8';
+import { abrirPublicar, cerrarPublicar, confirmarPublicar, mostrarPubStatus, togglePlat, mostrarYouTube, actualizarEnRedia, eliminarDeRedia, _injectPublicarDeps } from './publicar.js?v=8';
+import { updEsp, updFoc, buscarManual, guardarManualEnGS, generarAutomatico, guardarTodosEnGS, cancelarBusqueda, setGsStatus, autoConectarGS, _injectBusquedaDeps } from './busqueda.js?v=8';
+import { selTipo, generarCrear, buildCrearPrompt, guardarCrearEnGS, dlCrear, copiarHTMLCrear, aplicarEdicionManual, corregirConIA, selAll, clearAll, _injectCrearDeps } from './crear.js?v=8';
+import { deduplicateRecs, mergeConLocal, localAddRec, gsCall, guardarGS, limpiarDuplicados, cargarBandeja, gsGuardar, gsActualizar } from './storage.js?v=8';
 
 // ── INYECCIÓN DE DEPENDENCIAS CIRCULARES ──────────────────────────────────────
 _injectStorageDeps({ renderBandeja, setGsStatus });

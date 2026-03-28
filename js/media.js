@@ -1,8 +1,8 @@
 // ── MEDIA — imagen, audio, video, RRSS ───────────────────────────────────────
-import { state } from './state.js?v=7';
-import { localAddRec, gsActualizar } from './storage.js?v=7';
-import { sanitizeVocab } from './utils.js?v=7';
-import { getAIKey, callGemini } from './ai.js?v=7';
+import { state } from './state.js?v=8';
+import { localAddRec, gsActualizar } from './storage.js?v=8';
+import { sanitizeVocab } from './utils.js?v=8';
+import { getAIKey, callGemini } from './ai.js?v=8';
 
 // Inyección de dependencias circulares
 var _getRec, _buildHTML, _renderBandeja;
@@ -264,7 +264,7 @@ export function resizarImg820x400(dataUrl) {
 
 export async function generarImagenPollinations(prompt) {
   var polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt.substring(0, 500)) +
-               '?model=flux&width=820&height=400&seed=' + Math.floor(Math.random() * 99999);
+               '?width=820&height=400&seed=' + Math.floor(Math.random() * 99999);
   var polRes = await fetch(polUrl);
   if (!polRes.ok) throw new Error('Pollinations HTTP ' + polRes.status);
   var blob = await polRes.blob();
@@ -331,7 +331,7 @@ export async function generarImagenGemini(prompt, key) {
       // Fallback: Pollinations.ai
       try {
         var polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt.substring(0, 500)) +
-                     '?model=flux&width=820&height=400&seed=' + Math.floor(Math.random() * 99999);
+                     '?width=820&height=400&seed=' + Math.floor(Math.random() * 99999);
         var polRes = await fetch(polUrl);
         if (polRes.ok) {
           var blob = await polRes.blob();
