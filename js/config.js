@@ -18,6 +18,7 @@ export function applyCFG() {
   if (CFG.audiencias) document.querySelectorAll('#audGrid .aud-o').forEach(el => el.classList.toggle('on', (CFG.audiencias || []).includes(el.dataset.a)));
   var m = { cfVoz: 'voz', cfSensible: 'sensible', cfAud: 'aud', cfWords: 'words', cfSecc: 'secc', cfEstr: 'estr', cfDim: 'dim', cfAnal: 'anal', cfProh: 'proh', cfGeminiModel: 'geminiModel', cfImagenModel: 'imagenModel', cfAntModel1: 'antModel1', cfAntModel2: 'antModel2', cfDeepModel: 'deepModel', cfGemKey: 'gemKey', cfDeepKey: 'deepKey', cfTavilyKey: 'tavilyKey', cfAntKey: 'antKey' };
   Object.entries(m).forEach(([elId, key]) => { var el = document.getElementById(elId); if (el && CFG[key]) el.value = CFG[key]; });
+  var chkPol = document.getElementById('cfPollinationsImg'); if (chkPol) chkPol.checked = !!CFG.usarPollinationsImg;
   var fuentesGuardadas = CFG.fuentes ? CFG.fuentes.split('\n').filter(Boolean) : DEFAULT_FUENTES;
   renderFuentesPills(fuentesGuardadas);
 }
@@ -31,6 +32,7 @@ export function guardarCfg(sec, btn) {
   else if (sec === 'fuentes') { d.fuentes = getFuentesActivas().join('\n'); }
   else if (sec === 'prohibido') { d.proh = document.getElementById('cfProh').value; }
   else if (sec === 'modelos') { d.geminiModel = document.getElementById('cfGeminiModel').value.trim(); d.imagenModel = document.getElementById('cfImagenModel').value.trim(); d.antModel1 = document.getElementById('cfAntModel1').value.trim(); d.antModel2 = document.getElementById('cfAntModel2').value.trim(); d.deepModel = document.getElementById('cfDeepModel').value.trim(); }
+  else if (sec === 'img') { d.usarPollinationsImg = btn.checked; saveCFG(d); return; }
   else if (sec === 'apikeys') { d.gemKey = document.getElementById('cfGemKey').value.trim(); d.deepKey = document.getElementById('cfDeepKey').value.trim(); d.tavilyKey = document.getElementById('cfTavilyKey').value.trim(); d.antKey = document.getElementById('cfAntKey').value.trim(); }
   saveCFG(d);
   var orig = btn.textContent; btn.textContent = 'Guardado'; btn.classList.add('ok');

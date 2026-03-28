@@ -262,8 +262,24 @@ export function resizarImg820x400(dataUrl) {
   });
 }
 
+export async function generarImagenPollinations(prompt) {
+  var polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) +
+               '?width=820&height=400&nologo=true&seed=' + Math.floor(Math.random() * 99999);
+  var polRes = await fetch(polUrl);
+  if (!polRes.ok) throw new Error('Pollinations HTTP ' + polRes.status);
+  var blob = await polRes.blob();
+  return await new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onloadend = function() { resolve(reader.result); };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 export async function generarImagenGemini(prompt, key) {
   var CFG = state.CFG;
+  // Si está configurado para usar Pollinations (gratis), ir directo sin intentar Gemini
+  if (CFG && CFG.usarPollinationsImg) return await generarImagenPollinations(prompt);
   var model = (CFG && CFG.imagenModel) || '';
   var IMG_MODELS = [
     { m: 'gemini-3.1-flash-image-preview',            mod: ['IMAGE'] },
