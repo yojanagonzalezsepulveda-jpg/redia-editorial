@@ -127,7 +127,7 @@ export function normalizeRec(d) {
   return {
     id: uid, _uid: uid,
     titulo_seo: (d.titulo_seo || '').substring(0, 60),
-    descripcion_seo: (d.descripcion_seo || '').substring(0, 140),
+    descripcion_seo: (d.descripcion_seo || '').substring(0, 300),
     tags: d.tags || [],
     categoria: d.categoria || 'Análisis REDIA',
     tiempo_lectura: d.tiempo_lectura || '5 min',

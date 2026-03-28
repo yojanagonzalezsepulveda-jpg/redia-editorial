@@ -99,7 +99,7 @@ export async function confirmarPublicar() {
       }
       if (!token) throw new Error('Credenciales de redia.pro incorrectas — verifica email y contraseña en la pestaña Credenciales');
       var slug = titulo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-').substring(0, 80);
-      var descCorta  = desc.substring(0, 139);
+      var descCorta  = desc;
       var tipoFinal  = (['publicación', 'mercado', 'entrevista', 'indicadores'].indexOf(tipo) >= 0) ? tipo : 'publicación';
       var fd = new FormData();
       fd.append('titulo', titulo);
