@@ -136,10 +136,12 @@ export function buildPromptInvestigar(esp, foc, kw, temasYaCubiertos, especiesFo
     'Aqua.cl','MundoAcuícola','Visión Acuícola','Portal Acuícola','SalmonExpert','IntraFish','SalmonBusiness','Undercurrent News',
     'SERNAPESCA','SUBPESCA','SMA','INDESPA','IFOP',
     'Centro INCAR','ANID','UACH','Nofima','CSIRO Australia',
-    'SalmonChile','Consejo del Salmón','Asociación de Mitilicultores',
+    'SalmonChile','Consejo del Salmón','Asociación de Mitilicultores','AmiChile',
     'El Llanquihue','Diario de Aysén','Diario Chiloé',
-    'FAO','Globefish'
+    'FDA','FAO','Globefish'
   ];
+  // Fuentes de contexto interno: usar para informarse, NUNCA citar como fuente en el artículo
+  var FUENTES_SOLO_CONTEXTO = ['Intesal','Intemit'];
   var fuentesCl = BASE_CL.slice(), fuentesIntl = [];
   foc.forEach(function(f) {
     var m = FUENTES_POR_FOCO[f];
@@ -170,7 +172,8 @@ export function buildPromptInvestigar(esp, foc, kw, temasYaCubiertos, especiesFo
 
 ${temaLabel}: ${temaVal}
 ${esp.length ? 'ESPECIES: ' + esp.join(', ') : ''}${foc.length ? '\nFOCOS: ' + foc.join(', ') : ''}
-FUENTES PRIORITARIAS: ${fLib}${yaStr}${diversidadStr}
+FUENTES PRIORITARIAS: ${fLib}
+FUENTES DE CONTEXTO (consultar para entender el panorama, NUNCA citar ni mencionar como fuente en el artículo): ${FUENTES_SOLO_CONTEXTO.join(', ')}${yaStr}${diversidadStr}
 
 PROCESO (sigue este orden):
 1. Busca las noticias recientes del sector en las fuentes prioritarias — escanea titulares de los últimos 3 días
@@ -227,6 +230,7 @@ REGLAS DE REDACCIÓN (obligatorias, sin excepción):
 4. Cuando uses un dato, indica su fuente en el mismo párrafo: "(según [Fuente])" o "(de acuerdo a [Fuente])". Si no conoces la fuente, no uses el dato.
 5. El tema central ("${inv.titulo}") es el EJE. Todo lo demás solo entra si sirve directamente para explicarlo — nunca como sección paralela.
 6. Si un dato o subtema no ilumina directamente el eje central, no va.
+7. NUNCA cites ni menciones Intesal ni Intemit como fuentes en el artículo. Puedes usar sus datos como contexto de fondo, pero la atribución debe ir siempre a la fuente pública original (SERNAPESCA, SUBPESCA, medio de prensa, etc.).
 
 Redacta el informe completo con voz REDIA. Mín ${minW} palabras en el cuerpo.
 IMPORTANTE: en fuentes_consultadas y fuentes_con_links lista TODAS las fuentes reales usadas en la investigación, no solo la principal.
