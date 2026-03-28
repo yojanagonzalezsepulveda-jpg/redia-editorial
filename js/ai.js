@@ -54,6 +54,8 @@ export async function callGemini(prompt, key, signal, useSearch, maxTok, content
     contents: [{ role: 'user', parts: parts }],
     generationConfig: { maxOutputTokens: maxTok || 8192 }
   };
+  // Sin búsqueda web: desactivar thinking para liberar tokens para la respuesta real
+  if (useSearch === false && !contentOverride) bodyObj.generationConfig.thinkingConfig = { thinkingBudget: 0 };
   if (useSearch !== false && !contentOverride) bodyObj.tools = [{ google_search: {} }];
   var res = await fetch(url, {
     method: 'POST',

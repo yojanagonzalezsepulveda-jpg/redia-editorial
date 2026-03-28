@@ -172,7 +172,7 @@ export async function buscarManual() {
   // ── PASO 2: Redactar ──
   sp(38, 'Paso 2/3 — Redactando: <em>' + esc((inv.titulo || '').substring(0, 55)) + '</em>...');
   var t2 = na(90000); var r2;
-  try { r2 = await callAI(buildPromptRedactar(inv, minW), false, null, 8000, state._busquedaAbort.signal); clearTimeout(t2); }
+  try { r2 = await callAI(buildPromptRedactar(inv, minW), false, null, 12000, state._busquedaAbort.signal); clearTimeout(t2); }
   catch(e) { clearTimeout(t2); state._busquedaAbort = null; err('Error en redacción: ' + errMsg(e)); rb(); return; }
 
   var rec;

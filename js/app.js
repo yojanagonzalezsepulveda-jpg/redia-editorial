@@ -60,9 +60,13 @@ if (state.records.length) renderBandeja();
 // Conectar a GS automáticamente
 autoConectarGS();
 
-// Listeners de chips (búsqueda manual)
-document.querySelectorAll('#eGrid .chip').forEach(el => el.onclick = () => { el.classList.toggle('on'); updEsp(); });
-document.querySelectorAll('#fGrid .ftag').forEach(el => el.onclick = () => { el.classList.toggle('on'); updFoc(); });
+// Listeners de chips (búsqueda manual) — addEventListener para que no pueda ser sobreescrito
+document.getElementById('eGrid').addEventListener('click', function(e) {
+  var c = e.target.closest('.chip'); if (c) { c.classList.toggle('on'); try { updEsp(); } catch(e2) {} }
+});
+document.getElementById('fGrid').addEventListener('click', function(e) {
+  var c = e.target.closest('.ftag'); if (c) { c.classList.toggle('on'); try { updFoc(); } catch(e2) {} }
+});
 
 // Listeners de tone/audiencia (config)
 document.querySelectorAll('#toneGrid .tone-o').forEach(el => el.onclick = () => {
