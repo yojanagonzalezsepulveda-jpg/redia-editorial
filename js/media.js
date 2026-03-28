@@ -278,8 +278,12 @@ export async function generarImagenPollinations(prompt) {
 
 export async function generarImagenGemini(prompt, key) {
   var CFG = state.CFG;
-  // Si está configurado para usar Pollinations (gratis), ir directo sin intentar Gemini
-  if (CFG && CFG.usarPollinationsImg) return await generarImagenPollinations(prompt);
+  // Pollinations primero (gratis). Solo usar Gemini si Pollinations falla O si el usuario
+  // explícitamente configuró un modelo de imagen de Gemini/Imagen 3.
+  var modeloExplicito = CFG && CFG.imagenModel && CFG.imagenModel.trim();
+  if (!modeloExplicito) {
+    try { return await generarImagenPollinations(prompt); } catch(e) { /* fallback a Gemini */ }
+  }
   var model = (CFG && CFG.imagenModel) || '';
   var IMG_MODELS = [
     { m: 'gemini-3.1-flash-image-preview',            mod: ['IMAGE'] },
