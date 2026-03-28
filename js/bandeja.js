@@ -104,10 +104,10 @@ export function buildCard(r) {
     </div>
     <div class="cpanel" id="cp-${uid}-seo">
       <div class="sgrid">
-        <div class="sc"><div class="sl">Título SEO <span class="${tl <= 60 ? 'cok' : 'cbad'}">${tl}/60</span></div><div class="sv big">${esc(r.titulo_seo || '')}</div><button class="cpbtn" onclick="cp('${esc(r.titulo_seo || '')}',this)">Copiar</button></div>
-        <div class="sc"><div class="sl">Descripción SEO <span class="${dl <= 140 ? 'cok' : 'cbad'}">${dl}/140</span></div><div class="sv">${esc(r.descripcion_seo || '')}</div><button class="cpbtn" onclick="cp('${esc(r.descripcion_seo || '')}',this)">Copiar</button></div>
+        <div class="sc"><div class="sl">Título SEO <span id="seo-tl-${uid}" class="${tl <= 60 ? 'cok' : 'cbad'}">${tl}/60</span></div><input type="text" class="efi" id="ef-${uid}-tseo" value="${esc(r.titulo_seo || '')}" maxlength="80" oninput="dirty('${uid}');var s=this.value;var sp=document.getElementById('seo-tl-${uid}');sp.textContent=s.length+'/60';sp.className=s.length<=60?'cok':'cbad';var p=document.getElementById('seo-prev-t-${uid}');if(p)p.textContent=s;"><button class="cpbtn" onclick="cp(document.getElementById('ef-${uid}-tseo').value,this)">Copiar</button></div>
+        <div class="sc"><div class="sl">Descripción SEO <span id="seo-dl-${uid}" class="${dl <= 140 ? 'cok' : 'cbad'}">${dl}/140</span></div><textarea class="efi" id="ef-${uid}-dseo" rows="3" oninput="dirty('${uid}');var s=this.value;var sp=document.getElementById('seo-dl-${uid}');sp.textContent=s.length+'/140';sp.className=s.length<=140?'cok':'cbad';var p=document.getElementById('seo-prev-d-${uid}');if(p)p.textContent=s;">${esc(r.descripcion_seo || '')}</textarea><button class="cpbtn" onclick="cp(document.getElementById('ef-${uid}-dseo').value,this)">Copiar</button></div>
         <div class="sc"><div class="sl">Tags</div><div class="trow">${tags.map(t => '<div class="tpill">#' + t + '</div>').join('')}</div><button class="cpbtn" onclick="cp('${tags.map(t => '#' + t).join(' ')}',this)">Copiar tags</button></div>
-        <div class="sc"><div class="sl">Vista previa Google</div><div class="gprev"><div class="gp-t">${esc(r.titulo_seo || '')}</div><div class="gp-u">https://redia.pro/noticias/</div><div class="gp-d">${esc(r.descripcion_seo || '')}</div></div></div>
+        <div class="sc"><div class="sl">Vista previa Google</div><div class="gprev"><div class="gp-t" id="seo-prev-t-${uid}">${esc(r.titulo_seo || '')}</div><div class="gp-u">https://redia.pro/noticias/</div><div class="gp-d" id="seo-prev-d-${uid}">${esc(r.descripcion_seo || '')}</div></div></div>
       </div>
     </div>
     <div class="cpanel" id="cp-${uid}-rrss">
@@ -303,12 +303,14 @@ export async function estado(uid, newEstado) {
 export async function guardarEdicion(uid) {
   var rec = getRec(uid); if (!rec) return;
   var campos = {
-    titular:     document.getElementById('ef-' + uid + '-tit')?.value || '',
-    bajada:      document.getElementById('ef-' + uid + '-baj')?.value || '',
-    cuerpo_html: document.getElementById('ef-' + uid + '-cpo')?.value || '',
-    coyuntura:   document.getElementById('ef-' + uid + '-coy')?.value || '',
-    linkedin:    document.getElementById('ef-' + uid + '-li')?.value  || '',
-    facebook:    document.getElementById('ef-' + uid + '-fb')?.value  || '',
+    titular:        document.getElementById('ef-' + uid + '-tit')?.value  || '',
+    bajada:         document.getElementById('ef-' + uid + '-baj')?.value  || '',
+    cuerpo_html:    document.getElementById('ef-' + uid + '-cpo')?.value  || '',
+    coyuntura:      document.getElementById('ef-' + uid + '-coy')?.value  || '',
+    linkedin:       document.getElementById('ef-' + uid + '-li')?.value   || '',
+    facebook:       document.getElementById('ef-' + uid + '-fb')?.value   || '',
+    titulo_seo:     document.getElementById('ef-' + uid + '-tseo')?.value || rec.titulo_seo || '',
+    descripcion_seo: document.getElementById('ef-' + uid + '-dseo')?.value || rec.descripcion_seo || '',
   };
   Object.assign(rec, campos);
   if (rec.id) {
