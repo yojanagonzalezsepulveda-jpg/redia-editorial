@@ -717,21 +717,30 @@ vale la pena señalar</textarea>
 <script>
 // Chips y focos — funciones autónomas, sin depender de módulos ES
 function _eToggle(el) {
-  el.classList.toggle('on');
+  var on = el.classList.toggle('on');
+  el.style.borderColor = on ? '#a855f7' : '';
+  el.style.background  = on ? '#f3e8ff' : '';
+  el.style.color       = on ? '#7e22ce' : '';
+  el.style.fontWeight  = on ? '700' : '';
+  var dot = el.querySelector('.chip-dot');
+  if (dot) dot.style.background = on ? '#9333ea' : '';
   var s = []; document.querySelectorAll('#eGrid .chip.on').forEach(function(c){s.push(c.textContent.trim());});
   var l = document.getElementById('eLabel');
   if (l) l.textContent = s.length ? 'Especies — ' + s.join(', ') : 'Especies (opcional) — Todas';
 }
 function _fToggle(el) {
-  el.classList.toggle('on');
+  var on = el.classList.toggle('on');
+  el.style.background   = on ? '#1e293b' : '';
+  el.style.color        = on ? 'white'   : '';
+  el.style.borderColor  = on ? '#1e293b' : '';
   var n = document.querySelectorAll('#fGrid .ftag.on').length;
   var l = document.getElementById('fLabel');
   if (l) l.textContent = n ? 'Focos — ' + n + ' seleccionado' + (n > 1 ? 's' : '') : 'Focos temáticos (opcional) — Todos';
 }
-function _eSelAll()   { document.querySelectorAll('#eGrid .chip').forEach(function(c){c.classList.add('on');}); var l=document.getElementById('eLabel'); var s=[]; document.querySelectorAll('#eGrid .chip.on').forEach(function(c){s.push(c.textContent.trim());}); if(l) l.textContent=s.length?'Especies — '+s.join(', '):'Especies (opcional) — Todas'; }
-function _eClearAll() { document.querySelectorAll('#eGrid .chip').forEach(function(c){c.classList.remove('on');}); var l=document.getElementById('eLabel'); if(l) l.textContent='Especies (opcional) — Todas'; }
-function _fSelAll()   { document.querySelectorAll('#fGrid .ftag').forEach(function(c){c.classList.add('on');}); var n=document.querySelectorAll('#fGrid .ftag.on').length; var l=document.getElementById('fLabel'); if(l) l.textContent=n?'Focos — '+n+' seleccionado'+(n>1?'s':''):'Focos temáticos (opcional) — Todos'; }
-function _fClearAll() { document.querySelectorAll('#fGrid .ftag').forEach(function(c){c.classList.remove('on');}); var l=document.getElementById('fLabel'); if(l) l.textContent='Focos temáticos (opcional) — Todos'; }
+function _eSelAll()   { document.querySelectorAll('#eGrid .chip').forEach(function(c){c.classList.add('on');c.style.borderColor='#a855f7';c.style.background='#f3e8ff';c.style.color='#7e22ce';c.style.fontWeight='700';var d=c.querySelector('.chip-dot');if(d)d.style.background='#9333ea';}); var l=document.getElementById('eLabel'); var s=[]; document.querySelectorAll('#eGrid .chip.on').forEach(function(c){s.push(c.textContent.trim());}); if(l) l.textContent=s.length?'Especies — '+s.join(', '):'Especies (opcional) — Todas'; }
+function _eClearAll() { document.querySelectorAll('#eGrid .chip').forEach(function(c){c.classList.remove('on');c.style.borderColor='';c.style.background='';c.style.color='';c.style.fontWeight='';var d=c.querySelector('.chip-dot');if(d)d.style.background='';}); var l=document.getElementById('eLabel'); if(l) l.textContent='Especies (opcional) — Todas'; }
+function _fSelAll()   { document.querySelectorAll('#fGrid .ftag').forEach(function(c){c.classList.add('on');c.style.background='#1e293b';c.style.color='white';c.style.borderColor='#1e293b';}); var n=document.querySelectorAll('#fGrid .ftag.on').length; var l=document.getElementById('fLabel'); if(l) l.textContent=n?'Focos — '+n+' seleccionado'+(n>1?'s':''):'Focos temáticos (opcional) — Todos'; }
+function _fClearAll() { document.querySelectorAll('#fGrid .ftag').forEach(function(c){c.classList.remove('on');c.style.background='';c.style.color='';c.style.borderColor='';}); var l=document.getElementById('fLabel'); if(l) l.textContent='Focos temáticos (opcional) — Todos'; }
 </script>
 </body>
 </html>
