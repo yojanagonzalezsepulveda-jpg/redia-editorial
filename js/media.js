@@ -263,8 +263,7 @@ export function resizarImg820x400(dataUrl) {
 }
 
 export async function generarImagenPollinations(prompt) {
-  var polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt.substring(0, 500)) +
-               '?width=820&height=400&seed=' + Math.floor(Math.random() * 99999);
+  var polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt.substring(0, 500));
   var polRes = await fetch(polUrl);
   if (!polRes.ok) throw new Error('Pollinations HTTP ' + polRes.status);
   var blob = await polRes.blob();

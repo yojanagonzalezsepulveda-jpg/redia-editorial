@@ -126,7 +126,9 @@ export async function confirmarPublicar() {
       fd.append('tipo', tipoFinal);
       fd.append('publicado', 'true');
       fd.append('slug', slug);
-      fd.append('fecha_publicacion', new Date().toISOString().replace('T', ' ').substring(0, 19));
+      var fechaInput = document.getElementById('pubFecha');
+      var fechaVal = fechaInput && fechaInput.value ? fechaInput.value + ' 12:00:00' : new Date().toISOString().replace('T', ' ').substring(0, 19);
+      fd.append('fecha_publicacion', fechaVal);
       fd.append('verificationLevel', '1');
       if (recTags.length) fd.append('Tags', JSON.stringify(recTags));
       if (tipoFinal === 'mercado') fd.append('Disponiblemercado', 'true');

@@ -3579,8 +3579,7 @@ async function generarImagenGemini(prompt, key) {
       }
       // Fallback: Pollinations.ai (gratuito, sin clave, 820×400px nativo)
       try {
-        var polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt.substring(0,500)) +
-                     '?width=820&height=400&seed=' + Math.floor(Math.random()*99999);
+        var polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt.substring(0,500));
         var polRes = await fetch(polUrl);
         if (polRes.ok) {
           var blob = await polRes.blob();
@@ -4020,6 +4019,10 @@ function clearAll(gridId, cls) {
           <option value="entrevista">Entrevista</option>
           <option value="indicadores">Indicadores</option>
         </select>
+      </div>
+      <div class="pub-field">
+        <label class="pub-label">Fecha de publicación <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--s4)">(dejar en blanco = hoy)</span></label>
+        <input type="date" class="pub-input" id="pubFecha">
       </div>
     </div>
 
