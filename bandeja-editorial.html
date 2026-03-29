@@ -1537,7 +1537,6 @@ async function guardarEdicion(uid){
 async function generarImgBandeja(uid, btn){
   var rec=getRec(uid); if(!rec) return;
   var gemKey=getAIKey('gem');
-  if(!gemKey){ alert('Configura la API key de Gemini en Credenciales → API Keys IA'); return; }
   if(!rec.imagen_prompt){ alert('Este artículo no tiene prompt de imagen generado.'); return; }
   var orig=btn.textContent; btn.textContent='Generando...'; btn.disabled=true;
   var box=document.getElementById('img-box-'+uid);
@@ -3494,15 +3493,13 @@ async function generarImagenGemini(prompt, key) {
   // Cascade: solo v1beta (v1 no acepta responseModalities)
   // gemini-3.1-flash-image-preview = Nano Banana 2 (modelo principal REDIA)
   var IMG_MODELS = [
-    {m: 'gemini-3.1-flash-image-preview',            mod: ['IMAGE']},
-    {m: 'gemini-3.1-flash-image-preview',            mod: ['TEXT','IMAGE']},
-    {m: 'gemini-2.0-flash-preview-image-generation', mod: ['IMAGE']},
-    {m: 'gemini-2.0-flash-exp-image-generation',     mod: ['TEXT','IMAGE']},
+    {m: 'gemini-2.0-flash-exp', mod: ['IMAGE']},
+    {m: 'gemini-2.0-flash-exp', mod: ['TEXT','IMAGE']},
   ];
   // Honrar modelo configurado solo si es de generación de imagen (contiene "image"/"imagen")
   var customOk = model && (model.includes('image') || model.includes('imagen') || model.includes('imgen'))
                        && !model.startsWith('imagen');
-  var GEMINI_TRIES = model.startsWith('imagen') ? [] :
+  var GEMINI_TRIES = (!key || model.startsWith('imagen')) ? [] :
     (customOk
       ? [{m:model,mod:['IMAGE']},{m:model,mod:['TEXT','IMAGE']}].concat(IMG_MODELS)
       : IMG_MODELS);
@@ -3541,8 +3538,8 @@ async function generarImagenGemini(prompt, key) {
       }
       // Fallback: Pollinations.ai (gratuito, sin clave, 820×400px nativo)
       try {
-        var polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt) +
-                     '?width=820&height=400&nologo=true&seed=' + Math.floor(Math.random()*99999);
+        var polUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(prompt.substring(0,500)) +
+                     '?width=820&height=400&seed=' + Math.floor(Math.random()*99999);
         var polRes = await fetch(polUrl);
         if (polRes.ok) {
           var blob = await polRes.blob();
