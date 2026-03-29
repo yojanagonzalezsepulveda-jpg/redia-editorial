@@ -1767,9 +1767,25 @@ FACEBOOK:
 }
 
 // ── BÚSQUEDA MANUAL ───────────────────────────────────
-document.querySelectorAll('#eGrid .chip').forEach(el=>el.onclick=()=>{el.classList.toggle('on');updEsp();});
-// Chips y tags son opcionales — sin selección = busca todo
-document.querySelectorAll('#fGrid .ftag').forEach(el=>el.onclick=()=>{el.classList.toggle('on');updFoc();});
+function _eToggle(el) {
+  var on = el.classList.toggle('on');
+  el.style.borderColor = on ? '#a855f7' : '';
+  el.style.background  = on ? '#f3e8ff' : '';
+  el.style.color       = on ? '#7e22ce' : '';
+  el.style.fontWeight  = on ? '700' : '';
+  var dot = el.querySelector('.chip-dot');
+  if (dot) dot.style.background = on ? '#9333ea' : '';
+  updEsp();
+}
+function _fToggle(el) {
+  var on = el.classList.toggle('on');
+  el.style.background  = on ? '#1e293b' : '';
+  el.style.color       = on ? 'white'   : '';
+  el.style.borderColor = on ? '#1e293b' : '';
+  updFoc();
+}
+document.querySelectorAll('#eGrid .chip').forEach(el=>el.onclick=()=>_eToggle(el));
+document.querySelectorAll('#fGrid .ftag').forEach(el=>el.onclick=()=>_fToggle(el));
 
 function toggleCollapse(sId, aId) {
   var s=document.getElementById(sId), a=document.getElementById(aId);
