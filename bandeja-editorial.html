@@ -1963,20 +1963,23 @@ async function buscarManual(){
   kw = cleanTrackingUrl(kw);
   var searchQ=((kw||'')+' '+(esp.join(' '))+' '+(foc.join(' '))).trim();
 
-  // ── PASO 1: Investigar — siempre Gemini (Google Search grounding) ──
-  var gemKey = getAIKey('gem');
-  if(!gemKey){ err('Paso 1 requiere la API key de Gemini para buscar en la web. Configúrala en Credenciales → API Keys IA.'); rb(); return; }
-  sp(5,'Paso 1/3 — Investigando con Gemini + Google Search...');
+  // ── PASO 1: Investigar — Gemini, Claude o DeepSeek+Tavily ──
+  var avail1 = avail.filter(function(p){
+    if(p==='gem'||p==='ant') return true;
+    if(p==='deep') return !!(CFG&&CFG.tavilyKey);
+    return false;
+  });
+  if(!avail1.length){ err('Paso 1 requiere búsqueda web. Configura Gemini, Claude, o DeepSeek + Tavily en Credenciales → API Keys IA.'); rb(); return; }
+  var provLabel1 = avail1[0]==='gem' ? 'Gemini + Google Search' : avail1[0]==='ant' ? 'Claude + Web Search' : 'DeepSeek + Tavily';
+  sp(5,'Paso 1/3 — Investigando con '+provLabel1+'...');
   var t1=na(90000); var r1;
   var temasCubiertos=(records||[]).map(function(r){ return r.titular||r.titulo_seo||''; }).filter(Boolean);
 
   // Detectar si los últimos artículos son mayoritariamente salmón y forzar rotación
   var SALMON_KW = /salm[oó]n|salmonicultura|salmón|trucha|acuicultura.*salm|salm.*acuicultura/i;
-  var OTRAS_ESP  = ['mitilicultura','mejillón','chorito','ostión','ostra','alga','erizo','abalón','almeja','pelillo','pelillo'];
   var ultimosRecs = (records||[]).slice(-5);
   var ultimosSalmones = ultimosRecs.filter(function(r){ return SALMON_KW.test(r.titular||r.titulo_seo||''); }).length;
   var forzarRotacion = (!kw && !esp.length && ultimosSalmones >= 2);
-  // Si hay que rotar, elegir especie con menos cobertura reciente
   var especiesForzar = '';
   if(forzarRotacion){
     var cubiertas = temasCubiertos.join(' ').toLowerCase();
@@ -1992,8 +1995,12 @@ async function buscarManual(){
     especiesForzar = elegida.e;
   }
 
-  try { r1=await callGemini(buildPromptInvestigar(esp,foc,kw,temasCubiertos,especiesForzar),gemKey,_busquedaAbort.signal,true,null); clearTimeout(t1); }
-  catch(e){ clearTimeout(t1); _busquedaAbort=null; err('Error en investigación (Gemini): '+errMsg(e)); rb(); return; }
+  // Forzar solo el proveedor disponible para Paso 1
+  var _prevProv = AI_PROV_SEARCH;
+  AI_PROV_SEARCH = avail1[0];
+  try { r1=await callAI(buildPromptInvestigar(esp,foc,kw,temasCubiertos,especiesForzar),true,null,null,_busquedaAbort.signal,searchQ||'acuicultura Chile noticias'); clearTimeout(t1); }
+  catch(e){ clearTimeout(t1); _busquedaAbort=null; AI_PROV_SEARCH=_prevProv; err('Error en investigación ('+provLabel1+'): '+errMsg(e)); rb(); return; }
+  AI_PROV_SEARCH = _prevProv;
 
   // Parsear respuesta de texto plano de paso 1
   if(!r1 || r1.trim().length < 30){
@@ -2028,11 +2035,12 @@ async function buscarManual(){
     rb(); return;
   }
 
-  // ── PASO 2: Redactar — Gemini. Sin búsqueda (datos ya vienen de paso 1) ──
-  sp(38,'Paso 2/3 — Redactando con Gemini: <em>'+esc((inv.titulo||'').substring(0,55))+'</em>...');
+  // ── PASO 2: Redactar — usa proveedor seleccionado, sin búsqueda ──
+  var provLabel2 = avail[0]==='gem' ? 'Gemini' : avail[0]==='ant' ? 'Claude' : 'DeepSeek';
+  sp(38,'Paso 2/3 — Redactando con '+provLabel2+': <em>'+esc((inv.titulo||'').substring(0,55))+'</em>...');
   var t2=na(90000); var r2;
-  try { r2=await callGemini(buildPromptRedactar(inv,minW),gemKey,_busquedaAbort.signal,false,6000); clearTimeout(t2); }
-  catch(e){ clearTimeout(t2); _busquedaAbort=null; err('Error en redacción (Gemini): '+errMsg(e)); rb(); return; }
+  try { r2=await callAI(buildPromptRedactar(inv,minW),false,null,6000,_busquedaAbort.signal); clearTimeout(t2); }
+  catch(e){ clearTimeout(t2); _busquedaAbort=null; err('Error en redacción ('+provLabel2+'): '+errMsg(e)); rb(); return; }
 
   var rec;
   try { rec=normalizeRec(parseJSON(r2)); }
@@ -2137,8 +2145,17 @@ async function generarAutomatico(btn){
     }
 
     // PASO 1 — Investigar
-    setNotif('Paso 1/3 — Investigando con Gemini + Google Search...');
-    var r1 = await callGemini(buildPromptInvestigar([],[],null,temasCubiertos,especiesForzar), gemKey, null, true, null);
+    var _avail1 = buildProvOrder(AI_PROV_SEARCH).filter(function(p){ return !!getAIKey(p); }).filter(function(p){
+      if(p==='gem'||p==='ant') return true;
+      if(p==='deep') return !!(CFG&&CFG.tavilyKey);
+      return false;
+    });
+    if(!_avail1.length) throw new Error('Paso 1 requiere búsqueda web. Configura Gemini, Claude o DeepSeek+Tavily.');
+    var _pl1 = _avail1[0]==='gem'?'Gemini + Google Search':_avail1[0]==='ant'?'Claude + Web Search':'DeepSeek + Tavily';
+    setNotif('Paso 1/3 — Investigando con '+_pl1+'...');
+    var _prevProv2 = AI_PROV_SEARCH; AI_PROV_SEARCH = _avail1[0];
+    var r1 = await callAI(buildPromptInvestigar([],[],null,temasCubiertos,especiesForzar), true, null, null, null, 'acuicultura Chile noticias');
+    AI_PROV_SEARCH = _prevProv2;
     if(!r1 || r1.trim().length < 30) throw new Error('La investigación no devolvió datos. Intenta de nuevo.');
 
     function p1Field(text,key){ var m=text.match(new RegExp(key+':\\s*(.+)','i')); return m?m[1].trim():''; }
@@ -2157,11 +2174,11 @@ async function generarAutomatico(btn){
     // PASO 2 — Redactar
     setNotif('Paso 2/3 — Redactando: <em>'+inv.titulo.substring(0,55)+'</em>...');
     var minW = parseInt(CFG.words||'600');
-    var r2 = await callGemini(buildPromptRedactar(inv,minW), gemKey, null, false, 6000);
+    var r2 = await callAI(buildPromptRedactar(inv,minW), false, null, 6000, null);
     var rec;
     try { rec = normalizeRec(parseJSON(r2)); }
     catch(e){
-      var r2b = await callGemini('El siguiente JSON tiene errores. Corrígelo devolviendo SOLO el JSON válido:\n\n'+r2.substring(0,4000), gemKey, null, false, 3000);
+      var r2b = await callAI('El siguiente JSON tiene errores. Corrígelo devolviendo SOLO el JSON válido:\n\n'+r2.substring(0,4000), false, null, 3000, null);
       rec = normalizeRec(parseJSON(r2b));
     }
 
